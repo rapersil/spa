@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}401 - Unauthorized{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        text-align: center;
+        padding: 5rem 0;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .error-icon {
+        font-size: 5rem;
+        color: var(--color-500);
+        margin-bottom: 2rem;
+    }
+
+    .error-code {
+        font-size: 4rem;
+        font-weight: bold;
+        color: var(--color-700);
+        margin-bottom: 1rem;
+    }
+
+    .error-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--color-800);
+        margin-bottom: 1.5rem;
+    }
+
+    .error-message {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 2rem;
+    }
+
+    .error-actions {
+        margin-top: 2rem;
+    }
+
+    .error-image {
+        max-width: 300px;
+        margin-bottom: 2rem;
+    }
+    
+    .fade-animation {
+        animation: fade 2s infinite alternate;
+    }
+    
+    @keyframes fade {
+        0% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="error-container">
+        <div class="error-icon fade-animation">
+            <i class="material-icons">lock</i>
+        </div>
+        <div class="error-code">401</div>
+        <h1 class="error-title">Authentication Required</h1>
+        <p class="error-message">
+            Please log in to access this page.
+            If you were already logged in, your session might have expired.
+        </p>
+
+        <img src="{% static 'img/401.svg' %}" alt="Authentication required illustration" class="error-image">
+
+        <div class="error-actions">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                <i class="material-icons me-2">login</i>Log In
+            </a>
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-lg ms-2">
+                <i class="material-icons me-2">arrow_back</i>Go Back
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Disable footer for error pages
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('footer').style.display = 'none';
+        
+        // If we're in a frame or iframe, redirect the parent to the login page
+        if (window.parent && window.parent !== window) {
+            window.parent.location.href = "{% url 'login' %}";
+        }
+    });
+</script>
+{% endblock %}

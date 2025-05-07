@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Management - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><span class="material-icons me-2">person</span>Staff Management</h2>
+            <p class="text-muted">Manage staff accounts and permissions</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'staff_create' %}" class="btn btn-primary">
+                <span class="material-icons me-2">person_add</span>Add New Staff
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Staff Directory</h5>
+            
+            <form method="get" class="form-inline search-form">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" placeholder="Search staff..." 
+                           value="{{ request.GET.query|default:'' }}">
+                    <button class="btn btn-primary" type="submit">
+                        <span class="material-icons">search</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff_member in staff %}
+                        <tr>
+                            <td>{{ staff_member.user_id }}</td>
+                            <td>
+                                {% if staff_member.profile_picture %}
+                                <img src="{{ staff_member.profile_picture.url }}" alt="Profile" class="rounded-circle me-2" width="32" height="32">
+                                {% else %}
+                                <div class="staff-avatar me-2">{{ staff_member.first_name.0 }}{{ staff_member.last_name.0 }}</div>
+                                {% endif %}
+                                {{ staff_member.get_full_name|default:staff_member.username }}
+                            </td>
+                            <td>{{ staff_member.username }}</td>
+                            <td>
+                                <span class="badge {% if staff_member.user_type == 'ADMIN' %}bg-danger{% else %}bg-primary{% endif %}">
+                                    {{ staff_member.get_user_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <small>
+                                    <span class="material-icons me-1">email</span>{{ staff_member.email }}<br>
+                                    <span class="material-icons me-1">phone</span>{{ staff_member.phone_number }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if staff_member.password_change_required %}
+                                <span class="badge bg-warning">Password Reset</span>
+                                {% elif staff_member.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'staff_detail' staff_member.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <span class="material-icons">visibility</span>
+                                    </a>
+                                    <a href="{% url 'staff_update' staff_member.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        <span class="material-icons">edit</span>
+                                    </a>
+                                    <a href="{% url 'password_reset' staff_member.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <span class="material-icons">key</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <span class="material-icons fa-2x mb-2 text-muted">person_off</span>
+                                <p class="mb-0">No staff members found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if is_paginated %}
+        <div class="card-footer">
+            <nav aria-label="Staff pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">
+                            <span class="material-icons">first_page</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">
+                            <span class="material-icons">chevron_left</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">
+                            <span class="material-icons">chevron_right</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">
+                            <span class="material-icons">last_page</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

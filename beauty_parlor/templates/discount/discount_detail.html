@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Discount Details - {{ discount.discount_id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/discount.css' %}">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'discount_list' %}">Discounts</a></li>
+            <li class="breadcrumb-item active">{{ discount.discount_id }}</li>
+        </ol>
+    </nav>
+
+    <!-- Status Alert -->
+    <div class="row mb-4">
+        <div class="col-12">
+            {% if discount.is_active %}
+            <div class="alert alert-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="material-icons me-2">check_circle</i>
+                        <strong>Active Discount:</strong> This discount is currently active and will expire on {{ discount.end_date|date:"F d, Y" }}.
+                    </div>
+                    <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-success">
+                        <i class="material-icons me-2">edit</i>Edit Discount
+                    </a>
+                </div>
+            </div>
+            {% elif discount.start_date > now %}
+            <div class="alert alert-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="material-icons me-2">info</i>
+                        <strong>Upcoming Discount:</strong> This discount will become active on {{ discount.start_date|date:"F d, Y" }}.
+                    </div>
+                    <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-info">
+                        <i class="material-icons me-2">edit</i>Edit Discount
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="material-icons me-2">schedule</i>
+                        <strong>Expired Discount:</strong> This discount expired on {{ discount.end_date|date:"F d, Y" }}.
+                    </div>
+                    <div>
+                        <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="material-icons me-2">edit</i>Edit
+                        </a>
+                        <a href="{% url 'discount_create' %}?service_id={{ discount.service.id }}" class="btn btn-sm btn-outline-primary">
+                            <i class="material-icons me-2">percent</i>New Discount
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Discount Details -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">percent</i>Discount Information</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm discount-details-table">
+                        <tr>
+                            <th>Discount ID:</th>
+                            <td>{{ discount.discount_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Percentage:</th>
+                            <td>
+                                <span class="badge bg-primary">{{ discount.percentage }}% OFF</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Start Date:</th>
+                            <td>{{ discount.start_date|date:"F d, Y h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>End Date:</th>
+                            <td>{{ discount.end_date|date:"F d, Y h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Duration:</th>
+                            <td>{{ discount.end_date|timeuntil:discount.start_date }}</td>
+                        </tr>
+                        <!-- discount_detail.html - Update the status display section -->
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                {% if discount.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% elif discount.is_upcoming %}
+                                <span class="badge bg-info">Upcoming</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Expired</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created By:</th>
+                            <td>{{ discount.created_by.get_full_name }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'discount_list' %}" class="btn btn-outline-secondary">
+                            <i class="material-icons me-2">arrow_back</i>Back to List
+                        </a>
+                        <div>
+                            <a href="{% url 'discount_update' discount.pk %}" class="btn btn-primary me-2">
+                                <i class="material-icons me-2">edit</i>Edit Discount
+                            </a>
+                            <a href="{% url 'discount_delete' discount.pk %}" class="btn btn-danger">
+                                <i class="material-icons me-2">delete</i>Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Service Information -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">spa</i>Service Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="service-info">
+                        <div class="service-header">
+                            <h5>{{ discount.service.name }}</h5>
+                            <div class="service-meta">
+                                <span class="service-price">GHS{{ discount.service.price }}</span>
+                                <span class="service-duration">{{ discount.service.duration }} min</span>
+                            </div>
+                        </div>
+                        
+                        <div class="discount-calculation mt-4">
+                            <h6 class="mb-3">Price Calculation</h6>
+                            <div class="calculation-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Regular Price:</span>
+                                    <span>GHS{{ discount.service.price }}</span>
+                                </div>
+                            </div>
+                            <div class="calculation-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Discount ({{ discount.percentage }}%):</span>
+                                    <span class="text-danger">-GHS{{ discount.service.price|multiply:discount.percentage|divide:100|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                            <!-- discount_detail.html - Update the price calculation section -->
+                            <div class="calculation-item result">
+                                <div class="d-flex justify-content-between">
+                                    <span>Final Price:</span>
+                                    {% with discount_amount=discount.service.price|multiply:discount.percentage|divide:100 %}
+                                    <span class="final-price">GHS{{ discount.service.price|subtract:discount_amount|floatformat:2 }}</span>
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="service-description mt-4">
+                            <h6 class="mb-2">Service Description</h6>
+                            <p>{{ discount.service.description|truncatewords:50 }}</p>
+                            <a href="{% url 'service_detail' discount.service.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="material-icons me-1">info</i>View Service Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'booking_create' %}?service_id={{ discount.service.id }}" class="btn btn-primary w-100">
+                        <i class="material-icons me-2">add_event</i>Create Booking with this Service
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

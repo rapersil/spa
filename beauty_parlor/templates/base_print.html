@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}</title>
+    
+    <!-- Bootstrap CSS (Local) -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    
+    <!-- Material Icons (Local) -->
+    <link rel="stylesheet" href="{% static 'css/material-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/material-icons-outlined.css' %}">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sales.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="no-print text-center mb-4">
+        <button onclick="window.print()" class="btn btn-primary">
+            <span class="material-icons me-2">print</span>Print Receipt
+        </button>
+        <a href="javascript:window.close()" class="btn btn-outline-secondary ms-2">
+            <span class="material-icons me-2">close</span>Close
+        </a>
+    </div>
+    
+    {% block content %}{% endblock %}
+    
+    <script>
+        // Auto-trigger print dialog when page loads
+        window.onload = function() {
+            // Wait a moment for everything to load properly
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

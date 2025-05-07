@@ -1,0 +1,350 @@
+/* booking_calendar.css */
+
+.booking-calendar-container {
+    display: flex;
+    min-height: 1600px; /* Increased height for extended hours */
+    border-top: 1px solid var(--gray-200);
+    overflow-y: auto;
+}
+
+.time-column {
+    width: 80px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--gray-200);
+    position: relative;
+}
+
+.time-slot {
+    height: 100px;
+    border-bottom: 1px solid var(--gray-200);
+    position: relative;
+}
+
+.time-label {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    font-weight: bold;
+    color: var(--gray-600);
+    background-color: white;
+    padding: 0 5px;
+}
+
+.booking-columns {
+    display: flex;
+    flex-grow: 1;
+}
+
+.booking-column {
+    flex: 1;
+    min-width: 200px;
+    border-right: 1px solid var(--gray-200);
+    position: relative;
+}
+
+.staff-header {
+    height: 40px;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    background-color: var(--gray-100);
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.booking-slots {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-rows: repeat(128, 12.5px); /* 5-minute intervals for 16 hours (7am-10pm) */
+}
+
+.booking-block {
+    padding: 8px;
+    border-radius: 4px;
+    color: var(--black);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.1s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 2px 5px;
+    position: relative;
+    z-index: 5;
+}
+
+.booking-block:hover {
+    transform: scale(1.02);
+    z-index: 6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    color: var(--black);
+}
+
+.booking-service {
+    font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.booking-client {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+
+.booking-time {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Service type colors based on the project's color scheme */
+/* Service type colors based on the project's gold/brown color scheme */
+.service-type-0 {
+    background-color: var(--color-100-80);
+    border-left: 4px solid var(--color-300);
+}
+
+.service-type-1 {
+    background-color: var(--color-200-80);
+    border-left: 4px solid var(--color-400);
+}
+
+.service-type-2 {
+    background-color: var(--color-300-80);
+    border-left: 4px solid var(--color-500);
+}
+
+.service-type-3 {
+    background-color: var(--color-400-80);
+    border-left: 4px solid var(--color-600);
+}
+
+.service-type-4 {
+    background-color: var(--color-500-80);
+    border-left: 4px solid var(--color-700);
+}
+
+/* Adding additional service types for variety */
+.service-type-5 {
+    background-color: var(--color-400-50);
+    border-left: 4px solid var(--color-600);
+}
+
+.service-type-6 {
+    background-color: var(--color-500-50);
+    border-left: 4px solid var(--color-700);
+}
+
+.service-type-7 {
+    background-color: var(--color-300-50);
+    border-left: 4px solid var(--color-500);
+}
+
+/* Status-specific styling that maintains the color scheme */
+/* Status-specific styling that maintains the color scheme */
+.booking-block.booking-pending {
+    opacity: 0.8;
+    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, transparent 75%, transparent);
+    background-size: 15px 15px;
+}
+
+.booking-block.booking-confirmed {
+    opacity: 1; /* Full opacity for confirmed bookings */
+    border: 2px solid var(--color-600); /* Bold border */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+    /* Subtle pattern to distinguish confirmed bookings */
+    background-image: linear-gradient(45deg, rgba(193, 153, 49, 0.1) 25%, transparent 25%, transparent 50%, rgba(193, 153, 49, 0.1) 50%, rgba(193, 153, 49, 0.1) 75%, transparent 75%, transparent);
+    background-size: 20px 20px;
+}
+
+.booking-block.booking-completed {
+    opacity: 0.8;
+    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1) 75%, transparent 75%, transparent);
+    background-size: 10px 10px;
+}
+
+.booking-block.booking-cancelled {
+    opacity: 0.5; /* More faded than before */
+    text-decoration: line-through;
+    /* Distinctive diagonal pattern */
+    background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.1) 0, rgba(0, 0, 0, 0.1) 10px, transparent 10px, transparent 20px);
+    /* Add a border to ensure it's visible but obviously cancelled */
+    border: 1px dashed var(--gray-500);
+}
+
+/* Add color variants for different booking statuses */
+.booking-pending {
+    opacity: 0.7;
+}
+
+.booking-confirmed {
+    opacity: 1;
+}
+
+.booking-completed {
+    opacity: 0.8;
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent);
+    background-size: 10px 10px;
+}
+
+.booking-cancelled {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+/* Expected start time styling */
+.expected-start-badge {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    padding: 1px 4px;
+    max-width: fit-content;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px; /* Limited initial width */
+    transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0.7;
+}
+
+.expected-start-badge:hover,
+.booking-block:hover .expected-start-badge {
+    max-width: 200px; /* Expand on hover */
+    opacity: 1;
+}
+
+.expected-start-badge i {
+    font-size: 0.7rem;
+    margin-right: 2px;
+}
+
+/* Make booking blocks taller when they have expected start times */
+.booking-block:has(.expected-start-badge) {
+    padding-bottom: 12px;
+}
+
+/* Add a visual indicator for delayed appointments */
+.booking-block:has(.expected-start-badge):before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent var(--warning) transparent transparent;
+}
+
+/* Expected start time marker on timeline */
+.expected-start-marker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.marker-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--warning);
+    border-left: 3px solid var(--warning-dark);
+    z-index: 4;
+}
+
+.marker-tooltip {
+    position: absolute;
+    left: 5px;
+    top: -20px;
+    background-color: var(--warning);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.expected-start-marker:hover .marker-tooltip {
+    opacity: 1;
+}
+
+/* Highlight specific hours for better visual organization */
+.time-slot:nth-child(5), /* Noon - 12 PM */
+.time-slot:nth-child(12) /* Evening - 7 PM */ {
+    background-color: var(--color-50-25);
+}
+
+.time-slot:nth-child(5)::after,
+.time-slot:nth-child(12)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-300);
+    bottom: 0;
+    z-index: 2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .booking-calendar-container {
+        flex-direction: column;
+    }
+    
+    .time-column {
+        width: 100%;
+        height: 30px;
+        border-right: none;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .booking-columns {
+        flex-direction: column;
+    }
+    
+    .booking-column {
+        border-right: none;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    /* Mobile responsiveness for expected start badges */
+    .expected-start-badge {
+        display: inline-block;
+        margin-left: 5px;
+    }
+    
+    .booking-block {
+        padding: 5px;
+    }
+    
+    .booking-service, .booking-client, .booking-time {
+        font-size: 0.8rem;
+    }
+    
+    /* Add scroll indicator for extended time range */
+    .booking-calendar-container::after {
+        content: "Scroll down to view more hours";
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background-color: var(--color-50);
+        font-size: 0.8rem;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+    }
+}

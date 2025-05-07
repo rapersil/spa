@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Receipt - {{ sale.receipt_number }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales</a></li>
+            <li class="breadcrumb-item active">{{ sale.receipt_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Receipt Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow receipt-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><span class="material-icons me-2">receipt</span>Payment Receipt</h4>
+                    <a href="{% url 'sale_print' sale.pk %}" class="btn btn-sm btn-outline-primary btn-print" target="_blank">
+                        <span class="material-icons me-2">print</span>Print Receipt
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="receipt">
+                        <div class="receipt-header text-center">
+                            <h4>{{ settings.BEAUTY_PARLOR_NAME }}</h4>
+                            <p>{{ settings.BEAUTY_PARLOR_ADDRESS }}<br>
+                            Phone: {{ settings.BEAUTY_PARLOR_PHONE }}</p>
+                            <h5>PAYMENT RECEIPT</h5>
+                        </div>
+                        <div class="receipt-body">
+                            <!-- Receipt Info Section -->
+                            <div class="receipt-info">
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold">Receipt #:</div>
+                                    <div class="col-6 text-end">{{ sale.receipt_number }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold">Sale ID:</div>
+                                    <div class="col-6 text-end">{{ sale.sale_id }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold">Payment Date:</div>
+                                    <div class="col-6 text-end">{{ sale.payment_date|date:"F d, Y" }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold">Payment Time:</div>
+                                    <div class="col-6 text-end">{{ sale.payment_date|date:"h:i A" }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 fw-bold">Payment Method:</div>
+                                    <div class="col-6 text-end">
+                                        {% if sale.payment_method == 'CASH' %}
+                                            <span class="material-icons text-success me-1">money</span>
+                                        {% elif sale.payment_method == 'CREDIT_CARD' %}
+                                            <span class="material-icons text-primary me-1">credit_card</span>
+                                        {% elif sale.payment_method == 'DEBIT_CARD' %}
+                                            <span class="material-icons text-info me-1">credit_card</span>
+                                        {% elif sale.payment_method == 'MOBILE_PAYMENT' %}
+                                            <span class="material-icons text-warning me-1">phone_android</span>
+                                        {% else %}
+                                            <span class="material-icons text-secondary me-1">account_balance</span>
+                                        {% endif %}
+                                        {{ sale.get_payment_method_display }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Customer Information -->
+                            <div class="receipt-customer">
+                                <div class="customer-header mb-2">
+                                    <span class="material-icons me-2">person</span>Customer Information
+                                </div>
+                                <div class="customer-details p-3" style="background-color: #fff3fd; border-radius: 8px;">
+                                    <strong>Name:</strong> {{ sale.booking.customer.first_name }} {{ sale.booking.customer.last_name }}<br>
+                                    <strong>Phone:</strong> {{ sale.booking.customer.phone }}<br>
+                                    <strong>Customer ID:</strong> {{ sale.booking.customer.customer_id }}
+                                </div>
+                            </div>
+                            
+                            <!-- Service Details -->
+                            <div class="receipt-items">
+                                <div class="service-header mb-2">
+                                    <span class="material-icons me-2">spa</span>Service Details
+                                </div>
+                                <div class="receipt-item-header row">
+                                    <div class="col-7"><strong>Service</strong></div>
+                                    <div class="col-5 text-end"><strong>Amount</strong></div>
+                                </div>
+                                <hr class="my-2">
+                                
+                                <!-- Service Item -->
+                                <div class="receipt-item row">
+                                    <div class="col-7">{{ sale.booking.service.name }}</div>
+                                    <div class="col-5 text-end">GHS{{ sale.booking.service.price|floatformat:2 }}</div>
+                                </div>
+                                <div class="receipt-item row">
+                                    <div class="col-7"><small>Duration: {{ sale.booking.service.duration }} minutes</small></div>
+                                    <div class="col-5 text-end"></div>
+                                </div>
+                                
+                                <!-- Service Discount -->
+                                {% if sale.booking.service_discount %}
+                                <div class="receipt-item-discount row">
+                                    <div class="col-7 text-danger">Service Discount ({{ sale.booking.service_discount.percentage }}%)</div>
+                                    <div class="col-5 text-end text-danger">
+                                        -GHS{{ service_discount_amount|floatformat:2 }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Special Discount (formerly Custom Discount) -->
+                                {% if sale.booking.custom_discount > 0 %}
+                                <div class="receipt-item-discount row">
+                                    <div class="col-7 text-danger">Special Discount ({{ sale.booking.custom_discount }}%)</div>
+                                    <div class="col-5 text-end text-danger">
+                                        -GHS{{ custom_discount_amount|floatformat:2 }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <hr class="my-2">
+                                <div class="receipt-total row">
+                                    <div class="col-7"><strong>Total Amount</strong></div>
+                                    <div class="col-5 text-end"><strong>GHS{{ sale.payment_amount|floatformat:2 }}</strong></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Reference -->
+                            <div class="booking-reference">
+                                <div class="reference-header mb-2">
+                                    <span class="material-icons me-2">event_available</span>Booking Reference
+                                </div>
+                                <div class="reference-details p-3" style="background-color: #fff3fd; border-radius: 8px;">
+                                    <div class="row">
+                                        <div class="col-6 fw-bold">Booking ID:</div>
+                                        <div class="col-6 text-end">{{ sale.booking.booking_id }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 fw-bold">Booking Date:</div>
+                                        <div class="col-6 text-end">{{ sale.booking.date_time|date:"F d, Y" }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 fw-bold">Booking Time:</div>
+                                        <div class="col-6 text-end">{{ sale.booking.date_time|date:"h:i A" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Optional Notes -->
+                            {% if sale.booking.notes %}
+                            <div class="notes mt-3 p-3" style="background-color: #fffaf0; border-radius: 8px; border-left: 4px ">
+                                <strong><span class="material-icons me-2">assignment</span>Notes:</strong> {{ sale.booking.notes }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="receipt-footer text-center mt-4">
+                            <div class="thank-you mb-2"><strong>Thank you for your business!</strong></div>
+                            <p>We appreciate your patronage at {{ settings.BEAUTY_PARLOR_NAME }}</p>
+                            <p class="mb-2">We look forward to serving you again soon.</p>
+                            
+                            <!-- Processed by -->
+                            <div class="processed-by mt-3 p-2" style="background-color: #fff3fd; border-radius: 8px;">
+                                <small><span class="material-icons me-1">person_check</span>Processed by: {{ sale.created_by.get_full_name|default:sale.created_by.username }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <span class="material-icons me-1">schedule</span>Receipt generated on: {% now "F d, Y h:i A" %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sale Information and Booking Details -->
+        <div class="col-lg-6 mb-4">
+            <!-- Quick Action Buttons -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="material-icons me-2">bolt</span>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'sale_print' sale.pk %}" target="_blank" class="btn btn-outline-warning btn-print w-100 action-button">
+                                <span class="material-icons me-2">print</span>Print Receipt
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'booking_detail' sale.booking.pk %}" class="btn btn-outline-primary w-100 action-button">
+                                <span class="material-icons me-2">event_available</span>View Booking
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <a href="{% url 'customer_detail' sale.booking.customer.pk %}" class="btn btn-outline-secondary w-100 action-button">
+                                <span class="material-icons me-2">person</span>View Customer
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'sales_list' %}" class="btn btn-outline-dark w-100 action-button">
+                                <span class="material-icons me-2">list</span>All Sales
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="material-icons me-2">info</span>Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm sale-details-table">
+                        <tr>
+                            <th>Sale ID:</th>
+                            <td>{{ sale.sale_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Receipt Number:</th>
+                            <td>{{ sale.receipt_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Payment Date:</th>
+                            <td>{{ sale.payment_date|date:"F d, Y h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
+                            <td><span class="badge bg-success">GHS{{ sale.payment_amount|floatformat:2 }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Payment Method:</th>
+                            <td>
+                                {% if sale.payment_method == 'CASH' %}
+                                <span class="material-icons text-success me-1">money</span>
+                                {% elif sale.payment_method == 'CREDIT_CARD' %}
+                                <span class="material-icons text-primary me-1">credit_card</span>
+                                {% elif sale.payment_method == 'DEBIT_CARD' %}
+                                <span class="material-icons text-info me-1">credit_card</span>
+                                {% elif sale.payment_method == 'MOBILE_PAYMENT' %}
+                                <span class="material-icons text-warning me-1">phone_android</span>
+                                {% else %}
+                                <span class="material-icons text-secondary me-1">account_balance</span>
+                                {% endif %}
+                                {{ sale.get_payment_method_display }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Recorded By:</th>
+                            <td>{{ sale.created_by.get_full_name|default:sale.created_by.username }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Customer Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><span class="material-icons me-2">person</span>Customer Information</h5>
+                    <a href="{% url 'customer_detail' sale.booking.customer.pk %}" class="btn btn-sm btn-print">
+                        <span class="material-icons me-1">visibility</span>View Customer
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm customer-details-table">
+                        <tr>
+                            <th>Customer ID:</th>
+                            <td>{{ sale.booking.customer.customer_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ sale.booking.customer.first_name }} {{ sale.booking.customer.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ sale.booking.customer.phone }}</td>
+                        </tr>
+                        {% if sale.booking.customer.address %}
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ sale.booking.customer.address }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Booking Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><span class="material-icons me-2">event_available</span>Booking Details</h5>
+                    <a href="{% url 'booking_detail' sale.booking.pk %}" class="btn btn-sm btn-print">
+                        <span class="material-icons me-1">visibility</span>View Booking
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm booking-details-table">
+                        <tr>
+                            <th>Booking ID:</th>
+                            <td>{{ sale.booking.booking_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Service:</th>
+                            <td>{{ sale.booking.service.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Service Duration:</th>
+                            <td>{{ sale.booking.service.duration }} minutes</td>
+                        </tr>
+                        <tr>
+                            <th>Booking Date:</th>
+                            <td>{{ sale.booking.date_time|date:"F d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Booking Time:</th>
+                            <td>{{ sale.booking.date_time|date:"h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="badge bg-success">{{ sale.booking.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% if sale.booking.notes %}
+                        <tr>
+                            <th>Notes:</th>
+                            <td>{{ sale.booking.notes }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Additional Services Card -->
+            {% if additional_services %}
+            <div class="card shadow additional-services-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="material-icons me-2">add_circle</span>Additional Services</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 additional-services-table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Regular Price</th>
+                                    <th>Discount</th>
+                                    <th>Final Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in additional_services %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td>GHS{{ service.regular_price|floatformat:2 }}</td>
+                                    <td>
+                                        {% if service.discount_percentage > 0 %}
+                                        <span class="badge bg-danger">{{ service.discount_percentage }}%</span>
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>GHS{{ service.final_price|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <th class="additional-services-total">GHS{{ additional_services_total|floatformat:2 }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Floating Print Button -->
+    <a href="{% url 'sale_print' sale.pk %}" class="print-fab" target="_blank" data-bs-toggle="tooltip" title="Print Receipt">
+        <span class="material-icons">print</span>
+    </a>
+</div>
+{% endblock %}

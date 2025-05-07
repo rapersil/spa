@@ -1,0 +1,448 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="material-icons me-2">trending_up</i>Admin Dashboard</h2>
+            <p class="text-muted">Detailed business analytics and performance metrics</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group">
+                <a href="{% url 'sales_report' %}" class="btn btn-outline-primary">
+                    <i class="material-icons me-2">receipt_long</i>Sales Report
+                </a>
+                <a href="{% url 'staff_list' %}" class="btn btn-outline-primary">
+                    <i class="material-icons me-2">manage_accounts</i>Staff Management
+                </a>
+                <a href="{% url 'service_list' %}" class="btn btn-outline-primary">
+                    <i class="material-icons me-2">list_alt</i>Services
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Analytics Section - This has more detailed information than the main dashboard -->
+    <div class="row">
+        <!-- Column 1: Financial Metrics -->
+        <div class="col-lg-8 mb-4">
+            <!-- Revenue Trends -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="material-icons me-2">trending_up</i>Revenue Trends</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary active" data-period="week">Week</button>
+                        <button type="button" class="btn btn-outline-secondary" data-period="month">Month</button>
+                        <button type="button" class="btn btn-outline-secondary" data-period="quarter">Quarter</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="250"></canvas>
+                </div>
+            </div>
+
+            <!-- Service Performance -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">bar_chart</i>Service Performance</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Bookings</th>
+                                    <th>Revenue</th>
+                                    <th>Average Rating</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in popular_services %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.booking_count }}</td>
+                                    <td>${{ service.revenue|default:0|floatformat:2|intcomma }}</td>
+                                    <td>
+                                        <div class="rating">
+                                            <i class="material-icons" style="font-size: 1rem;">star</i>
+                                            <i class="material-icons" style="font-size: 1rem;">star</i>
+                                            <i class="material-icons" style="font-size: 1rem;">star</i>
+                                            <i class="material-icons" style="font-size: 1rem;">star</i>
+                                            <i class="material-icons" style="font-size: 1rem;">star_half</i>
+                                            <span class="ms-1">4.5</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ service.performance|default:85 }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Column 2: Business Insights -->
+        <div class="col-lg-4 mb-4">
+            <!-- Key Performance Indicators -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">speed</i>KPIs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="kpi-metric mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Customer Retention</span>
+                            <span class="fw-bold">78%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: 78%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-metric mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Booking Conversion</span>
+                            <span class="fw-bold">92%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-metric mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Staff Utilization</span>
+                            <span class="fw-bold">86%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: 86%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-metric">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Average Service Value</span>
+                            <span class="fw-bold">${{ average_service_value|default:'75.50' }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Peak Hours Analysis -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">schedule</i>Peak Hours</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="peakHoursChart" height="200"></canvas>
+                </div>
+            </div>
+            
+            <!-- Staff Performance -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">how_to_reg</i>Staff Performance</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0 fw-bold">Sarah Johnson</p>
+                                    <small class="text-muted">25 bookings this month</small>
+                                </div>
+                                <div class="staff-rating">
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0 fw-bold">Mike Thompson</p>
+                                    <small class="text-muted">18 bookings this month</small>
+                                </div>
+                                <div class="staff-rating">
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star_border</i>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0 fw-bold">Jessica Lee</p>
+                                    <small class="text-muted">22 bookings this month</small>
+                                </div>
+                                <div class="staff-rating">
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star</i>
+                                    <i class="material-icons" style="font-size: 1rem;">star_half</i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">percent</i>Discount Impact Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="discountImpactChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">person_add</i>Customer Acquisition</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="customerAcquisitionChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chart.min.js' %}"></script>
+
+<script>
+    const style = getComputedStyle(document.documentElement);
+    const color100 = style.getPropertyValue('--color-100').trim();
+    const color200 = style.getPropertyValue('--color-200').trim();
+    const color300 = style.getPropertyValue('--color-300').trim();
+    const color400 = style.getPropertyValue('--color-400').trim();
+    const color500 = style.getPropertyValue('--color-500').trim();
+    const color600 = style.getPropertyValue('--color-600').trim();
+    const color700 = style.getPropertyValue('--color-700').trim();
+    const color800 = style.getPropertyValue('--color-800').trim();
+    const color900 = style.getPropertyValue('--color-900').trim();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Revenue Trends Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [750, 825, 680, 920, 1050, 1380, 1200],
+                    backgroundColor: color1000,
+                    borderColor: color900,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Peak Hours Chart
+        const peakHoursCtx = document.getElementById('peakHoursChart').getContext('2d');
+        const peakHoursChart = new Chart(peakHoursCtx, {
+            type: 'bar',
+            data: {
+                labels: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM'],
+                datasets: [{
+                    label: 'Bookings',
+                    data: [2, 5, 8, 6, 3, 7, 9, 12, 10, 8, 3],
+                    backgroundColor: 'rgba(157, 11, 136, 0.7)',
+                    borderColor: 'rgba(157, 11, 136, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 3
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Discount Impact Chart
+        const discountImpactCtx = document.getElementById('discountImpactChart').getContext('2d');
+        const discountImpactChart = new Chart(discountImpactCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Without Discount',
+                    data: [5200, 5400, 5300, 5500],
+                    borderColor: 'rgba(157, 11, 136, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false
+                }, {
+                    label: 'With Discount',
+                    data: [7800, 8200, 7900, 8400],
+                    borderColor: 'rgba(255, 106, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Customer Acquisition Chart
+        const customerAcquisitionCtx = document.getElementById('customerAcquisitionChart').getContext('2d');
+        const customerAcquisitionChart = new Chart(customerAcquisitionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'New Customers',
+                    data: [18, 25, 30, 22, 28, 35],
+                    backgroundColor: 'rgba(255, 166, 235, 0.7)',
+                    borderColor: 'rgba(255, 166, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Returning Customers',
+                    data: [42, 48, 53, 58, 62, 68],
+                    backgroundColor: 'rgba(222, 17, 200, 0.7)',
+                    borderColor: 'rgba(222, 17, 200, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stacked: true
+                    },
+                    x: {
+                        stacked: true
+                    }
+                }
+            }
+        });
+        
+        // Toggle between time periods for revenue chart
+        document.querySelectorAll('[data-period]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Update chart data based on selected period
+                const period = this.getAttribute('data-period');
+                let labels, data;
+                
+                if (period === 'week') {
+                    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    data = [750, 825, 680, 920, 1050, 1380, 1200];
+                } else if (period === 'month') {
+                    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    data = [4825, 5250, 6180, 8430];
+                } else if (period === 'quarter') {
+                    labels = ['Jan', 'Feb', 'Mar'];
+                    data = [15200, 17800, 20400];
+                }
+                
+                revenueChart.data.labels = labels;
+                revenueChart.data.datasets[0].data = data;
+                revenueChart.update();
+            });
+        });
+    });
+</script>
+{% endblock %}

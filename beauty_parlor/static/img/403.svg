@@ -1,0 +1,27 @@
+<svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background elements -->
+  <circle cx="250" cy="200" r="150" fill="#ffcbfb" opacity="0.5"/>
+  
+  <!-- Lock -->
+  <g transform="translate(250, 200) scale(1.5)">
+    <!-- Lock body -->
+    <rect x="-30" y="-10" width="60" height="50" rx="10" ry="10" fill="#de11c8" />
+    
+    <!-- Lock shackle -->
+    <path d="M -15 -10 L -15 -30 Q -15 -50 0 -50 Q 15 -50 15 -30 L 15 -10" 
+          fill="none" stroke="#de11c8" stroke-width="10" stroke-linecap="round" />
+    
+    <!-- Keyhole -->
+    <circle cx="0" cy="15" r="8" fill="white" />
+    <rect x="-2" y="15" width="4" height="10" fill="white" />
+  </g>
+  
+  <!-- 403 text -->
+  <text x="250" y="110" font-family="Arial, sans-serif" font-size="50" font-weight="bold" text-anchor="middle" fill="#9d0b88">403</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="150" cy="100" r="10" fill="#ffa2f3"/>
+  <circle cx="350" cy="150" r="15" fill="#ffa2f3"/>
+  <circle cx="170" cy="320" r="12" fill="#ffa2f3"/>
+  <circle cx="370" cy="280" r="8" fill="#ffa2f3"/>
+</svg>

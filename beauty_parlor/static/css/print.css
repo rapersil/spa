@@ -1,0 +1,142 @@
+.receipt-container {
+    max-width: 190mm;        /* Wider for standard paper */
+    margin: 0 auto;
+    border: 1px dashed var(--gray-300);
+    padding: 10px;
+    background-color: var(--white);
+}
+
+.receipt {
+    padding: 1rem;
+    font-family: Arial, sans-serif;  /* Better for standard printing */
+    max-width: none;                 /* Remove width restriction */
+    width: 100%;
+    margin: 0 auto;
+}
+
+.receipt-header h4 {
+    color: var(--color-800);
+    margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.receipt-header p {
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--gray-700);
+}
+
+.receipt-header h5 {
+    margin-top: 10px;
+    font-size: 16px;
+    border-top: 1px solid var(--gray-300);
+    border-bottom: 1px solid var(--gray-300);
+    padding: 5px 0;
+    color: var(--color-700);
+}
+
+/* Section headers */
+.customer-header,
+.service-header,
+.reference-header {
+    font-weight: 600;
+    color: var(--color-700);
+    font-size: 14px;
+    border-bottom: 1px dashed var(--gray-300);
+    padding-bottom: 3px;
+}
+
+/* Discount styling */
+.receipt-item-discount {
+    color: var(--danger);
+    font-size: 0.9em;
+}
+
+/* Total amount highlight */
+.receipt-total {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+/* Thank you message styling */
+.thank-you {
+    font-weight: 600;
+    color: var(--color-700);
+    font-size: 16px;
+}
+
+/* Notes section */
+.notes {
+    background-color: var(--color-50);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    border-left: 2px solid var(--color-400);
+}
+
+/* Print-specific styling */
+@media print {
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .receipt-container {
+        border: none;
+        width: 90%;
+        max-width: 190mm; /* Much wider than before */
+        padding: 0;
+        margin: 0 auto;
+    }
+    
+    .no-print {
+        display: none;
+    }
+    
+    @page {
+        size: auto; /* Use standard paper size */
+        margin: 10mm; /* Standard margins */
+    }
+    
+    /* Make content fit on one page */
+    .receipt {
+        font-size: 12pt;
+        font-family: Arial, sans-serif; /* Better for standard printing */
+        max-width: none;
+        width: 100%;
+    }
+    
+    /* Create a two-column layout for wider format */
+    .receipt-body {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .receipt-info, .customer-header, .service-header {
+        width: 100%;
+    }
+    
+    .receipt-customer, .receipt-items {
+        width: 48%;
+        margin-right: 2%;
+    }
+    
+    .booking-reference {
+        width: 48%;
+    }
+}
+
+.additional-services {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.receipt-subtotal {
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.receipt-item-discount {
+    font-size: 0.9em;
+}

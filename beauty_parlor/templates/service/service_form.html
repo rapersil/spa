@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}Edit Service - {{ form.instance.name }}{% else %}Add New Service{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/service.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'service_list' %}">Services</a></li>
+            <li class="breadcrumb-item active">
+                {% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Add New Service{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if form.instance.pk %}
+                        <i class="material-icons me-2">edit</i>Edit Service
+                        {% else %}
+                        <i class="material-icons me-2">add_circle</i>Add New Service
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Service Name and Price -->
+                            <div class="col-md-6 mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.price|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Duration and Status -->
+                            <div class="col-md-6 mb-3">
+                                {{ form.duration|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.active|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-4">
+                            {{ form.description|as_crispy_field }}
+                        </div>
+                        
+                        
+                        <!-- Service Image -->
+                        <div class="mb-4">
+                            {{ form.image|as_crispy_field }}
+                            
+                            {% if form.instance.pk and form.instance.image %}
+                            <div class="current-image mt-2">
+                                <div class="card">
+                                    <div class="card-header">Current Image</div>
+                                    <div class="card-body text-center">
+                                        <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" class="img-fluid rounded" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Additional Images -->
+                        <div class="mb-4">
+                            <label for="additional_images" class="form-label">Additional Images</label>
+                            <input type="file" name="additional_images" id="additional_images" class="form-control" multiple>
+                            <div class="form-text">You can upload multiple additional images for this service</div>
+                            
+                            {% if form.instance.pk and form.instance.images.all %}
+                            <div class="mt-3">
+                                <label class="form-label">Current Additional Images:</label>
+                                <div class="row">
+                                    {% for img in form.instance.images.all %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
+                                            <img src="{{ img.image.url }}" class="card-img-top" alt="Additional image">
+                                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">Image {{ forloop.counter }}</small>
+                                                <form method="post" action="{% url 'service_image_delete' service_id=form.instance.pk image_id=img.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="material-icons">delete</i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if form.instance.pk %}{% url 'service_detail' form.instance.pk %}{% else %}{% url 'service_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                <i class="material-icons me-2">close</i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons me-2">save</i>
+                                {% if form.instance.pk %}Save Changes{% else %}Create Service{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview image before upload
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('id_image');
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Create or update image preview
+                        let previewContainer = document.querySelector('.image-preview');
+                        if (!previewContainer) {
+                            previewContainer = document.createElement('div');
+                            previewContainer.className = 'image-preview mt-3';
+                            
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            
+                            const cardHeader = document.createElement('div');
+                            cardHeader.className = 'card-header';
+                            cardHeader.textContent = 'Image Preview';
+                            
+                            const cardBody = document.createElement('div');
+                            cardBody.className = 'card-body text-center';
+                            
+                            const img = document.createElement('img');
+                            img.className = 'img-fluid rounded preview-image';
+                            img.style.maxHeight = '200px';
+                            
+                            cardBody.appendChild(img);
+                            card.appendChild(cardHeader);
+                            card.appendChild(cardBody);
+                            previewContainer.appendChild(card);
+                            
+                            imageInput.parentNode.appendChild(previewContainer);
+                        }
+                        
+                        const previewImage = previewContainer.querySelector('.preview-image');
+                        previewImage.src = e.target.result;
+                    }
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

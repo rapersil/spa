@@ -1,0 +1,204 @@
+{% extends 'base_print.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Payment Receipt - {{ sale.receipt_number }}{% endblock %}
+
+{% block head_extras %}
+{% endblock %}
+
+{% block content %}
+<div class="receipt-container">
+    <div class="receipt">
+        <!-- Header Section -->
+        <div class="receipt-header text-center">
+            <h4>{{ settings.BEAUTY_PARLOR_NAME }}</h4>
+            <p>{{ settings.BEAUTY_PARLOR_ADDRESS }}<br>
+            Phone: {{ settings.BEAUTY_PARLOR_PHONE }}</p>
+            <h5>PAYMENT RECEIPT</h5>
+        </div>
+        
+        <!-- Receipt Info Section -->
+        <div class="receipt-body">
+            <div class="receipt-info">
+                <div class="row mb-2">
+                    <div class="col-6">Receipt #:</div>
+                    <div class="col-6 text-end">{{ sale.receipt_number }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Sale ID:</div>
+                    <div class="col-6 text-end">{{ sale.sale_id }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Payment Date:</div>
+                    <div class="col-6 text-end">{{ sale.payment_date|date:"F d, Y" }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Payment Time:</div>
+                    <div class="col-6 text-end">{{ sale.payment_date|date:"h:i A" }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Payment Method:</div>
+                    <div class="col-6 text-end">
+                        {% if sale.payment_method == 'CASH' %}
+                            <i class="material-icons text-success me-1" style="font-size: 1rem; vertical-align: text-bottom;">payments</i>
+                        {% elif sale.payment_method == 'CREDIT_CARD' %}
+                            <i class="material-icons text-primary me-1" style="font-size: 1rem; vertical-align: text-bottom;">credit_card</i>
+                        {% elif sale.payment_method == 'DEBIT_CARD' %}
+                            <i class="material-icons text-info me-1" style="font-size: 1rem; vertical-align: text-bottom;">credit_card</i>
+                        {% elif sale.payment_method == 'MOBILE_PAYMENT' %}
+                            <i class="material-icons text-warning me-1" style="font-size: 1rem; vertical-align: text-bottom;">smartphone</i>
+                        {% else %}
+                            <i class="material-icons text-secondary me-1" style="font-size: 1rem; vertical-align: text-bottom;">account_balance</i>
+                        {% endif %}
+                        {{ sale.get_payment_method_display }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Information -->
+            <div class="receipt-customer mb-3">
+                <div class="customer-header mb-2">Customer Information</div>
+                <div class="customer-details">
+                    <strong>Name:</strong> {{ sale.booking.customer.first_name }} {{ sale.booking.customer.last_name }}<br>
+                    <strong>Phone:</strong> {{ sale.booking.customer.phone }}<br>
+                    <strong>Customer ID:</strong> {{ sale.booking.customer.customer_id }}
+                </div>
+            </div>
+            
+            <!-- Service Details -->
+            <div class="receipt-items">
+                <div class="service-header mb-2">Service Details</div>
+                <div class="receipt-item-header row">
+                    <div class="col-7"><strong>Service</strong></div>
+                    <div class="col-5 text-end"><strong>Amount</strong></div>
+                </div>
+                <hr class="my-2">
+                
+                <!-- Service Item -->
+                <div class="receipt-item row">
+                    <div class="col-7">{{ sale.booking.service.name }}</div>
+                    <div class="col-5 text-end">GHS{{ sale.booking.service.price|floatformat:2 }}</div>
+                </div>
+                <div class="receipt-item row">
+                    <div class="col-7"><small>Duration: {{ sale.booking.service.duration }} minutes</small></div>
+                    <div class="col-5 text-end"></div>
+                </div>
+                
+                {% if sale.booking.service_discount %}
+                <div class="receipt-item-discount row">
+                    <div class="col-7 text-danger">Service Discount ({{ sale.booking.service_discount.percentage }}%)</div>
+                    <div class="col-5 text-end text-danger">
+                        -GHS{{ service_discount_amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Special Discount (formerly Custom Discount) -->
+                {% if sale.booking.custom_discount > 0 %}
+                <div class="receipt-item-discount row">
+                    <div class="col-7 text-danger">Special Discount ({{ sale.booking.custom_discount }}%)</div>
+                    <div class="col-5 text-end text-danger">
+                        -GHS{{ custom_discount_amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Additional Services -->
+                {% if additional_services %}
+                <div class="additional-services mb-3">
+                    <div class="service-header mb-2">Additional Services</div>
+                    <hr class="my-2">
+                    
+                    {% for service in additional_services %}
+                    <div class="receipt-item row">
+                        <div class="col-7">{{ service.name }}</div>
+                        <div class="col-5 text-end">GHS{{ service.regular_price|floatformat:2 }}</div>
+                    </div>
+                    
+                    {% if service.discount_percentage > 0 %}
+                    <div class="receipt-item-discount row">
+                        <div class="col-7 text-danger">Discount ({{ service.discount_percentage }}%)</div>
+                        <div class="col-5 text-end text-danger">
+                            -GHS{{ service.regular_price|multiply:service.discount_percentage|divide:100|floatformat:2 }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    <div class="receipt-subtotal row">
+                        <div class="col-7"><em>Additional Services Total:</em></div>
+                        <div class="col-5 text-end"><em>GHS{{ additional_services_total|floatformat:2 }}</em></div>
+                    </div>
+                    <hr class="my-2">
+                </div>
+                {% endif %}
+                
+                {% if sale.payment_discount > 0 %}
+                <div class="receipt-item-discount row">
+                    <div class="col-7 text-danger">Payment Discount ({{ sale.payment_discount }}%)</div>
+                    <div class="col-5 text-end text-danger">
+                        -GHS{{ payment_discount_amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                
+                <hr class="my-2">
+                <div class="receipt-total row">
+                    <div class="col-7"><strong>Total Amount</strong></div>
+                    <div class="col-5 text-end"><strong>GHS{{ sale.payment_amount|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+            
+            <!-- Booking Reference -->
+            <div class="booking-reference mt-4">
+                <div class="reference-header mb-2">Booking Reference</div>
+                <div class="reference-details">
+                    <div class="row">
+                        <div class="col-6">Booking ID:</div>
+                        <div class="col-6 text-end">{{ sale.booking.booking_id }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">Booking Date:</div>
+                        <div class="col-6 text-end">{{ sale.booking.date_time|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">Booking Time:</div>
+                        <div class="col-6 text-end">{{ sale.booking.date_time|date:"h:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Optional Notes -->
+            {% if sale.booking.notes %}
+            <div class="notes mt-3">
+                <strong>Notes:</strong> {{ sale.booking.notes }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="receipt-footer text-center mt-4">
+            <div class="thank-you mb-2">Thank you for your business!</div>
+            <p>We appreciate your patronage at {{ settings.BEAUTY_PARLOR_NAME }}</p>
+            <p class="mb-2">We look forward to serving you again soon.</p>
+            
+            <!-- Processed by -->
+            <div class="processed-by mt-3">
+                <small>Processed by: {{ sale.created_by.get_full_name|default:sale.created_by.username }}</small>
+            </div>
+            
+            <div class="print-date">
+                <small>Printed on: {% now "F d, Y h:i A" %}</small>
+            </div>
+            
+            <!-- QR Code for digital verification -->
+            <div class="qr-code mt-3">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="Receipt Verification QR" class="img-fluid" style="max-width: 100px;">
+                <div><small>Scan to verify receipt</small></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

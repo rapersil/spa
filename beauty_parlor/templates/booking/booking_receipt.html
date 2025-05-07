@@ -1,0 +1,166 @@
+{% extends 'base_print.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Booking Receipt - {{ booking.booking_id }}{% endblock %}
+
+{% block content %}
+<div class="receipt-container">
+    <div class="receipt">
+        <!-- Header Section -->
+        <div class="receipt-header text-center">
+            <h4>{{ settings.BEAUTY_PARLOR_NAME }}</h4>
+            <p>{{ settings.BEAUTY_PARLOR_ADDRESS }}<br>
+            Phone: {{ settings.BEAUTY_PARLOR_PHONE }}</p>
+            <h5>BOOKING CONFIRMATION RECEIPT</h5>
+        </div>
+        
+        <!-- Receipt Info Section -->
+        <div class="receipt-body">
+            <div class="receipt-info">
+                <div class="row mb-2">
+                    <div class="col-6">Booking #:</div>
+                    <div class="col-6 text-end">{{ booking.booking_id }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Appointment Date:</div>
+                    <div class="col-6 text-end">{{ booking.date_time|date:"F d, Y" }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Scheduled Time:</div>
+                    <div class="col-6 text-end">{{ booking.date_time|date:"h:i A" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">Expected Start:</div>
+                    <div class="col-6 text-end">
+                        {% if wait_time_minutes > 0 %}
+                            {{ expected_start_time|date:"h:i A" }}
+                            <small>({{ wait_time_minutes }} min wait)</small>
+                        {% else %}
+                            {{ booking.date_time|date:"h:i A" }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Status:</div>
+                    <div class="col-6 text-end">
+                        <span class="status-badge
+                            {% if booking.status == 'PENDING' %}pending
+                            {% elif booking.status == 'CONFIRMED' %}confirmed
+                            {% elif booking.status == 'COMPLETED' %}completed
+                            {% else %}cancelled{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Information -->
+            <div class="receipt-customer mb-3">
+                <div class="customer-header mb-2"><strong>Customer Information</strong></div>
+                <div class="customer-details">
+                    <strong>Name:</strong> {{ booking.customer.first_name }} {{ booking.customer.last_name }}<br>
+                    <strong>Phone:</strong> {{ booking.customer.phone }}<br>
+                    <strong>Customer ID:</strong> {{ booking.customer.customer_id }}
+                </div>
+            </div>
+            
+            <!-- Service Details -->
+            <div class="receipt-items">
+                <div class="service-header mb-2"><strong>Service Details</strong></div>
+                <div class="receipt-item-header row">
+                    <div class="col-7"><strong>Service</strong></div>
+                    <div class="col-5 text-end"><strong>Amount</strong></div>
+                </div>
+                <hr class="my-2">
+                
+                <!-- Service Item -->
+                <div class="receipt-item row">
+                    <div class="col-7">{{ booking.service.name }}</div>
+                    <div class="col-5 text-end">GHS{{ booking.service.price|floatformat:2 }}</div>
+                </div>
+                <div class="receipt-item row">
+                    <div class="col-7"><small>Duration: {{ booking.service.duration }} minutes</small></div>
+                    <div class="col-5 text-end"></div>
+                </div>
+                
+                <!-- Service Discount -->
+                {% if service_discount %}
+                <div class="receipt-item-discount row">
+                    <div class="col-7 text-danger">Service Discount ({{ service_discount.percentage }}%)</div>
+                    <div class="col-5 text-end text-danger">
+                        -GHS{{ service_discount_amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Special Discount (formerly Custom Discount) -->
+                {% if booking.custom_discount > 0 %}
+                <div class="receipt-item-discount row">
+                    <div class="col-7 text-danger">Special Discount ({{ booking.custom_discount }}%)</div>
+                    <div class="col-5 text-end text-danger">
+                        -GHS{{ custom_discount_amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endif %}
+                                
+                <hr class="my-2">
+                <div class="receipt-total row">
+                    <div class="col-7"><strong>Total Amount</strong></div>
+                    <div class="col-5 text-end"><strong>GHS{{ booking.get_final_price|floatformat:2 }}</strong></div>
+                </div>
+            </div>
+            
+            <!-- Payment Instructions (if needed) -->
+            <div class="payment-instruction mt-4">
+                <div class="instruction-header mb-2"><strong>Payment Information</strong></div>
+                <div class="instruction-details">
+                    {% if booking.status == 'COMPLETED' and booking.sale %}
+                        <p><strong>Payment Status:</strong> <span class="paid-status">PAID</span></p>
+                        <p><strong>Receipt Number:</strong> {{ booking.sale.receipt_number }}</p>
+                        <p><strong>Payment Date:</strong> {{ booking.sale.payment_date|date:"F d, Y h:i A" }}</p>
+                        <p><strong>Payment Method:</strong> {{ booking.sale.get_payment_method_display }}</p>
+                    {% else %}
+                        <p><strong>Payment Status:</strong> <span class="unpaid-status">NOT PAID</span></p>
+                        <p>Payment will be collected at the time of service.</p>
+                        <p>We accept cash, credit cards, debit cards, and mobile payments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="receipt-footer text-center mt-4">
+            <div class="thank-you mb-2"><strong>Thank you for choosing {{ settings.BEAUTY_PARLOR_NAME }}!</strong></div>
+            <p>Please arrive 5-10 minutes before your scheduled time.</p>
+            
+            {% if booking.notes %}
+            <div class="notes mt-3">
+                <strong>Notes:</strong> {{ booking.notes }}
+            </div>
+            {% endif %}
+            
+            <!-- Salon Policy (Optional) -->
+            <div class="salon-policy mt-3">
+                <p><small>* Cancellations must be made at least 24 hours in advance.</small></p>
+                <p><small>* Late arrivals may result in shortened service time.</small></p>
+            </div>
+            
+            <!-- Processed by -->
+            <div class="processed-by mt-3">
+                <small>Generated by: {{ booking.created_by.get_full_name|default:booking.created_by.username }}</small>
+            </div>
+            
+            <div class="print-date">
+                <small>Printed on: {% now "F d, Y h:i A" %}</small>
+            </div>
+            
+            <!-- QR Code for verification -->
+            <div class="qr-code mt-3">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="Booking Verification QR" class="img-fluid" style="max-width: 100px;">
+                <div><small>Scan to verify booking</small></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

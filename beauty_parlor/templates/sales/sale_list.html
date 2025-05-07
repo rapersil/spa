@@ -1,0 +1,473 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Sales - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><i class="material-icons me-2">point_of_sale</i>Sales</h2>
+            <p class="text-muted">View and manage payment records</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="btn-group">
+                {% if user.user_type in "ADMIN,SUPERADMIN" %}
+                <a href="{% url 'sales_report' %}" class="btn btn-outline-primary">
+                    <i class="material-icons me-2">bar_chart</i>Sales Report
+                </a>
+                {% endif %}
+                <a href="{% url 'sale_create' %}" class="btn btn-primary">
+                    <i class="material-icons me-2">add</i>Record Payment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Summary Cards -->
+    <div class="row mb-4">
+        <!-- Today's Sales -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">Today's Sales</h6>
+                            <h3 class="mb-0">GHS{{ today_sales.total|default:"0.00"|floatformat:2|intcomma }}</h3>
+                            <small class="text-muted">{{ today_sales.count|default:"0" }} transaction(s)</small>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">today</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- This Week's Sales -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">This Week</h6>
+                            <h3 class="mb-0">GHS{{ week_sales.total|default:"0.00"|floatformat:2|intcomma }}</h3>
+                            <small class="text-muted">{{ week_sales.count|default:"0" }} transaction(s)</small>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">date_range</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- This Month's Sales -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">This Month</h6>
+                            <h3 class="mb-0">GHS{{ month_sales.total|default:"0.00"|floatformat:2|intcomma }}</h3>
+                            <small class="text-muted">{{ month_sales.count|default:"0" }} transaction(s)</small>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">calendar_month</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Search and Filter -->
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="material-icons me-2">filter_list</i>Search & Filter</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="sale-search-form">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="material-icons">search</i></span>
+                            {{ search_form.query }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="material-icons">today</i></span>
+                            {{ search_form.start_date }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="material-icons">today</i></span>
+                            {{ search_form.end_date }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        {{ search_form.payment_method }}
+                    </div>
+                    
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mt-1">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">GHS</span>
+                            {{ search_form.min_amount }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">GHS</span>
+                            {{ search_form.max_amount }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="btn-group btn-group-sm d-flex flex-wrap" role="group" id="dateRangeButtons">
+                            <button type="button" class="btn btn-outline-secondary date-preset" data-range="today">Today</button>
+                            <button type="button" class="btn btn-outline-secondary date-preset" data-range="yesterday">Yesterday</button>
+                            <button type="button" class="btn btn-outline-secondary date-preset" data-range="week">This Week</button>
+                            <button type="button" class="btn btn-outline-secondary date-preset" data-range="month">This Month</button>
+                            <button type="button" class="btn btn-outline-secondary date-preset" data-range="year">This Year</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 d-grid">
+                        <a href="{% url 'sales_list' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales List -->
+    <div class="card shadow-sm border">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="material-icons me-2">list</i>Sales Records</h5>
+            {% if user.user_type in "ADMIN,SUPERADMIN" %}
+            <a href="{% url 'sales_report' %}" class="btn btn-sm btn-outline-primary">
+                <i class="material-icons me-1">trending_up</i>View Reports
+            </a>
+            {% endif %}
+        </div>
+        <div class="card-body p-0">
+            {% if sales %}
+            <div class="table-responsive">
+                <table class="table table-hover sales-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Receipt #</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Payment Method</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.receipt_number }}</td>
+                            <td>
+                                <span class="sale-date">{{ sale.payment_date|date:"M d, Y" }}</span>
+                                <span class="sale-time">{{ sale.payment_date|date:"h:i A" }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'customer_detail' sale.booking.customer.pk %}" class="customer-link">
+                                    {{ sale.booking.customer.first_name }} {{ sale.booking.customer.last_name }}
+                                </a>
+                            </td>
+                            <td>{{ sale.booking.service.name }}</td>
+                            <td>
+                                <span class="payment-method">
+                                    {% if sale.payment_method == 'CASH' %}
+                                    <i class="material-icons text-success me-1" style="font-size: 1rem; vertical-align: text-bottom;">payments</i>
+                                    {% elif sale.payment_method == 'CREDIT_CARD' %}
+                                    <i class="material-icons text-primary me-1" style="font-size: 1rem; vertical-align: text-bottom;">credit_card</i>
+                                    {% elif sale.payment_method == 'DEBIT_CARD' %}
+                                    <i class="material-icons text-info me-1" style="font-size: 1rem; vertical-align: text-bottom;">credit_card</i>
+                                    {% elif sale.payment_method == 'MOBILE_PAYMENT' %}
+                                    <i class="material-icons text-warning me-1" style="font-size: 1rem; vertical-align: text-bottom;">smartphone</i>
+                                    {% else %}
+                                    <i class="material-icons text-secondary me-1" style="font-size: 1rem; vertical-align: text-bottom;">account_balance</i>
+                                    {% endif %}
+                                    {{ sale.get_payment_method_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="sale-amount">GHS{{ sale.payment_amount|floatformat:2 }}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'sale_detail' sale.pk %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                    <a href="{% url 'booking_detail' sale.booking.pk %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="View Booking">
+                                        <i class="material-icons">event_available</i>
+                                    </a>
+                                    
+                                    <a href="{% url 'sale_print' sale.pk %}" class="btn btn-outline-success" data-bs-toggle="tooltip" title="Print Receipt" target="_blank">
+                                        <i class="material-icons">print</i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="material-icons text-muted" style="font-size: 3em;">receipt_long</i>
+                <h4>No sales records found</h4>
+                <p class="text-muted">There are no recorded payments in the system yet.</p>
+                <a href="{% url 'sale_create' %}" class="btn btn-primary mt-3">
+                    <i class="material-icons me-2">add</i>Record First Payment
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer">
+            <nav aria-label="Sales pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <!-- Update the pagination links to include filter parameters -->
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.min_amount %}&min_amount={{ request.GET.min_amount }}{% endif %}{% if request.GET.max_amount %}&max_amount={{ request.GET.max_amount }}{% endif %}">
+                            <i class="material-icons">first_page</i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <!-- Update the pagination links to include filter parameters -->
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.min_amount %}&min_amount={{ request.GET.min_amount }}{% endif %}{% if request.GET.max_amount %}&max_amount={{ request.GET.max_amount }}{% endif %}">
+                            <i class="material-icons">chevron_left</i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <!-- Update the pagination links to include filter parameters -->
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.min_amount %}&min_amount={{ request.GET.min_amount }}{% endif %}{% if request.GET.max_amount %}&max_amount={{ request.GET.max_amount }}{% endif %}">
+                            <i class="material-icons">chevron_right</i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <!-- Update the pagination links to include filter parameters -->
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.payment_method %}&payment_method={{ request.GET.payment_method }}{% endif %}{% if request.GET.min_amount %}&min_amount={{ request.GET.min_amount }}{% endif %}{% if request.GET.max_amount %}&max_amount={{ request.GET.max_amount }}{% endif %}">
+                            <i class="material-icons">last_page</i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Add to your extra_js block
+// Date range preset buttons
+document.querySelectorAll('.date-preset').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const range = this.getAttribute('data-range');
+        const startDateInput = document.querySelector('input[name="start_date"]');
+        const endDateInput = document.querySelector('input[name="end_date"]');
+        
+        const today = new Date();
+        let startDate = new Date(today);
+        
+        switch(range) {
+            case 'today':
+                // Both start and end are today
+                break;
+            case 'yesterday':
+                startDate.setDate(today.getDate() - 1);
+                endDateInput.valueAsDate = startDate;
+                break;
+            case 'week':
+                startDate.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+                break;
+            case 'month':
+                startDate.setDate(1); // Start of month
+                break;
+            case 'year':
+                startDate.setMonth(0, 1); // January 1st of current year
+                break;
+        }
+        
+        startDateInput.valueAsDate = startDate;
+        if (range !== 'yesterday') {
+            endDateInput.valueAsDate = today;
+        }
+    });
+});
+// Date range preset buttons with active state
+document.addEventListener('DOMContentLoaded', function() {
+    const datePresetButtons = document.querySelectorAll('.date-preset');
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
+    
+    // First, check if there are already date filters applied and highlight the matching button
+    function checkExistingDateFilters() {
+        if (!startDateInput || !endDateInput) return;
+        
+        const startValue = startDateInput.value;
+        const endValue = endDateInput.value;
+        
+        if (!startValue && !endValue) return;
+        
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        
+        // Yesterday
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const yesterdayFormatted = yesterday.toISOString().split('T')[0];
+        
+        // Week start
+        const weekStart = new Date();
+        weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+        const weekStartFormatted = weekStart.toISOString().split('T')[0];
+        
+        // Month start
+        const monthStart = new Date();
+        monthStart.setDate(1); // Start of month
+        const monthStartFormatted = monthStart.toISOString().split('T')[0];
+        
+        // Year start
+        const yearStart = new Date();
+        yearStart.setMonth(0, 1); // January 1st
+        const yearStartFormatted = yearStart.toISOString().split('T')[0];
+        
+        // Check which preset matches
+        if (startValue === todayFormatted && endValue === todayFormatted) {
+            setActiveButton('today');
+        } else if (startValue === yesterdayFormatted && endValue === yesterdayFormatted) {
+            setActiveButton('yesterday');
+        } else if (startValue === weekStartFormatted && endValue === todayFormatted) {
+            setActiveButton('week');
+        } else if (startValue === monthStartFormatted && endValue === todayFormatted) {
+            setActiveButton('month');
+        } else if (startValue === yearStartFormatted && endValue === todayFormatted) {
+            setActiveButton('year');
+        }
+    }
+    
+    // Helper function to set active button
+    function setActiveButton(range) {
+        // Remove active class from all buttons
+        datePresetButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-secondary');
+        });
+        
+        // Add active class to the matching button
+        const activeButton = document.querySelector(`.date-preset[data-range="${range}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+            activeButton.classList.remove('btn-outline-secondary');
+            activeButton.classList.add('btn-primary');
+        }
+    }
+    
+    // Add click event to all preset buttons
+    datePresetButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const range = this.getAttribute('data-range');
+            
+            // Set the active button style
+            setActiveButton(range);
+            
+            // Set date values based on the selected range
+            const today = new Date();
+            let startDate = new Date(today);
+            
+            switch(range) {
+                case 'today':
+                    // Both start and end are today
+                    endDateInput.valueAsDate = today;
+                    break;
+                case 'yesterday':
+                    startDate.setDate(today.getDate() - 1);
+                    endDateInput.valueAsDate = startDate;
+                    break;
+                case 'week':
+                    startDate.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+                    endDateInput.valueAsDate = today;
+                    break;
+                case 'month':
+                    startDate.setDate(1); // Start of month
+                    endDateInput.valueAsDate = today;
+                    break;
+                case 'year':
+                    startDate.setMonth(0, 1); // January 1st of current year
+                    endDateInput.valueAsDate = today;
+                    break;
+            }
+            
+            startDateInput.valueAsDate = startDate;
+        });
+    });
+    
+    // If the date inputs change manually, clear active buttons
+    startDateInput.addEventListener('change', function() {
+        if (this.value) {
+            datePresetButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            });
+        }
+    });
+    
+    endDateInput.addEventListener('change', function() {
+        if (this.value) {
+            datePresetButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            });
+        }
+    });
+    
+    // Check if there are existing date filters when the page loads
+    checkExistingDateFilters();
+});
+</script>
+{% endblock %}

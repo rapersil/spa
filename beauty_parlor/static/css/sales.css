@@ -1,0 +1,367 @@
+/* static/css/sales.css */
+
+/* Sales Summary Cards */
+.summary-card {
+    border: none;
+    border-radius: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px var(--black-10) !important;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    background-color: var(--color-100);
+    color: var(--color-600);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.sales-table th {
+    background-color: var(--color-50);
+    color: var(--color-900);
+}
+
+.sale-date {
+    display: block;
+    font-weight: 500;
+}
+
+.sale-time {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+.sale-amount {
+    font-weight: 600;
+    color: var(--color-700);
+}
+
+.receipt-container {
+    max-width: 190mm;        /* Wider for standard paper */
+    margin: 0 auto;
+    border: 1px dashed var(--gray-300);
+    padding: 10px;
+    background-color: var(--white);
+}
+
+.receipt {
+    padding: 1rem;
+    font-family: Arial, sans-serif;  /* Better for standard printing */
+    max-width: none;                 /* Remove width restriction */
+    width: 100%;
+    margin: 0 auto;
+}
+
+.receipt-header h4 {
+    color: var(--color-800);
+    margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.receipt-header p {
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--gray-700);
+}
+
+.receipt-header h5 {
+    margin-top: 10px;
+    font-size: 16px;
+    border-top: 1px solid var(--gray-300);
+    border-bottom: 1px solid var(--gray-300);
+    padding: 5px 0;
+    color: var(--color-700);
+}
+
+.receipt-items hr {
+    margin: 0.5rem 0;
+    border-style: dashed;
+}
+
+.receipt-card .card-header {
+    background-color: var(--color-50);
+}
+
+/* Section headers */
+.customer-header, .service-header, .reference-header, .instruction-header {
+    font-weight: 600;
+    color: var(--color-700);
+    font-size: 14px;
+    border-bottom: 1px dashed var(--gray-300);
+    padding-bottom: 3px;
+}
+
+/* Discount styling */
+.receipt-item-discount {
+    color: var(--danger);
+    font-size: 0.9em;
+}
+
+/* Total amount highlight */
+.receipt-total {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+/* Thank you message styling */
+.thank-you {
+    font-weight: 600;
+    color: var(--color-700);
+    font-size: 16px;
+}
+
+/* Notes section */
+.notes {
+    background-color: var(--color-50);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    border-left: 2px solid var(--color-400);
+}
+
+/* Receipt payment info */
+.payment-instruction {
+    border-top: 1px dashed var(--gray-300);
+    padding-top: 10px;
+}
+
+.paid-status {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.unpaid-status {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+/* Receipt body styling */
+.receipt-body {
+    border-radius: 8px;
+    background-color: var(--white);
+}
+
+.receipt-info, .receipt-customer, .receipt-items, .booking-reference {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-200);
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.pending {
+    background-color: var(--warning-light);
+    color: var(--warning);
+}
+
+.status-badge.confirmed {
+    background-color: var(--info-light);
+    color: var(--info);
+}
+
+.status-badge.completed {
+    background-color: var(--success-light);
+    color: var(--success);
+}
+
+.status-badge.cancelled {
+    background-color: var(--danger-light);
+    color: var(--danger);
+}
+
+/* QR code styling */
+.qr-code {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.qr-code img {
+    max-width: 100px;
+    margin: 0 auto;
+}
+
+/* Sale Detail Tables */
+.sale-details-table th,
+.booking-details-table th,
+.customer-details-table th {
+    width: 40%;
+    font-weight: 600;
+    color: var(--color-800);
+}
+
+/* Payment Form */
+.payment-preview .card {
+    border: 1px solid var(--color-100);
+}
+
+/* Sales Report Form */
+.report-form .form-control,
+.report-form .form-select {
+    border: 1px solid var(--color-200);
+}
+
+.report-form .form-control:focus,
+.report-form .form-select:focus {
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem var(--color-600-25);
+}
+
+.report-form .input-group-text {
+    background-color: var(--color-50);
+    border: 1px solid var(--color-200);
+    color: var(--color-800);
+}
+
+.sales-chart-container {
+    height: 250px;
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+/* Filter form styling */
+.sale-search-form .input-group-text {
+    background-color: var(--color-50);
+    border-color: var(--color-200);
+    color: var(--color-600);
+}
+
+.sale-search-form .form-control:focus,
+.sale-search-form .form-select:focus {
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem rgba(222, 17, 200, 0.25);
+}
+
+.sale-search-form .btn-primary {
+    background-color: var(--color-600);
+    border-color: var(--color-700);
+}
+
+.sale-search-form .btn-primary:hover {
+    background-color: var(--color-700);
+    border-color: var(--color-800);
+}
+
+/* Additional services styling */
+.additional-services {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.additional-services-header {
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.receipt-subtotal {
+    margin-top: 8px;
+    border-top: 1px dashed #ddd;
+    padding-top: 8px;
+}
+
+/* Button styling */
+.btn-group .date-preset.active,
+.btn-group .btn-primary.active {
+    background-color: var(--color-800);
+    border-color: var(--color-800) !important; /* Same as background to hide border */
+    color: var(--white) !important;
+    box-shadow: none !important; /* Remove the focus shadow */
+}
+
+/* Hover state for active button */
+.btn-group .date-preset.active:hover,
+.btn-group .btn-primary.active:hover {
+    background-color: var(--color-900) !important;
+    border-color: var(--color-900) !important;
+}
+
+/* Regular button styling */
+.btn-group .date-preset {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom styling for the active button */
+.btn-group .btn-primary,
+.btn-group .date-preset.btn-primary {
+    background-color: var(--color-900);
+    border-color: var(--color-900);
+}
+
+/* Make sure the non-active buttons maintain consistent styling */
+.btn-group .btn-outline-secondary {
+    border-color: var(--color-200);
+}
+
+.btn-group .btn-outline-secondary:hover {
+    background-color: var(--color-1000);
+    color: var(--color-900);
+    border-color: var(--white);
+}
+
+.toast {
+    background-color: var(--white);
+    border-left: 4px solid var(--color-600);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast-header {
+    border-bottom: 1px solid var(--color-100);
+    background-color: var(--white);
+}
+
+.toast-header .btn-close:focus {
+    box-shadow: none;
+}
+@media print {
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    body * {
+        visibility: hidden;
+    }
+    
+    .receipt, .receipt * {
+        visibility: visible;
+    }
+    
+    .receipt {
+        position: relative;  /* Changed from absolute */
+        width: 100%;
+        max-width: none;     /* Remove width restriction */
+    }
+    
+    .receipt-container {
+        border: none;
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    
+    .no-print {
+        display: none;
+    }
+    
+    @page {
+        size: auto;          /* Use standard paper */
+        margin: 10mm;
+    }
+}

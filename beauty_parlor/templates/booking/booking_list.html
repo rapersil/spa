@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bookings - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><span class="material-icons me-2">event_available</span>Bookings</h2>
+            <p class="text-muted">View and manage customer appointments</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'booking_calendar' %}" class="btn btn-outline-primary ms-2">
+                <span class="material-icons me-2">calendar_today</span>Calendar View
+            </a>
+            <a href="{% url 'booking_create' %}" class="btn btn-primary">
+                <span class="material-icons me-2">add</span>New Booking
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><span class="material-icons me-2">filter_alt</span>Search & Filter</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="booking-search-form">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><span class="material-icons">search</span></span>
+                            <input type="text" name="query" class="form-control" placeholder="Search by customer or service..."
+                                value="{{ search_form.query.value|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text"><span class="material-icons">calendar_month</span></span>
+                            <input type="date" name="start_date" class="form-control" placeholder="Start Date" 
+                                value="{{ search_form.start_date.value|date:'Y-m-d'|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text"><span class="material-icons">calendar_month</span></span>
+                            <input type="date" name="end_date" class="form-control" placeholder="End Date"
+                                value="{{ search_form.end_date.value|date:'Y-m-d'|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            {% for status_value, status_label in status_choices %}
+                            <option value="{{ status_value }}" {% if search_form.status.value == status_value %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><span class="material-icons me-2">list</span>Booking List</h5>
+            <div>
+                <span class="badge bg-primary">Total: {{ paginator.count }}</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover booking-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Expected Start</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr class="{% if booking.date_time.date == today %}today-booking{% endif %}">
+                            <td>{{ booking.booking_id }}</td>
+                            <td>
+                                <span class="booking-date">{{ booking.date_time|date:"M d, Y" }}</span>
+                                <span class="booking-time">{{ booking.date_time|date:"h:i A" }}</span>
+                                {% if booking.date_time.date == today %}
+                                <span class="badge bg-info">Today</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'customer_detail' booking.customer.pk %}" class="customer-link">
+                                    {{ booking.customer.first_name }} {{ booking.customer.last_name }}
+                                </a>
+                                <small class="d-block text-muted">{{ booking.customer.phone }}</small>
+                            </td>
+                            <td>{{ booking.service.name }}</td>
+                            <td>
+                                <span class="booking-price">GHS{{ booking.get_final_price|floatformat:2 }}</span>
+                                
+                                {% if booking.service_discount %}
+                                <div class="discount-info">
+                                    <span class="badge bg-primary">{{ booking.service_discount.percentage }}% Service Discount</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if booking.custom_discount > 0 %}
+                                <div class="discount-info">
+                                    <span class="badge bg-warning">{{ booking.custom_discount }}% Special Discount</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if booking.service_discount or booking.custom_discount > 0 %}
+                                <small class="d-block text-muted">
+                                    <s>Original: GHS{{ booking.service.price|floatformat:2 }}</s>
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if booking.status == 'PENDING' %}bg-warning
+                                    {% elif booking.status == 'CONFIRMED' %}bg-info
+                                    {% elif booking.status == 'COMPLETED' %}bg-success
+                                    {% else %}bg-danger{% endif %}"
+                                >
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="booking-date">{{ booking.date_time|date:"M d, Y" }}</span>
+                                <span class="booking-time">{{ booking.date_time|date:"h:i A" }}</span>
+                                {% if booking.date_time.date == today %}
+                                <span class="badge bg-info">Today</span>
+                                {% endif %}
+                                
+                                {% if booking.status in 'PENDING,CONFIRMED' %}
+                                    {% with wait_minutes=booking.get_wait_time_minutes %}
+                                        {% if wait_minutes > 0 %}
+                                            <div class="expected-start-info">
+                                                <small class="text-muted">
+                                                    <span class="material-icons me-1">hourglass_bottom</span>Est. start: {{ booking.get_expected_start_time|date:"h:i A" }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                        <span class="material-icons">visibility</span>
+                                    </a>
+                                   
+                                    {% if booking.status not in "CANCELLED,COMPLETED" %}
+                                    <a href="{% url 'booking_update' booking.pk %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit">
+                                        <span class="material-icons">edit</span>
+                                    </a>
+                                    <a href="{% url 'booking_print' booking.pk %}" class="btn btn-outline-info" data-bs-toggle="tooltip" title="Print Receipt" target="_blank">
+                                        <span class="material-icons">print</span>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    <!-- Status Update Dropdown -->
+                                    <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="material-icons">assignment</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        {% if booking.status != 'PENDING' %}
+                                        <li>
+                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="status" value="PENDING">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <span class="material-icons text-warning me-2">schedule</span>Mark as Pending
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        {% if booking.status != 'CONFIRMED' %}
+                                        <li>
+                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="status" value="CONFIRMED">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <span class="material-icons text-info me-2">check</span>Mark as Confirmed
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        {% if booking.status in 'PENDING,CONFIRMED' %}
+                                            {% with wait_minutes=booking.get_wait_time_minutes %}
+                                                {% if wait_minutes > 0 %}
+                                                    <div class="expected-start-info">
+                                                        <small class="text-muted">
+                                                            <span class="material-icons me-1">hourglass_bottom</span>Est. start: {{ booking.get_expected_start_time|date:"h:i A" }}
+                                                        </small>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                        
+                                        {% if booking.status != 'COMPLETED' %}
+                                        <li>
+                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="status" value="COMPLETED">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <span class="material-icons text-success me-2">done_all</span>Mark as Completed
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        {% if booking.status != 'CANCELLED' %}
+                                        <li>
+                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="status" value="CANCELLED">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <span class="material-icons text-danger me-2">close</span>Mark as Cancelled
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        <li><hr class="dropdown-divider"></li>
+                                        
+                                        {% if booking.status == 'COMPLETED' and request.user.user_type in 'ADMIN,SUPERADMIN' and not booking.sale %}
+                                        <li>
+                                            <a href="{% url 'sale_create' %}?booking_id={{ booking.pk }}" class="dropdown-item">
+                                                <span class="material-icons text-success me-2">monetization_on</span>Record Payment
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                        
+                                        {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                                        <li>
+                                            <a href="{% url 'booking_delete' booking.pk %}" class="dropdown-item text-danger">
+                                                <span class="material-icons me-2">delete</span>Delete Booking
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <span class="material-icons fa-3x mb-3 text-muted">event_busy</span>
+                <h4>No bookings found</h4>
+                <p class="text-muted">
+                    {% if search_form.query.value or search_form.start_date.value or search_form.end_date.value or search_form.status.value %}
+                    No bookings matching your search criteria.
+                    {% else %}
+                    There are no bookings in the system yet.
+                    {% endif %}
+                </p>
+                <a href="{% url 'booking_create' %}" class="btn btn-primary mt-3">
+                    <span class="material-icons me-2">add</span>Create New Booking
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer">
+            <nav aria-label="Booking pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <span class="material-icons">first_page</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <span class="material-icons">chevron_left</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <span class="material-icons">chevron_right</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                            <span class="material-icons">last_page</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Details - {{ booking.booking_id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item active">{{ booking.booking_id }}</li>
+        </ol>
+    </nav>
+
+    <!-- Status Update Alert -->
+    <div class="row mb-4">
+        <div class="col-12">
+            {% if booking.status == 'PENDING' %}
+            <div class="alert alert-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="material-icons me-2">warning</span>
+                        <strong>Pending Booking:</strong> This booking is waiting for confirmation.
+                    </div>
+                    <form method="post" action="{% url 'booking_status_update' booking.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="CONFIRMED">
+                        <input type="hidden" name="next" value="{% url 'booking_detail' booking.pk %}">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <span class="material-icons me-2">check_circle</span>Confirm Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% elif booking.status == 'CONFIRMED' %}
+            <div class="alert alert-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="material-icons me-2">check_circle</span>
+                        <strong>Confirmed Booking:</strong> This booking has been confirmed.
+                    </div>
+                    <form method="post" action="{% url 'booking_status_update' booking.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="COMPLETED">
+                        <input type="hidden" name="next" value="{% url 'booking_detail' booking.pk %}">
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <span class="material-icons me-2">done_all</span>Mark as Completed
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% elif booking.status == 'COMPLETED' %}
+            <div class="alert alert-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="material-icons me-2">done_all</span>
+                        <strong>Completed Booking:</strong> This service has been completed.
+                    </div>
+                    {% if request.user.user_type in 'STAFF,ADMIN,SUPERADMIN' and not booking.sale %}
+                    <a href="{% url 'sale_create' %}?booking_id={{ booking.pk }}" class="btn btn-sm btn-outline-success">
+                        <span class="material-icons me-2">monetization_on</span>Record Payment
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif booking.status == 'CANCELLED' %}
+            <div class="alert alert-danger">
+                <span class="material-icons me-2">cancel</span>
+                <strong>Cancelled Booking:</strong> This booking has been cancelled.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Booking Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm booking-detail-card">
+                <div class="card-header">
+                    <h4 class="mb-0"><span class="material-icons me-2">event_available</span>Booking Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="detail-section-title">Booking Details</h5>
+                            <table class="table table-sm booking-details-table">
+                                <tr>
+                                    <th>Booking ID:</th>
+                                    <td>{{ booking.booking_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ booking.date_time|date:"l, F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Time:</th>
+                                    <td>{{ booking.date_time|date:"h:i A" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        <span class="badge 
+                                            {% if booking.status == 'PENDING' %}bg-warning
+                                            {% elif booking.status == 'CONFIRMED' %}bg-info
+                                            {% elif booking.status == 'COMPLETED' %}bg-success
+                                            {% else %}bg-danger{% endif %}"
+                                        >
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Created On:</th>
+                                    <td>{{ booking.created_at|date:"M d, Y h:i A" }}</td>
+                                </tr>
+                                {% if booking.updated_by %}
+                                <tr>
+                                    <th>Last Updated:</th>
+                                    <td>
+                                        {{ booking.updated_at|date:"M d, Y h:i A" }} by {{ booking.updated_by.get_full_name }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="detail-section-title">Service & Pricing</h5>
+                            <table class="table table-sm booking-details-table">
+                                <tr>
+                                    <th>Service:</th>
+                                    <td>
+                                        <a href="{% url 'service_detail' booking.service.pk %}" class="service-link">
+                                            {{ booking.service.name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Duration:</th>
+                                    <td>{{ booking.service.duration }} minutes</td>
+                                </tr>
+                                <tr>
+                                    <th>Regular Price:</th>
+                                    <td>GHS{{ booking.service.price }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Expected Start:</th>
+                                    <td>
+                                        {% if booking.status in 'PENDING,CONFIRMED' %}
+                                            {% if wait_time_minutes > 0 %}
+                                                <span class="badge bg-info">{{ expected_start_time|date:"h:i A" }}</span>
+                                                <small class="text-muted d-block">
+                                                    <span class="material-icons me-1">hourglass_bottom</span>Estimated wait: {{ wait_time_minutes }} minute{{ wait_time_minutes|pluralize }}
+                                                </small>
+                                            {% else %}
+                                                <span>As scheduled ({{ booking.date_time|date:"h:i A" }})</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span>{{ booking.date_time|date:"h:i A" }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                
+                                <!-- Service Discount -->
+                                {% if service_discount %}
+                                <tr>
+                                    <th>Service Discount:</th>
+                                    <td>
+                                        <span class="badge bg-primary">{{ service_discount.percentage }}% OFF</span>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                <!-- Custom Discount -->
+                                {% if booking.custom_discount > 0 %}
+                                <tr>
+                                    <th>Special Discount:</th>
+                                    <td>
+                                        <span class="badge bg-warning">{{ booking.custom_discount }}% OFF</span>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                
+                                <tr>
+                                    <th>Final Price:</th>
+                                    <td class="fw-bold text-primary">GHS{{ booking.get_final_price|floatformat:2 }}</td>
+                                </tr>
+                                
+                                {% if booking.sale %}
+                                <tr>
+                                    <th>Payment Status:</th>
+                                    <td>
+                                        <span class="badge bg-success">PAID</span>
+                                        <small class="text-muted d-block">
+                                            {{ booking.sale.payment_date|date:"M d, Y" }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Receipt:</th>
+                                    <td>{{ booking.sale.receipt_number }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <th>Payment Status:</th>
+                                    <td>
+                                        <span class="badge bg-secondary">UNPAID</span>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="detail-section-title">Notes</h5>
+                            <div class="booking-notes p-3 rounded">
+                                {% if booking.notes %}
+                                {{ booking.notes|linebreaks }}
+                                {% else %}
+                                <p class="text-muted mb-0">No additional notes for this booking.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- In booking_detail.html, add this button to the card-footer section -->
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary">
+                            <span class="material-icons me-2">arrow_back</span>Back to List
+                        </a>
+                        <div>
+                            <!-- Add this print button -->
+                            <a href="{% url 'booking_print' booking.pk %}" class="btn btn-outline-primary me-2" target="_blank">
+                                <span class="material-icons me-2">print</span>Print Booking Receipt
+                            </a>
+                            
+                            <a href="{% url 'booking_update' booking.pk %}" class="btn btn-primary me-2">
+                                <span class="material-icons me-2">edit</span>Edit Booking
+                            </a>
+                            
+                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                            <a href="{% url 'booking_delete' booking.pk %}" class="btn btn-danger">
+                                <span class="material-icons me-2">delete</span>Delete
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm customer-info-card">
+                <div class="card-header">
+                    <h4 class="mb-0"><span class="material-icons me-2">person</span>Customer Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="customer-profile mb-4">
+                        <div class="customer-avatar">
+                            {{ booking.customer.first_name.0 }}{{ booking.customer.last_name.0 }}
+                        </div>
+                        <div class="customer-name">
+                            {{ booking.customer.first_name }} {{ booking.customer.last_name }}
+                        </div>
+                        <div class="customer-id text-muted">
+                            {{ booking.customer.customer_id }}
+                        </div>
+                    </div>
+                    
+                    <div class="customer-details">
+                        <div class="detail-item">
+                            <span class="material-icons me-2">phone</span>
+                            <span>{{ booking.customer.phone }}</span>
+                        </div>
+                        {% if booking.customer.email %}
+                        <div class="detail-item">
+                            <span class="material-icons me-2">email</span>
+                            <span>{{ booking.customer.email }}</span>
+                        </div>
+                        {% endif %}
+                        {% if booking.customer.address %}
+                        <div class="detail-item">
+                            <span class="material-icons me-2">location_on</span>
+                            <span>{{ booking.customer.address }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <span class="material-icons me-2">calendar_today</span>
+                            <span>Client since: {{ booking.customer.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'customer_detail' booking.customer.pk %}" class="btn btn-outline-primary w-100">
+                            <span class="material-icons me-2">account_circle</span>View Customer Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Bookings for this Customer -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="material-icons me-2">history</span>Customer's Recent Bookings</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for recent_booking in booking.customer.booking_set.all|dictsortreversed:"date_time"|slice:":5" %}
+                        <li class="list-group-item {% if recent_booking.pk == booking.pk %}active{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="{% if recent_booking.pk == booking.pk %}text-white{% endif %}">
+                                        {{ recent_booking.service.name }}
+                                    </div>
+                                    <small class="{% if recent_booking.pk == booking.pk %}text-white-50{% else %}text-muted{% endif %}">
+                                        {{ recent_booking.date_time|date:"M d, Y h:i A" }}
+                                    </small>
+                                </div>
+                                <span class="badge 
+                                    {% if recent_booking.pk == booking.pk %}
+                                        {% if recent_booking.status == 'PENDING' %}bg-warning text-dark
+                                        {% elif recent_booking.status == 'CONFIRMED' %}bg-info text-dark
+                                        {% elif recent_booking.status == 'COMPLETED' %}bg-success
+                                        {% else %}bg-danger{% endif %}
+                                    {% else %}
+                                        {% if recent_booking.status == 'PENDING' %}bg-warning text-dark
+                                        {% elif recent_booking.status == 'CONFIRMED' %}bg-info text-dark
+                                        {% elif recent_booking.status == 'COMPLETED' %}bg-success
+                                        {% else %}bg-danger{% endif %}
+                                    {% endif %}"
+                                >
+                                    {{ recent_booking.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            {% if recent_booking.pk != booking.pk %}
+                            <div class="mt-2">
+                                <a href="{% url 'booking_detail' recent_booking.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    View
+                                </a>
+                            </div>
+                            {% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center py-4">
+                            <p class="text-muted mb-0">No other bookings for this customer.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

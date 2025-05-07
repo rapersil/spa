@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ staff_member.get_full_name|default:staff_member.username }} - Staff Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'staff_list' %}">Staff</a></li>
+                    <li class="breadcrumb-item active">{{ staff_member.get_full_name|default:staff_member.username }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Staff Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    {% if staff_member.profile_picture %}
+                    <img src="{{ staff_member.profile_picture.url }}" alt="Profile" class="staff-profile-image mb-3">
+                    {% else %}
+                    <div class="staff-profile-avatar mb-3">{{ staff_member.first_name.0 }}{{ staff_member.last_name.0 }}</div>
+                    {% endif %}
+                    
+                    <h4>{{ staff_member.get_full_name }}</h4>
+                    <p class="badge {% if staff_member.user_type == 'ADMIN' %}bg-danger{% else %}bg-primary{% endif %} mb-3">
+                        {{ staff_member.get_user_type_display }}
+                    </p>
+                    
+                    <div class="staff-contact-info">
+                        <p><span class="material-icons me-2">badge</span>{{ staff_member.user_id }}</p>
+                        <p><span class="material-icons me-2">person</span>{{ staff_member.username }}</p>
+                        <p><span class="material-icons me-2">email</span>{{ staff_member.email }}</p>
+                        <p><span class="material-icons me-2">phone</span>{{ staff_member.phone_number }}</p>
+                        <p><span class="material-icons me-2">calendar_today</span>Joined: {{ staff_member.date_joined|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'staff_update' staff_member.pk %}" class="btn btn-primary">
+                            <span class="material-icons me-2">edit</span>Edit Profile
+                        </a>
+                        <a href="{% url 'password_reset' staff_member.pk %}" class="btn btn-outline-warning">
+                            <span class="material-icons me-2">key</span>Reset Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Card -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0"><span class="material-icons me-2">history</span>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="border-bottom pb-2 mb-3">Recent Bookings Created</h6>
+                    
+                    {% if recent_bookings %}
+                    <div class="recent-activities">
+                        {% for booking in recent_bookings %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <span class="material-icons">event_available</span>
+                            </div>
+                            <div class="activity-content">
+                                <p class="mb-1">
+                                    <strong>{{ booking.customer.first_name }} {{ booking.customer.last_name }}</strong> - 
+                                    {{ booking.service.name }}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <small>
+                                        <span class="material-icons me-1">schedule</span>{{ booking.date_time|date:"F d, Y h:i A" }}
+                                        <span class="badge 
+                                            {% if booking.status == 'PENDING' %}bg-warning
+                                            {% elif booking.status == 'CONFIRMED' %}bg-info
+                                            {% elif booking.status == 'COMPLETED' %}bg-success
+                                            {% else %}bg-danger{% endif %}"
+                                        >
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </small>
+                                </p>
+                                <p class="text-muted"><small>Created on {{ booking.created_at|date:"F d, Y h:i A" }}</small></p>
+                            </div>
+                            <div class="activity-action">
+                                <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <span class="material-icons">visibility</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none">View all activity</a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <span class="material-icons fa-2x mb-2 text-muted">event_busy</span>
+                        <p class="text-muted">No recent booking activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

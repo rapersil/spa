@@ -1,0 +1,91 @@
+{% load custom_filters %}
+{% if discounts %}
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover discount-table mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Service</th>
+                        <th>Discount</th>
+                        <th>Period</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for discount in discounts %}
+                    <tr>
+                      <td>{{ discount.discount_id }}</td>
+                      <td>
+                        <a href="{% url 'service_detail' discount.service.pk %}" class="service-link">
+                          {{ discount.service.name }}
+                        </a>
+                        <small class="d-block text-muted">GHS{{ discount.service.price }} - {{ discount.service.duration }} min</small>
+                      </td>
+                      <td>
+                        <span class="discount-percentage">{{ discount.percentage }}% OFF</span>
+                        <div class="discount-value text-muted">
+                          <small>Saves GHS{{ discount.service.price|multiply:discount.percentage|divide:100|floatformat:2 }}</small>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="discount-dates">
+                          <div class="start-date">
+                            <i class="material-icons text-success me-1">event_available</i>
+                            <span class="discount-percentage">Starts</span>
+                            {{ discount.start_date|date:"F d, Y h:i A" }}
+                          </div>
+                          <div class="end-date">
+                            <i class="material-icons text-danger me-1">event_busy</i>
+                            <span class="discount-percentage">Ends</span>
+                            {{ discount.end_date|date:"F d, Y h:i A" }}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {% if discount.is_active %}
+                          <span class="badge bg-success">Active</span>
+                        {% elif discount.is_upcoming %}
+                          <span class="badge bg-info">Upcoming</span>
+                        {% else %}
+                          <span class="badge bg-secondary">Expired</span>
+                        {% endif %}
+                      </td>
+                     
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <a href="{% url 'discount_detail' discount.pk %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                            <i class="material-icons">visibility</i>
+                          </a>
+                          
+                          <a href="{% url 'discount_update' discount.pk %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit">
+                            <i class="material-icons">edit</i>
+                          </a>
+    
+                          <a href="{% url 'discount_delete' discount.pk %}" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Delete">
+                            <i class="material-icons">delete</i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="material-icons text-muted mb-3" style="font-size: 3em;">percent</i>
+        <h4>No discounts found</h4>
+        <p class="text-muted">No discounts match the selected filter.</p>
+        
+        <a href="{% url 'discount_create' %}" class="btn btn-primary mt-3">
+            <i class="material-icons me-2">add</i>Add New Discount
+        </a>
+    </div>
+</div>
+{% endif %}

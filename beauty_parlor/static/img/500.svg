@@ -1,0 +1,47 @@
+<svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background elements -->
+  <circle cx="250" cy="200" r="150" fill="#ffcbfb" opacity="0.5"/>
+  
+  <!-- Server/Computer -->
+  <g transform="translate(250, 200) scale(1.5)">
+    <!-- Server body -->
+    <rect x="-35" y="-30" width="70" height="60" rx="5" ry="5" fill="#fff3fd" stroke="#c00ba9" stroke-width="3" />
+    
+    <!-- Server lights -->
+    <circle cx="-20" cy="-15" r="5" fill="#ff32e9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="0" cy="-15" r="5" fill="#ff32e9">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="20" cy="-15" r="5" fill="#ff32e9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Server slots -->
+    <rect x="-25" y="0" width="50" height="8" rx="2" ry="2" fill="#de11c8" />
+    <rect x="-25" y="15" width="50" height="8" rx="2" ry="2" fill="#de11c8" />
+  </g>
+  
+  <!-- Gears -->
+  <g transform="translate(180, 150) scale(0.8)">
+    <path d="M 0 -20 L 5 -5 L 20 0 L 5 5 L 0 20 L -5 5 L -20 0 L -5 -5 Z" fill="#c00ba9">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite" />
+    </path>
+  </g>
+  
+  <g transform="translate(320, 240) scale(0.6)">
+    <path d="M 0 -20 L 5 -5 L 20 0 L 5 5 L 0 20 L -5 5 L -20 0 L -5 -5 Z" fill="#c00ba9">
+      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="8s" repeatCount="indefinite" />
+    </path>
+  </g>
+  
+  <!-- 500 text -->
+  <text x="250" y="110" font-family="Arial, sans-serif" font-size="50" font-weight="bold" text-anchor="middle" fill="#9d0b88">500</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="150" cy="100" r="10" fill="#ffa2f3"/>
+  <circle cx="350" cy="150" r="15" fill="#ffa2f3"/>
+  <circle cx="170" cy="320" r="12" fill="#ffa2f3"/>
+  <circle cx="370" cy="280" r="8" fill="#ffa2f3"/>
+</svg>

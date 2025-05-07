@@ -1,0 +1,248 @@
+/* static/css/booking.css */
+
+/* Booking List Styling */
+.booking-search-form .input-group-text {
+    background-color: var(--color-50);
+    border-color: var(--color-200);
+    color: var(--color-600);
+}
+
+.booking-search-form .form-control:focus,
+.booking-search-form .form-select:focus {
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem var(--color-600-25);
+}
+
+.booking-table th {
+    background-color: var(--color-50);
+    color: var(--color-900);
+}
+
+.booking-table .booking-date {
+    display: block;
+    font-weight: 500;
+}
+
+.booking-table .booking-time {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+.booking-table .booking-price {
+    font-weight: 600;
+    color: var(--color-700);
+}
+
+.customer-link {
+    color: var(--color-700);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.customer-link:hover {
+    color: var(--color-900);
+    text-decoration: underline;
+}
+
+.today-booking {
+    background-color: rgba(255, 203, 251, 0.1);
+}
+
+/* Booking Detail Styling */
+.booking-detail-card .card-header,
+.customer-info-card .card-header {
+    background-color: var(--color-50);
+}
+
+.detail-section-title {
+    color: var(--color-800);
+    border-bottom: 2px solid var(--color-100);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.booking-details-table th {
+    width: 40%;
+    font-weight: 600;
+    color: var(--color-800);
+}
+
+.booking-details-table td {
+    width: 60%;
+}
+
+.booking-notes {
+    background-color: var(--color-50);
+    border: 1px solid var(--color-100);
+}
+
+/* Customer Info Card */
+.customer-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: var(--color-300);
+    color: var(--color-900);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+
+.customer-details .detail-item {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-100);
+}
+
+.customer-details i {
+    color: var(--color-600);
+    width: 20px;
+    text-align: center;
+}
+
+/* Booking Form Styling */
+.form-section-title {
+    color: var(--color-800);
+    margin-bottom: 0.75rem;
+}
+
+.form-section-card {
+    border: 1px solid var(--color-100);
+    margin-bottom: 1.5rem;
+}
+
+.selected-customer-avatar {
+    width: 50px;
+    height: 50px;
+    background-color: var(--color-300);
+    color: var(--color-900);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Price Calculator */
+.price-result {
+    background-color: var(--color-50);
+    border: 1px solid var(--color-100);
+}
+
+.price-result div:last-child {
+    border-top: 1px solid var(--color-200);
+}
+
+/* Delete Confirmation Page */
+.delete-icon {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--danger);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto;
+}
+
+.booking-summary {
+    background-color: rgba(244, 67, 54, 0.05);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+/* Flatpickr customization */
+.flatpickr-calendar.open {
+    z-index: 1050;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: var(--color-600);
+    border-color: var(--color-600);
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--color-600);
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--color-600);
+}
+
+/* Minimum height for cards */
+.card.shadow-sm.mb-4 {
+    min-height: 250px;
+}
+
+.expected-start-info {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--color-700);
+}
+
+.expected-start-info i {
+    color: var(--color-600);
+}
+
+/* Booking receipt styling */
+.booking-receipt {
+    max-width: 80mm;
+    margin: 0 auto;
+    padding: 15px;
+    border: 1px solid var(--color-200);
+    background-color: var(--white);
+    box-shadow: 0 4px 8px var(--black-10);
+    font-family: 'Courier New', monospace;
+}
+
+.receipt-item-discount {
+    color: var(--color-600);
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .booking-receipt, .booking-receipt * {
+        visibility: visible;
+    }
+    
+    .booking-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        border: none;
+        box-shadow: none;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}

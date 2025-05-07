@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}400 - Bad Request{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        text-align: center;
+        padding: 5rem 0;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .error-icon {
+        font-size: 5rem;
+        color: var(--color-500);
+        margin-bottom: 2rem;
+    }
+
+    .error-code {
+        font-size: 4rem;
+        font-weight: bold;
+        color: var(--color-700);
+        margin-bottom: 1rem;
+    }
+
+    .error-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--color-800);
+        margin-bottom: 1.5rem;
+    }
+
+    .error-message {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 2rem;
+    }
+
+    .error-actions {
+        margin-top: 2rem;
+    }
+
+    .error-image {
+        max-width: 300px;
+        margin-bottom: 2rem;
+    }
+    
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="error-container">
+        <div class="error-icon pulse-animation">
+            <i class="material-icons">error</i>
+        </div>
+        <div class="error-code">400</div>
+        <h1 class="error-title">Bad Request</h1>
+        <p class="error-message">
+            Sorry, we couldn't process your request due to invalid input.
+            Please check your information and try again.
+        </p>
+
+        <img src="{% static 'img/400.svg' %}" alt="Bad request illustration" class="error-image">
+
+        <div class="error-actions">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                <i class="material-icons me-2">home</i>Go to Dashboard
+            </a>
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-lg ms-2">
+                <i class="material-icons me-2">arrow_back</i>Go Back
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Disable footer for error pages
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('footer').style.display = 'none';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+{% block title %}Sales Reports - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'sales_list' %}">Sales</a></li>
+            <li class="breadcrumb-item active">Reports</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2><i class="material-icons me-2">trending_up</i>Sales Reports</h2>
+            <p class="text-muted">Generate and analyze sales performance reports</p>
+        </div>
+    </div>
+
+    <!-- Report Generation Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="material-icons me-2">filter_list</i>Report Parameters</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" class="report-form row g-3">
+                {% csrf_token %}
+                <div class="col-md-3">
+                    <label for="id_start_date" class="form-label">Start Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="material-icons">calendar_today</i></span>
+                        {{ form.start_date }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="id_end_date" class="form-label">End Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="material-icons">calendar_today</i></span>
+                        {{ form.end_date }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="id_service" class="form-label">Service (Optional)</label>
+                    {{ form.service }}
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="material-icons me-2">search</i>Generate
+                        </button>
+                        <button type="submit" name="export" value="csv" class="btn btn-outline-primary">
+                            <i class="material-icons me-2">description</i>Export
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if report_generated %}
+    <!-- Report Results -->
+    <div class="row mb-4">
+        <!-- Summary Cards -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">Total Revenue</h6>
+                            <h3 class="mb-0">GHS{{ total_sales|floatformat:2|intcomma }}</h3>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">attach_money</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">Total Sales</h6>
+                            <h3 class="mb-0">{{ sales_count }}</h3>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">shopping_cart</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm summary-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="summary-info">
+                            <h6 class="text-muted mb-1">Average Sale</h6>
+                            <h3 class="mb-0">GHS{{ total_sales|default:0|divide:sales_count|default:1|floatformat:2|intcomma }}</h3>
+                        </div>
+                        <div class="summary-icon">
+                            <i class="material-icons">bar_chart</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sales By Service -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">pie_chart</i>Sales by Service</h5>
+                </div>
+                <div class="card-body">
+                    {% if sales_by_service %}
+                    <div class="sales-chart-container mb-3">
+                        <canvas id="serviceChart"></canvas>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th class="text-center">Sales</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in sales_by_service %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td class="text-center">{{ service.sales_count }}</td>
+                                    <td class="text-end">GHS{{ service.total_amount|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No sales data available for the selected period.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Daily Sales -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">calendar_today</i>Daily Sales</h5>
+                </div>
+                <div class="card-body">
+                    {% if sales_by_day %}
+                    <div class="sales-chart-container mb-3">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-center">Sales</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day in sales_by_day %}
+                                <tr>
+                                    <td>{{ day.date|date:"M d, Y" }}</td>
+                                    <td class="text-center">{{ day.count }}</td>
+                                    <td class="text-end">GHS{{ day.total|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No sales data available for the selected period.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Report Yet -->
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="material-icons text-muted" style="font-size: 3em;">trending_up</i>
+            <h4>No Report Generated Yet</h4>
+            <p class="text-muted">Use the form above to set the date range and generate a sales report.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+
+<script>
+    const style = getComputedStyle(document.documentElement);
+    const color100 = style.getPropertyValue('--color-100').trim();
+    const color200 = style.getPropertyValue('--color-200').trim();
+    const color300 = style.getPropertyValue('--color-300').trim();
+    const color400 = style.getPropertyValue('--color-400').trim();
+    const color500 = style.getPropertyValue('--color-500').trim();
+    const color600 = style.getPropertyValue('--color-600').trim();
+    const color700 = style.getPropertyValue('--color-700').trim();
+    const color800 = style.getPropertyValue('--color-800').trim();
+    const color900 = style.getPropertyValue('--color-900').trim();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers
+        flatpickr("#id_start_date", {
+            dateFormat: "Y-m-d",
+        });
+        
+        flatpickr("#id_end_date", {
+            dateFormat: "Y-m-d",
+        });
+        
+        // Initialize charts
+        {% if report_generated and sales_by_service %}
+        // Service Chart
+        const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+        const serviceChart = new Chart(serviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for service in sales_by_service %}'{{ service.name }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for service in sales_by_service %}{{ service.total_amount }},{% endfor %}],
+                    backgroundColor: [
+                        color300,
+                        color400,
+                        color500,
+                        color600,
+                        color700,
+                        color800,
+                        color900
+                    ],
+                    borderColor: [
+                    color300,
+                    color400,
+                    color500,
+                    color600,
+                    color700,
+                    color800,
+                    color900
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed || 0;
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = Math.round((value / total) * 100);
+                                return `${label}: GHS${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        {% if report_generated and sales_by_day %}
+        // Daily Chart
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        const dailyChart = new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for day in sales_by_day %}'{{ day.date|date:"M d" }}',{% endfor %}],
+                datasets: [{
+                    label: 'Daily Sales',
+                    data: [{% for day in sales_by_day %}{{ day.total }},{% endfor %}],
+                    backgroundColor: color900,
+                    borderColor: color800,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'GHS' + value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.parsed.y || 0;
+                                return `${label}: GHS${value.toFixed(2)}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

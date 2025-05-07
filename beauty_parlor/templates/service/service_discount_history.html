@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discount History - {{ service.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/service.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'service_list' %}">Services</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'service_detail' service.pk %}">{{ service.name }}</a></li>
+            <li class="breadcrumb-item active">Discount History</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="material-icons me-2">percent</i>Discount History for {{ service.name }}</h2>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'discount_create' %}?service_id={{ service.id }}" class="btn btn-primary">
+                <i class="material-icons me-2">add</i>Add New Discount
+            </a>
+        </div>
+    </div>
+
+    <!-- Discount Status Tabs -->
+    <ul class="nav nav-tabs mb-4" id="discountTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+                All Discounts ({{ all_discounts|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="false">
+                Active ({{ active_discounts|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="false">
+                Upcoming ({{ upcoming_discounts|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab" aria-controls="expired" aria-selected="false">
+                Expired ({{ expired_discounts|length }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- All Discounts Tab -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover discount-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Percentage</th>
+                                    <th>Period</th>
+                                    <th>Status</th>
+                                    <th>Usage</th>
+                                    <th>Total Savings</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for discount in all_discounts %}
+                                <tr>
+                                    <td>{{ discount.discount_id }}</td>
+                                    <td>
+                                        <span class="discount-percentage">{{ discount.percentage }}% OFF</span>
+                                    </td>
+                                    <td>
+                                        <div class="discount-dates">
+                                            <div class="start-date">
+                                                <i class="material-icons text-success me-1">event_available</i>
+                                                {{ discount.start_date|date:"M d, Y" }}
+                                            </div>
+                                            <div class="end-date">
+                                                <i class="material-icons text-danger me-1">event_busy</i>
+                                                {{ discount.end_date|date:"M d, Y" }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if discount.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% elif discount.is_upcoming %}
+                                        <span class="badge bg-info">Upcoming</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Expired</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ discount.usage_count }} booking(s)
+                                    </td>
+                                    <td>
+                                        GHS{{ discount.total_saved|floatformat:2 }}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'discount_detail' discount.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="material-icons me-1">visibility</i>Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">No discounts found for this service.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Other tabs with filtered content -->
+        <!-- [Similar code for active, upcoming, and expired tabs] -->
+    </div>
+</div>
+{% endblock %}

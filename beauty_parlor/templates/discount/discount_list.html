@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discounts - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/discount.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><i class="material-icons me-2">percent</i>Discounts</h2>
+            <p class="text-muted">Manage service promotions and special offers</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'discount_create' %}" class="btn btn-primary">
+                <i class="material-icons me-2">add</i>Add New Discount
+            </a>
+        </div>
+    </div>
+
+    <!-- Discount Status Tabs -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <ul class="nav nav-tabs discount-tabs" id="discountTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+                        All Discounts
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="false">
+                        Active <span class="badge bg-success rounded-pill ms-1">{{ active_count }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="false">
+                        Upcoming <span class="badge bg-info rounded-pill ms-1">{{ upcoming_count }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab" aria-controls="expired" aria-selected="false">
+                        Expired <span class="badge bg-secondary rounded-pill ms-1">{{ expired_count }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="discountTabsContent">
+        <!-- All Discounts Tab -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+            {% include 'discount/includes/discount_table.html' with discounts=discounts %}
+        </div>
+        
+        <!-- Active Discounts Tab -->
+        <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+            {% include 'discount/includes/discount_table.html' with discounts=active_discounts %}
+        </div>
+        
+        <!-- Upcoming Discounts Tab -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+            {% include 'discount/includes/discount_table.html' with discounts=upcoming_discounts %}
+        </div>
+        
+        <!-- Expired Discounts Tab -->
+        <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
+            {% include 'discount/includes/discount_table.html' with discounts=expired_discounts %}
+        </div>
+    </div>
+
+    <!-- Services Without Discounts -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="material-icons me-2">spa</i>Services Without Active Discounts</h5>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#servicesWithoutDiscount">
+                <i class="material-icons">keyboard_arrow_down</i>
+            </button>
+        </div>
+        <div class="collapse" id="servicesWithoutDiscount">
+            <div class="card-body">
+                {% if services_without_discount %}
+                <div class="alert alert-info mb-3">
+                    <i class="material-icons me-2">info</i>
+                    These services have no active or upcoming discounts and are available for new promotions.
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for service in services_without_discount %}
+                    <div class="col">
+                        <div class="card h-100 service-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ service.name }}</h5>
+                                <p class="card-text">
+                                    <span class="service-price">GHS{{ service.price }}</span>
+                                    <span class="service-duration">{{ service.duration }} min</span>
+                                </p>
+                                <div class="d-grid">
+                                    <a href="{% url 'discount_create' %}?service_id={{ service.id }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="material-icons me-1">percent</i>Add Discount
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <p class="text-muted mb-0">All active services currently have active or upcoming discounts.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

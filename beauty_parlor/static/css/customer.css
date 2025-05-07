@@ -1,0 +1,106 @@
+/* static/css/customer.css */
+
+/* Customer List Styling */
+.customer-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: var(--color-300);
+    color: var(--color-900);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.customer-contact {
+    font-size: 0.85rem;
+}
+
+.customer-contact i {
+    color: var(--color-600);
+    width: 16px;
+    text-align: center;
+}
+
+.customer-table th {
+    background-color: var(--color-50);
+    color: var(--color-900);
+}
+
+/* Customer Detail Styling */
+.customer-profile-avatar {
+    width: 100px;
+    height: 100px;
+    background-color: var(--color-300);
+    color: var(--color-900);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+
+.customer-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.contact-item {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-100);
+}
+
+.contact-item i {
+    color: var(--color-600);
+    width: 20px;
+    text-align: center;
+}
+
+.customer-notes {
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+/* Customer Bookings Table */
+.customer-bookings-table th {
+    background-color: var(--color-50);
+    color: var(--color-900);
+}
+
+.booking-time {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+.booking-price {
+    font-weight: 600;
+    color: var(--color-700);
+}
+
+/* Customer Statistics */
+.preference-item .progress-bar {
+    background-color: var(--color-600);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-100);
+}
+
+.summary-label {
+    color: var(--gray-700);
+}
+
+.summary-value {
+    font-weight: 600;
+    color: var(--color-800);
+}

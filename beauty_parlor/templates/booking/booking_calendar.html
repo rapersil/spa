@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Booking Calendar - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_calendar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><span class="material-icons me-2">calendar_today</span>Booking Calendar</h2>
+            <p class="text-muted">View and manage daily appointments</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary ms-2">
+                <span class="material-icons me-2">list</span>List View
+            </a>
+            <a href="{% url 'booking_create' %}" class="btn btn-primary">
+                <span class="material-icons me-2">add</span>New Booking
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Navigation -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="?date={{ prev_day|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                    <span class="material-icons">chevron_left</span> Previous Day
+                </a>
+                <h5 class="mb-0">{{ current_date|date:"l, F d, Y" }}</h5>
+                <a href="?date={{ next_day|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                    Next Day <span class="material-icons">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><span class="material-icons me-2">schedule</span>Daily Schedule</h5>
+                <span class="badge bg-primary">{{ bookings|length }} Bookings</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="booking-calendar-container">
+                <!-- Time Column -->
+                <div class="time-column">
+                    {% for hour in hours %}
+                    <div class="time-slot">
+                        <span class="time-label">
+                            {% if hour == 12 %}
+                                12 PM
+                            {% elif hour > 12 %}
+                                {{ hour|add:"-12" }} PM
+                            {% else %}
+                                {{ hour }} AM
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Booking Columns -->
+                <div class="booking-columns">
+                    <!-- Staff/Service Columns -->
+                    {% for staff in staffs %}
+                    <div class="booking-column">
+                        <div class="staff-header">{{ staff.get_full_name }}</div>
+                        <div class="booking-slots">
+                            {% for booking in bookings_by_staff|get_item:staff.id %}
+                                {% if booking %}
+                                <a href="{% url 'booking_detail' booking.pk %}" 
+                                   class="booking-block service-type-{{ booking.service.id|modulo:5 }} booking-{{ booking.status|lower }}" 
+                                   style="grid-row: {{ booking.start_row }} / {{ booking.end_row }};">
+                                    <div class="booking-service">{{ booking.service.name }}</div>
+                                    <div class="booking-client">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
+                                    <div class="booking-time">
+                                        {{ booking.date_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}
+                                        {% with wait_minutes=booking.get_wait_time_minutes %}
+                                            {% if wait_minutes > 0 %}
+                                                <span class="expected-start-badge">
+                                                    <span class="material-icons">hourglass_bottom</span> Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </a>
+                                
+                                <!-- Expected Start Timeline Marker -->
+                                {% with wait_minutes=booking.get_wait_time_minutes %}
+                                    {% if wait_minutes > 0 %}
+                                    <div class="expected-start-marker" style="grid-row: {{ booking.expected_start_row }};">
+                                        <div class="marker-line"></div>
+                                        <div class="marker-tooltip">Expected start for {{ booking.customer.first_name }}</div>
+                                    </div>
+                                    {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <!-- If no staff, just show all bookings in one column -->
+                    <div class="booking-column">
+                        <div class="staff-header">All Bookings</div>
+                        <div class="booking-slots">
+                            {% for booking in bookings %}
+                            <a href="{% url 'booking_detail' booking.pk %}" 
+                               class="booking-block service-type-{{ booking.service.id|modulo:5 }} booking-{{ booking.status|lower }}" 
+                               style="grid-row: {{ booking.start_row }} / {{ booking.end_row }};">
+                                <div class="booking-service">{{ booking.service.name }}</div>
+                                <div class="booking-client">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
+                                <div class="booking-time">
+                                    {{ booking.date_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}
+                                    {% with wait_minutes=booking.get_wait_time_minutes %}
+                                        {% if wait_minutes > 0 %}
+                                            <span class="expected-start-badge">
+                                                <span class="material-icons">hourglass_bottom</span> Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </a>
+                            
+                            <!-- Expected Start Timeline Marker -->
+                            {% with wait_minutes=booking.get_wait_time_minutes %}
+                                {% if wait_minutes > 0 %}
+                                <div class="expected-start-marker" style="grid-row: {{ booking.expected_start_row }};">
+                                    <div class="marker-line"></div>
+                                    <div class="marker-tooltip">Expected start for {{ booking.customer.first_name }}</div>
+                                </div>
+                                {% endif %}
+                            {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips for expected start badges
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('.expected-start-badge'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                title: 'Scheduled time may be delayed due to earlier appointments'
+            });
+        });
+    });
+</script>
+{% endblock %}

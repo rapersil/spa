@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ customer.first_name }} {{ customer.last_name }} - Customer Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'customer_list' %}">Customers</a></li>
+            <li class="breadcrumb-item active">{{ customer.first_name }} {{ customer.last_name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Customer Profile Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm customer-profile-card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">person</i>Customer Profile</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="customer-profile-avatar">
+                        {{ customer.first_name.0 }}{{ customer.last_name.0 }}
+                    </div>
+                    <h3 class="customer-name">{{ customer.first_name }} {{ customer.last_name }}</h3>
+                    <p class="customer-id text-muted">{{ customer.customer_id }}</p>
+                    
+                    <div class="customer-contact-info">
+                        <div class="contact-item">
+                            <i class="material-icons me-2">phone</i>
+                            <span>{{ customer.phone }}</span>
+                        </div>
+                        {% comment %}
+                        {% if customer.email %}
+                        <div class="contact-item">
+                            <i class="material-icons me-2">email</i>
+                            <span>{{ customer.email }}</span>
+                        </div>
+                        {% endif %}
+                        {% endcomment %}
+                        
+                        {% if customer.address %}
+                        <div class="contact-item">
+                            <i class="material-icons me-2">location_on</i>
+                            <span>{{ customer.address }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="contact-item">
+                            <i class="material-icons me-2">event</i>
+                            <span>Customer since: {{ customer.date_joined|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'customer_update' customer.pk %}" class="btn btn-primary">
+                            <i class="material-icons me-2">edit</i>Edit Profile
+                        </a>
+                        <a href="{% url 'booking_create' %}?customer_id={{ customer.pk }}" class="btn btn-outline-primary">
+                            <i class="material-icons me-2">add_event</i>New Booking
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Notes -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="material-icons me-2">note</i>Notes</h5>
+                    <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-outline-primary">
+                        <i class="material-icons me-1">edit</i>Edit
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if customer.notes %}
+                    <div class="customer-notes">
+                        {{ customer.notes|linebreaks }}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No notes for this customer.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer History and Bookings -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm bookings-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="material-icons me-2">history</i>Booking History</h4>
+                    <a href="{% url 'booking_create' %}?customer_id={{ customer.pk }}" class="btn btn-sm btn-primary">
+                        <i class="material-icons me-1">add</i>New Booking
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover customer-bookings-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Date & Time</th>
+                                    <th>Service</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in recent_bookings %}
+                                <tr>
+                                    <td>{{ booking.booking_id }}</td>
+                                    <td>
+                                        <span class="booking-date">{{ booking.date_time|date:"M d, Y" }}</span>
+                                        <span class="booking-time">{{ booking.date_time|date:"h:i A" }}</span>
+                                    </td>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>
+                                        <span class="booking-price">GHS{{ booking.get_final_price|floatformat:2 }}</span>
+                                        {% if booking.custom_discount > 0 %}
+                                        <span class="badge bg-warning">{{ booking.custom_discount }}% OFF</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if booking.status == 'PENDING' %}bg-warning
+                                            {% elif booking.status == 'CONFIRMED' %}bg-info
+                                            {% elif booking.status == 'COMPLETED' %}bg-success
+                                            {% else %}bg-danger{% endif %}"
+                                        >
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                                <i class="material-icons">visibility</i>
+                                            </a>
+                                            <a href="{% url 'booking_update' booking.pk %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="material-icons">edit</i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="material-icons text-muted" style="font-size: 3em;">event_busy</i>
+                        <h5>No bookings found</h5>
+                        <p class="text-muted">This customer hasn't made any bookings yet.</p>
+                        <a href="{% url 'booking_create' %}?customer_id={{ customer.pk }}" class="btn btn-primary mt-2">
+                            <i class="material-icons me-2">add_event</i>Create First Booking
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if recent_bookings %}
+                <div class="card-footer text-center">
+                    <a href="{% url 'booking_list' %}" class="text-decoration-none">
+                        <i class="material-icons me-1">list</i>View All Bookings
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Customer Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm stats-card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="material-icons me-2">pie_chart</i>Service Preferences</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if service_counts %}
+                            <div class="service-preferences">
+                                {% for service in service_counts %}
+                                <div class="preference-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>{{ service.service__name }}</span>
+                                        <span class="badge bg-primary">{{ service.count }}x</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 5px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                            style="width: {% if service_counts.0.count %}{{ service.count|multiply:100|divide:service_counts.0.count }}{% else %}0{% endif %}%"></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center mb-0">No service data available yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm stats-card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="material-icons me-2">info</i>Customer Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="customer-summary">
+                                <div class="summary-item">
+                                    <div class="summary-label">Total Bookings</div>
+                                    <div class="summary-value">{{ customer.booking_set.count }}</div>
+                                </div>
+                                
+                                <div class="summary-item">
+                                    <div class="summary-label">Completed Services</div>
+                                    <div class="summary-value">
+                                        {{ completed_bookings_count }}
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-item">
+                                    <div class="summary-label">Last Visit</div>
+                                    <div class="summary-value">
+                                        {% if last_completed_booking %}
+                                            {{ last_completed_booking.date_time|date:"M d, Y" }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-item">
+                                    <div class="summary-label">Upcoming Appointments</div>
+                                    <div class="summary-value">
+                                        {{ upcoming_bookings_count }}
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Cancelled Appointments</div>
+                                    <div class="summary-value">
+                                        {{ cancelled_bookings_count }}
+                                    </div>
+                                </div>
+                                
+                                {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                                <div class="summary-item">
+                                    <div class="summary-label">Total Spent</div>
+                                    <div class="summary-value">
+                                        GHS{{ total_spent|floatformat:2 }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}
