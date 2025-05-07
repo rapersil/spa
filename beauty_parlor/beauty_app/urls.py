@@ -14,7 +14,8 @@ from .views.customer_views import (
     CustomerListView, CustomerDetailView, CustomerCreateView, CustomerUpdateView
 )
 from .views.service_views import (
-    ServiceListView, ServiceDetailView, ServiceCreateView, ServiceUpdateView,check_service_discount,ServiceImageDeleteView
+    ServiceListView, ServiceDetailView, ServiceCreateView, ServiceUpdateView,check_service_discount,ServiceImageDeleteView,PublicLandingView
+    ,PublicServiceListView,PublicServiceDetailView
 )
 from .views.booking_views import (
     BookingListView, BookingDetailView, BookingCreateView, BookingUpdateView, 
@@ -102,6 +103,12 @@ urlpatterns = [
     path('services/<int:pk>/discounts/', ServiceDiscountHistoryView.as_view(), name='service_discount_history'),
     path('check-service-discount/', check_service_discount, name='check_service_discount'),
     path('api/keep-session-alive/', keep_session_alive, name='keep_session_alive'),
+
+
+    # Public-facing URLs
+    path('public/', PublicLandingView.as_view(), name='public_landing'),
+    path('public/services/', PublicServiceListView.as_view(), name='public_service_list'),
+    path('public/services/<int:pk>/', PublicServiceDetailView.as_view(), name='public_service_detail'),
 
     
 ]

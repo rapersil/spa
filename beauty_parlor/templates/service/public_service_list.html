@@ -1,0 +1,138 @@
+{% extends 'public_base.html' %}
+{% load static %}
+
+{% block title %}Our Services - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/service.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><i class="material-icons me-2">spa</i>Our Services</h2>
+            <p class="text-muted">Discover our range of beauty services</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="material-icons">search</i></span>
+                        <input type="text" name="query" class="form-control" placeholder="Search services..." 
+                               value="{{ request.GET.query|default:'' }}">
+                    </div>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Services Grid -->
+    {% if services %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for service in services %}
+        <div class="col">
+            <div class="card service-card h-100 shadow-sm">
+                <div class="service-image-container">
+                    {% if service.image %}
+                    <img src="{{ service.image.url }}" class="card-img-top service-image" alt="{{ service.name }}">
+                    {% else %}
+                    <div class="service-image-placeholder">
+                        <i class="material-icons">spa</i>
+                    </div>
+                    {% endif %}
+                    
+                    {% for discount in active_discounts %}
+                        {% if discount.service.id == service.id %}
+                        <div class="discount-badge">
+                            <span class="badge bg-primary">{{ discount.percentage }}% OFF</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text service-description">{{ service.description|truncatechars:100 }}</p>
+                    
+                    <div class="service-meta">
+                        <div class="service-price">
+                            <span class="price-label">Price:</span>
+                            <span class="price-value">GHS{{ service.price }}</span>
+                        </div>
+                        <div class="service-duration">
+                            <span class="duration-label">Duration:</span>
+                            <span class="duration-value">{{ service.duration }} min</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'public_service_detail' service.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="material-icons me-1">visibility</i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="material-icons text-muted" style="font-size: 3em;">spa</i>
+            <h4>No services found</h4>
+            <p class="text-muted">{% if request.GET.query %}No services matching your search.{% else %}There are no services available at the moment.{% endif %}</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" aria-label="First">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item disabled">
+                <a class="page-link" href="#">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </a>
+            </li>
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" aria-label="Last">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

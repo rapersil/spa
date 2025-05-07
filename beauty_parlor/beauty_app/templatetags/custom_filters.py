@@ -66,7 +66,13 @@ def modulo(value, arg):
 #     """Gets an item from a dictionary using the key"""
 #     return dictionary.get(key, [])
 
-
+@register.filter
+def abs(value):
+    """Return the absolute value"""
+    try:
+        return abs(float(value))
+    except (ValueError, TypeError):
+        return ''
 
 @register.filter
 def get_item(dictionary, key):

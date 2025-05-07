@@ -200,3 +200,97 @@ def check_service_discount(request):
     
 
 
+
+
+
+
+
+# Add these imports if they're not already at the top
+from django.views.generic import ListView, DetailView, TemplateView
+
+# Add these new classes for public-facing views
+class PublicServiceListView(ListView):
+    model = Service
+    template_name = 'service/public_service_list.html'
+    context_object_name = 'services'
+    paginate_by = 6
+    
+    def get_queryset(self):
+        # Only show active services to the public
+        queryset = Service.objects.filter(active=True).order_by('name')
+        
+        # Apply search if provided
+        query = self.request.GET.get('query')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query)
+            )
+            
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get current timestamp
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Add active discounts to context
+        context['active_discounts'] = Discount.objects.filter(
+            start_date__lte=now,
+            end_date__gte=now
+        )
+        
+        return context
+
+class PublicServiceDetailView(DetailView):
+    model = Service
+    template_name = 'service/public_service_detail.html'
+    context_object_name = 'service'
+    
+    def get_queryset(self):
+        # Only show active services to the public
+        return Service.objects.filter(active=True)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add active discounts for this service
+        from django.utils import timezone
+        now = timezone.now()
+        
+        context['discounts'] = Discount.objects.filter(
+            service=self.object,
+            start_date__lte=now,
+            end_date__gte=now
+        ).order_by('-percentage')
+        
+        # Add service images
+        context['service_images'] = self.object.images.all()
+        
+        return context
+
+class PublicLandingView(TemplateView):
+    template_name = 'public_landing_page.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get current timestamp
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Add featured services (active services with images)
+        context['featured_services'] = Service.objects.filter(
+            active=True,
+            image__isnull=False
+        ).order_by('?')[:3]  # Random selection of 3 services
+        
+        # Add active discounts
+        context['active_discounts'] = Discount.objects.filter(
+            start_date__lte=now,
+            end_date__gte=now
+        )
+        
+        return context
