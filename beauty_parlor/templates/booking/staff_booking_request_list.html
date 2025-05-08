@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Requests - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .request-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: var(--danger);
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .notification-bell {
+        position: relative;
+        display: inline-block;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2>
+                <div class="notification-bell">
+                    <i class="material-icons me-2">event_available</i>
+                    {% if booking_requests %}
+                    <span class="request-badge">{{ booking_requests|length }}</span>
+                    {% endif %}
+                </div>
+                Booking Requests
+            </h2>
+            <p class="text-muted">Review and approve customer booking requests</p>
+        </div>
+    </div>
+
+    <!-- Booking Requests List -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="material-icons me-2">list</i>Pending Requests</h5>
+            {% if booking_requests %}
+            <span class="badge bg-warning">{{ booking_requests|length }} Pending</span>
+            {% endif %}
+        </div>
+        <div class="card-body p-0">
+            {% if booking_requests %}
+            <div class="table-responsive">
+                <table class="table table-hover booking-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Requested On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in booking_requests %}
+                        <tr>
+                            <td>{{ request.request_id }}</td>
+                            <td>
+                                {% if request.is_new_customer %}
+                                <div class="d-flex align-items-center">
+                                    <div class="customer-avatar me-2">
+                                        {{ request.first_name.0 }}{{ request.last_name.0 }}
+                                    </div>
+                                    <div>
+                                        {{ request.first_name }} {{ request.last_name }}
+                                        <span class="badge bg-info ms-1">New</span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <a href="{% url 'customer_detail' request.existing_customer.pk %}" class="customer-link">
+                                    {{ request.existing_customer.first_name }} {{ request.existing_customer.last_name }}
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>{{ request.service.name }}</td>
+                            <td>
+                                <span class="booking-date">{{ request.date_time|date:"M d, Y" }}</span>
+                                <span class="booking-time">{{ request.date_time|date:"h:i A" }}</span>
+                            </td>
+                            <td>{{ request.created_at|date:"M d, Y h:i A" }}</td>
+                            <td>
+                                <span class="badge bg-warning">Pending</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'staff_booking_request_detail' request.pk %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                    <form method="post" action="{% url 'staff_booking_request_approve' request.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-success" data-bs-toggle="tooltip" title="Approve">
+                                            <i class="material-icons">check_circle</i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'staff_booking_request_reject' request.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Reject">
+                                            <i class="material-icons">cancel</i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="material-icons text-muted" style="font-size: 3em;">event_available</i>
+                <h4>No pending booking requests</h4>
+                <p class="text-muted">There are no pending booking requests at the moment.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

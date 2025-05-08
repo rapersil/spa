@@ -1,0 +1,80 @@
+{% extends 'public_base.html' %}
+{% load static %}
+
+{% block title %}Booking Request Submitted{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .confirmation-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        color: var(--success);
+    }
+    
+    .confirmation-card {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .confirmation-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .confirmation-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-5">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow-sm confirmation-card">
+                <div class="card-body text-center p-5">
+                    <i class="material-icons confirmation-icon">check_circle</i>
+                    <h2 class="mb-3">Thank You! Your Booking Request Has Been Submitted</h2>
+                    <p class="text-muted mb-4">Your request reference number is: <strong>{{ booking_request.request_id }}</strong></p>
+                    
+                    <div class="confirmation-section text-start">
+                        <h5 class="mb-3">What happens next?</h5>
+                        <ol>
+                            <li>Our staff will review your booking request Asap.</li>
+                            <li>We'll contact you to confirm your appointment or suggest alternative times if needed.</li>
+                            <li>Once confirmed, you'll receive a confirmation message with the final details.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="confirmation-section text-start">
+                        <h5 class="mb-3">Request Details</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Service:</strong> {{ booking_request.service.name }}</p>
+                                <p><strong>Date & Time:</strong> {{ booking_request.date_time|date:"l, F d, Y h:i A" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> <span class="badge bg-warning">Pending</span></p>
+                                <p><strong>Request ID:</strong> {{ booking_request.request_id }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-3 mt-4">
+                        <a href="{% url 'public_service_list' %}" class="btn btn-primary">
+                            <i class="material-icons me-2">spa</i>Browse More Services
+                        </a>
+                        <a href="{% url 'public_landing' %}" class="btn btn-outline-secondary">
+                            <i class="material-icons me-2">home</i>Return to Homepage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

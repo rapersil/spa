@@ -60,6 +60,8 @@ MIDDLEWARE = [
     'beauty_app.middleware.AuditMiddleware',
     'beauty_app.middleware.SessionTimeoutMiddleware',
     'beauty_app.middleware.UnauthorizedMiddleware',
+     
+
 ]
 
 ROOT_URLCONF = 'beauty_parlor.urls'
@@ -76,6 +78,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'beauty_app.context_processors.beauty_settings',
+                'beauty_app.context_processors.notification_counts',
             ],
         },
     },
@@ -176,7 +179,7 @@ MESSAGE_TAGS = {
 # Custom settings for Beauty Parlor
 BEAUTY_PARLOR_NAME = 'Coded Spa'
 BEAUTY_PARLOR_ADDRESS = '123 Beauty Street, Beauty City'
-BEAUTY_PARLOR_PHONE = '+1234567890'
+BEAUTY_PARLOR_PHONE = '+233591910726'
 BEAUTY_PARLOR_EMAIL = 'contact@beautyparlor.com'
 BEAUTY_PARLOR_OPENING_HOURS = '9:00 AM - 8:00 PM'
 BEAUTY_PARLOR_WORKING_DAYS = 'Monday - Saturday'

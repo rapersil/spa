@@ -360,3 +360,62 @@ def booking_calendar_view(request):
     }
     
     return render(request, 'booking/booking_calendar.html', context)
+
+
+
+#public booking calendar view
+def public_booking_calendar_view(request):
+    """A public-facing calendar view showing booked time slots without personal details"""
+    # Get the date from the query params, default to today
+    date_param = request.GET.get('date')
+    if date_param:
+        try:
+            current_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+        except ValueError:
+            current_date = timezone.now().date()
+    else:
+        current_date = timezone.now().date()
+    
+    # Get the previous and next days for navigation
+    prev_day = current_date - timedelta(days=1)
+    next_day = current_date + timedelta(days=1)
+    
+    # Get all bookings for the current date, but only those with status CONFIRMED or PENDING
+    # Don't include CANCELLED bookings
+    bookings = Booking.objects.filter(
+        date_time__date=current_date,
+        status__in=['PENDING', 'CONFIRMED']
+    ).order_by('date_time')
+    
+    # Anonymize the bookings - replace customer names with "Reserved"
+    for booking in bookings:
+        # Hide customer information
+        booking.anonymous = True
+        # Calculate end time
+        booking.end_time = booking.date_time + timedelta(minutes=booking.service.duration)
+        
+        # Calculate grid position (each hour = 8 grid rows, each row = 7.5 minutes)
+        # Adjusted for 7 AM start time
+        start_minutes = (booking.date_time.hour - 7) * 60 + booking.date_time.minute
+        booking.start_row = int(start_minutes / 7.5) + 1  # +1 for 1-based grid
+        
+        # End time - adjusted for 7 AM start time
+        end_minutes = (booking.end_time.hour - 7) * 60 + booking.end_time.minute
+        booking.end_row = int(end_minutes / 7.5) + 1  # +1 for 1-based grid
+    
+    # Extended hours from 7 AM to 10 PM
+    hours = list(range(7, 23))  # 7 AM to 10 PM
+    
+    # Get active services for the sidebar
+    active_services = Service.objects.filter(active=True)
+    
+    context = {
+        'current_date': current_date,
+        'prev_day': prev_day,
+        'next_day': next_day,
+        'bookings': bookings,
+        'hours': hours,
+        'active_services': active_services,
+    }
+    
+    return render(request, 'booking/public_booking_calendar.html', context)

@@ -1,0 +1,196 @@
+{% extends 'public_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Request Booking - Step 2{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .step.active {
+        font-weight: bold;
+        color: var(--color-700);
+    }
+    
+    .step.completed {
+        color: var(--color-500);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 50%;
+        background-color: var(--gray-200);
+        margin-right: 5px;
+    }
+    
+    .step.active .step-number {
+        background-color: var(--color-500);
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background-color: var(--color-300);
+        color: white;
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 20px;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--gray-200);
+        z-index: -1;
+    }
+    
+    .step:last-child .step-line {
+        display: none;
+    }
+    
+    .step.completed .step-line {
+        background-color: var(--color-300);
+    }
+    
+    .service-card {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 1rem;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .service-card.selected {
+        border: 2px solid var(--color-500);
+        background-color: var(--color-50);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="material-icons me-2">event_available</i>Request a Booking</h2>
+            <p class="text-muted">Fill out the form below to request an appointment</p>
+        </div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <div class="step-indicator">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Customer Info</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step active">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Service & Time</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Additional Services</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Confirm</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">spa</i>Step 2: Select Service & Time</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="serviceForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            {{ form.service|as_crispy_field }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.time|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="material-icons me-2">info</i>
+                            Please note that this is a booking request. Your appointment is not confirmed until you receive a confirmation from our team.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'public_booking_request_create' step=1 %}" class="btn btn-outline-secondary">
+                                <i class="material-icons me-2">arrow_back</i>Previous Step
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons me-2">arrow_forward</i>Next Step
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker
+        flatpickr("#id_date", {
+            minDate: "today",
+            disable: [
+                function(date) {
+                    // Disable weekends or specific days if needed
+                    // return date.getDay() === 0 || date.getDay() === 6;
+                    return false;
+                }
+            ]
+        });
+        
+        // Initialize time picker
+        flatpickr("#id_time", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minTime: "09:00",
+            maxTime: "17:00",
+            time_24hr: true
+        });
+    });
+</script>
+{% endblock %}

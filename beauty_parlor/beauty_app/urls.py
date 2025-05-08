@@ -19,7 +19,7 @@ from .views.service_views import (
 )
 from .views.booking_views import (
     BookingListView, BookingDetailView, BookingCreateView, BookingUpdateView, 
-    BookingDeleteView, BookingStatusUpdateView, BookingPrintView,booking_calendar_view
+    BookingDeleteView, BookingStatusUpdateView, BookingPrintView,booking_calendar_view,public_booking_calendar_view
 )
 from .views.discount_views import (
     DiscountListView, DiscountDetailView, DiscountCreateView, DiscountUpdateView, DiscountDeleteView,ServiceDiscountHistoryView
@@ -30,6 +30,13 @@ from .views.sales_views import (
 from .views.user_views import (
     StaffListView, StaffDetailView, StaffCreateView, StaffUpdateView, ProfileView
 )
+
+from .views.booking_request_views import (
+    PublicBookingRequestCreateView, PublicBookingRequestConfirmationView,
+    StaffBookingRequestListView, StaffBookingRequestDetailView,
+    StaffBookingRequestApproveView, StaffBookingRequestRejectView
+)
+
 from .views.session_views import keep_session_alive
 
 
@@ -109,6 +116,22 @@ urlpatterns = [
     path('public/', PublicLandingView.as_view(), name='public_landing'),
     path('public/services/', PublicServiceListView.as_view(), name='public_service_list'),
     path('public/services/<int:pk>/', PublicServiceDetailView.as_view(), name='public_service_detail'),
+    # Public booking calendar
+    path('calendar/', public_booking_calendar_view, name='public_booking_calendar'),
+
+
+
+
+    # Public booking request URLs
+    path('request-booking/', PublicBookingRequestCreateView.as_view(), name='public_booking_request_create'),
+    path('request-booking/<int:step>/', PublicBookingRequestCreateView.as_view(), name='public_booking_request_create'),
+    path('request-booking/confirmation/<str:request_id>/', PublicBookingRequestConfirmationView.as_view(), name='public_booking_request_confirmation'),
+
+    # Staff booking request URLs
+    path('booking-requests/', StaffBookingRequestListView.as_view(), name='staff_booking_request_list'),
+    path('booking-requests/<int:pk>/', StaffBookingRequestDetailView.as_view(), name='staff_booking_request_detail'),
+    path('booking-requests/<int:pk>/approve/', StaffBookingRequestApproveView.as_view(), name='staff_booking_request_approve'),
+    path('booking-requests/<int:pk>/reject/', StaffBookingRequestRejectView.as_view(), name='staff_booking_request_reject'),
 
     
 ]

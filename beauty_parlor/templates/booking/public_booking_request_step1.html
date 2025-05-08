@@ -1,0 +1,210 @@
+{% extends 'public_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Request Booking - Step 1{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .step.active {
+        font-weight: bold;
+        color: var(--color-700);
+    }
+    
+    .step.completed {
+        color: var(--color-500);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 50%;
+        background-color: var(--gray-200);
+        margin-right: 5px;
+    }
+    
+    .step.active .step-number {
+        background-color: var(--color-500);
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background-color: var(--color-300);
+        color: white;
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 20px;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--gray-200);
+        z-index: -1;
+    }
+    
+    .step:last-child .step-line {
+        display: none;
+    }
+    
+    .step.completed .step-line {
+        background-color: var(--color-300);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="material-icons me-2">event_available</i>Request a Booking</h2>
+            <p class="text-muted">Fill out the form below to request an appointment</p>
+        </div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <div class="step-indicator">
+                <div class="step active">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Customer Info</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Service & Time</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Additional Services</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Confirm</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">person</i>Step 1: Customer Information</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="customerForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            {{ form.customer_choice|as_crispy_field }}
+                        </div>
+                        
+                        <div id="existingCustomerSection" class="mb-4" style="display: none;">
+                            {{ form.existing_customer|as_crispy_field }}
+                        </div>
+                        
+                        <div id="newCustomerSection">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.first_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form.last_name|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.phone|as_crispy_field }}
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.address|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'public_service_list' %}" class="btn btn-outline-secondary">
+                                <i class="material-icons me-2">arrow_back</i>Back to Services
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons me-2">arrow_forward</i>Next Step
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the radio buttons and sections
+        const customerChoiceRadios = document.querySelectorAll('input[name="customer_choice"]');
+        const existingCustomerSection = document.getElementById('existingCustomerSection');
+        const newCustomerSection = document.getElementById('newCustomerSection');
+        const existingCustomerSelect = document.getElementById('id_existing_customer');
+        
+        // Function to toggle sections based on selection
+        function toggleSections() {
+            const selectedValue = document.querySelector('input[name="customer_choice"]:checked').value;
+            
+            if (selectedValue === 'existing') {
+                existingCustomerSection.style.display = 'block';
+                newCustomerSection.style.display = 'none';
+                existingCustomerSelect.disabled = false;
+                
+                // Make existing customer field required
+                existingCustomerSelect.required = true;
+                
+                // Make new customer fields not required
+                document.getElementById('id_first_name').required = false;
+                document.getElementById('id_last_name').required = false;
+                document.getElementById('id_phone').required = false;
+            } else {
+                existingCustomerSection.style.display = 'none';
+                newCustomerSection.style.display = 'block';
+                existingCustomerSelect.disabled = true;
+                
+                // Make existing customer field not required
+                existingCustomerSelect.required = false;
+                
+                // Make new customer fields required
+                document.getElementById('id_first_name').required = true;
+                document.getElementById('id_last_name').required = true;
+                document.getElementById('id_phone').required = true;
+            }
+        }
+        
+        // Add event listeners to radio buttons
+        customerChoiceRadios.forEach(function(radio) {
+            radio.addEventListener('change', toggleSections);
+        });
+        
+        // Initialize sections based on default selection
+        toggleSections();
+    });
+</script>
+{% endblock %}
