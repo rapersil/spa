@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
-from .models import CustomUser, Customer, Service, Booking, Discount, Sale, ServiceImage,AdditionalService,Audit
+from .models import CustomUser, Customer, Service, Booking, Discount, Sale, ServiceImage,AdditionalService,Audit, BookingRequest
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -194,3 +194,33 @@ class AuditAdmin(admin.ModelAdmin):
     search_fields = ('object_id', 'object_repr', 'user__username')
     readonly_fields = ('timestamp', 'user', 'action', 'model_name', 'object_id', 'object_repr', 'data', 'ip_address')
     date_hierarchy = 'timestamp'
+
+
+
+
+@admin.register(BookingRequest)
+class BookingRequestAdmin(admin.ModelAdmin):
+    list_display = ('request_id', 'existing_customer', 'service_name', 'date_time', 'status')
+    list_filter = ('status', 'date_time', 'service')
+    search_fields = ('request_id', 'existing_customer__first_name', 'existing_customer__last_name', 'service__name')
+    ordering = ('-date_time',)
+    
+    # fieldsets = (
+    #     ('Booking Request Information', {'fields': ('request_id', 'existing_customer', 'service', 'date_time')}),
+    #     ('Status & Notes', {'fields': ('status', 'notes')}),
+    #     ('System Information', {'fields': ('created_at')}),
+    # )
+    
+    readonly_fields = ('request_id', 'created_at')
+    
+    def customer_name(self, obj):
+        return f"{obj.customer.first_name} {obj.customer.last_name}"
+    customer_name.short_description = 'Customer'
+    
+    def service_name(self, obj):
+        return obj.service.name
+    service_name.short_description = 'Service'
+
+    # def get_total_price(self, obj):
+    #     return f"${obj.get_total_price()}"
+    # get_total_price.short_description = 'Total Price'

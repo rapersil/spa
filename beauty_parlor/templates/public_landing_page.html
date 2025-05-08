@@ -42,9 +42,15 @@
                     <div class="landing-text">
                         <h1 class="display-4">Welcome to {{ settings.BEAUTY_PARLOR_NAME }}</h1>
                         <p class="lead">Discover our range of professional beauty services designed to help you look and feel your best.</p>
-                        <a href="{% url 'public_service_list' %}" class="btn btn-primary btn-lg">
-                            <i class="material-icons me-2">spa</i>Explore Our Services
-                        </a>
+                       <!-- Add this to the landing-text div in the hero section -->
+                        <div class="btn-group mt-3">
+                            <a href="{% url 'public_service_list' %}" class="btn btn-primary btn-lg">
+                                <i class="material-icons me-2">spa</i>Explore Our Services
+                            </a>
+                            <a href="{% url 'public_booking_calendar' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="material-icons me-2">calendar_today</i>Check Availability
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-6">

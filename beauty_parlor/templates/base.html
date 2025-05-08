@@ -49,6 +49,21 @@
                             <span class="material-icons">event_available</span>Bookings
                         </a>
                     </li>
+                     <!-- Add this inside the navbar-nav list, perhaps after the Bookings link -->
+                     <li class="nav-item">
+                        <a class="nav-link {% if 'booking-requests' in request.path %}active{% endif %}" href="{% url 'staff_booking_request_list' %}">
+                            <span class="position-relative">
+                                <span class="material-icons">notifications</span>
+                                {% if pending_booking_requests_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ pending_booking_requests_count }}
+                                    {% comment %} <span class="visually-hidden">pending booking requests</span> {% endcomment %}
+                                </span>
+                                {% endif %}
+                            </span>
+                            Booking Requests
+                        </a>
+                    </li>
                     
                     <li class="nav-item">
                         <a class="nav-link {% if 'customer' in request.path %}active{% endif %}" href="{% url 'customer_list' %}">
@@ -61,6 +76,7 @@
                             <span class="material-icons">room_service</span>Services
                         </a>
                     </li>
+                   
                     
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">

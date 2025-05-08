@@ -1,0 +1,172 @@
+{% extends 'public_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Request Booking - Step 3{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .step.active {
+        font-weight: bold;
+        color: var(--color-700);
+    }
+    
+    .step.completed {
+        color: var(--color-500);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 50%;
+        background-color: var(--gray-200);
+        margin-right: 5px;
+    }
+    
+    .step.active .step-number {
+        background-color: var(--color-500);
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background-color: var(--color-300);
+        color: white;
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 20px;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--gray-200);
+        z-index: -1;
+    }
+    
+    .step:last-child .step-line {
+        display: none;
+    }
+    
+    .step.completed .step-line {
+        background-color: var(--color-300);
+    }
+    
+    .additional-service-item {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    
+    .additional-service-item:hover {
+        background-color: var(--color-50);
+    }
+    
+    .service-header {
+        background-color: var(--color-100);
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="material-icons me-2">event_available</i>Request a Booking</h2>
+            <p class="text-muted">Fill out the form below to request an appointment</p>
+        </div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <div class="step-indicator">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Customer Info</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step completed">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Service & Time</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step active">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Additional Services</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Confirm</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">add_circle</i>Step 3: Additional Services (Optional)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="service-header">
+                        <h5 class="mb-2">Your Selected Service:</h5>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">{{ main_service.name }}</span>
+                            <span>GHS{{ main_service.price }} - {{ main_service.duration }} min</span>
+                        </div>
+                    </div>
+                    
+                    <form method="post" id="additionalServicesForm">
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">Would you like to add any other services?</h5>
+                        
+                        {% for field in form %}
+                            {% if field.name != 'notes' %}
+                            <div class="additional-service-item">
+                                {{ field|as_crispy_field }}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="mb-4">
+                            {{ form.notes|as_crispy_field }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'public_booking_request_create' step=2 %}" class="btn btn-outline-secondary">
+                                <i class="material-icons me-2">arrow_back</i>Previous Step
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons me-2">arrow_forward</i>Next Step
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

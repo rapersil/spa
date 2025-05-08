@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Request - {{ booking_request.request_id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .request-detail-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .request-detail-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .customer-detail-card {
+        background-color: var(--color-50);
+        border-left: 4px solid var(--color-500);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'staff_booking_request_list' %}">Booking Requests</a></li>
+            <li class="breadcrumb-item active">{{ booking_request.request_id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Request Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="material-icons me-2">event_available</i>Booking Request Details</h4>
+                    <span class="badge bg-warning">Pending</span>
+                </div>
+                <div class="card-body">
+                    <!-- Request ID and Date -->
+                    <div class="request-detail-section">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Request ID:</strong> {{ booking_request.request_id }}</p>
+                                <p><strong>Requested On:</strong> {{ booking_request.created_at|date:"F d, Y h:i A" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> <span class="badge bg-warning">Pending</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service & Time -->
+                    <div class="request-detail-section">
+                        <h5 class="mb-3">Service & Appointment Details</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Service:</strong> {{ booking_request.service.name }}</p>
+                                <p><strong>Duration:</strong> {{ booking_request.service.duration }} minutes</p>
+                                <p><strong>Price:</strong> GHS{{ booking_request.service.price }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Date:</strong> {{ booking_request.date_time|date:"l, F d, Y" }}</p>
+                                <p><strong>Time:</strong> {{ booking_request.date_time|date:"h:i A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Services -->
+                    <!-- Additional services section -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Additional Services</h5>
+    </div>
+    <div class="card-body">
+        {% if additional_services %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Duration</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in additional_services %}
+                <tr>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.duration }} minutes</td>
+                    <td>GHS{{ service.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-secondary">
+                    <th>Total (including main service)</th>
+                    <th>{{ total_duration }} minutes</th>
+                    <th>GHS{{ total_price }}</th>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <p class="text-muted">No additional services selected</p>
+        {% endif %}
+    </div>
+</div>
+                    
+                    <!-- Notes -->
+                    {% if booking_request.notes %}
+                    <div class="request-detail-section">
+                        <h5 class="mb-3">Customer Notes</h5>
+                        <div class="alert alert-light">
+                            {{ booking_request.notes }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="request-detail-section">
+                        <h5 class="mb-3">Action Required</h5>
+                        <div class="action-buttons">
+                            <form method="post" action="{% url 'staff_booking_request_approve' booking_request.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">
+                                    <i class="material-icons me-2">check_circle</i>Approve Request
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'staff_booking_request_reject' booking_request.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="material-icons me-2">cancel</i>Reject Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">person</i>Customer Information</h4>
+                </div>
+                <div class="card-body">
+                    {% if booking_request.is_new_customer %}
+                    <div class="customer-detail-card">
+                        <h6 class="mb-3">New Customer</h6>
+                        <p><strong>Name:</strong> {{ booking_request.first_name }} {{ booking_request.last_name }}</p>
+                        <p><strong>Phone:</strong> {{ booking_request.phone }}</p>
+                        {% if booking_request.address %}
+                        <p><strong>Address:</strong> {{ booking_request.address }}</p>
+                        {% endif %}
+                        <div class="alert alert-info mt-3">
+                            <i class="material-icons me-2">info</i>
+                            A new customer profile will be created when you approve this request.
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="customer-profile mb-4">
+                        <div class="customer-avatar">
+                            {{ booking_request.existing_customer.first_name.0 }}{{ booking_request.existing_customer.last_name.0 }}
+                        </div>
+                        <div class="customer-name">
+                            {{ booking_request.existing_customer.first_name }} {{ booking_request.existing_customer.last_name }}
+                        </div>
+                        <div class="customer-id text-muted">
+                            {{ booking_request.existing_customer.customer_id }}
+                        </div>
+                    </div>
+                    
+                    <div class="customer-details">
+                        <div class="detail-item">
+                            <span class="material-icons me-2">phone</span>
+                            <span>{{ booking_request.existing_customer.phone }}</span>
+                        </div>
+                        {% if booking_request.existing_customer.address %}
+                        <div class="detail-item">
+                            <span class="material-icons me-2">location_on</span>
+                            <span>{{ booking_request.existing_customer.address }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <span class="material-icons me-2">calendar_today</span>
+                            <span>Client since: {{ booking_request.existing_customer.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'customer_detail' booking_request.existing_customer.pk %}" class="btn btn-outline-primary w-100">
+                            <span class="material-icons me-2">account_circle</span>View Customer Profile
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Calendar Availability -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">calendar_today</i>Calendar Availability</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Requested Date:</strong> {{ booking_request.date_time|date:"l, F d, Y" }}</p>
+                    <p><strong>Requested Time:</strong> {{ booking_request.date_time|date:"h:i A" }}</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="material-icons me-2">info</i>
+                        Check the calendar to ensure there are no conflicts with existing bookings.
+                    </div>
+                    
+                    <a href="{% url 'booking_calendar' %}?date={{ booking_request.date_time|date:'Y-m-d' }}" class="btn btn-outline-primary w-100">
+                        <i class="material-icons me-2">calendar_today</i>View Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

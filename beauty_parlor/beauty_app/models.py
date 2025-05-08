@@ -391,3 +391,61 @@ class Audit(models.Model):
     # Add these new fields:
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     message = models.TextField(blank=True, null=True)
+
+
+
+
+
+
+
+class BookingRequest(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    )
+    
+    request_id = models.CharField(max_length=15, unique=True, editable=False)
+    # Customer information fields - these will be used if the customer is new
+    is_new_customer = models.BooleanField(default=False)
+    existing_customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    first_name = models.CharField(max_length=100, blank=True, null=True)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    
+    # Service and time information
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    date_time = models.DateTimeField()
+    
+    # Additional services as a JSON field
+    additional_services = models.JSONField(blank=True, null=True)
+    
+    # Request status
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    notes = models.TextField(blank=True, null=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # For tracking which staff member reviewed the request
+    reviewed_by = models.ForeignKey(CustomUser, related_name='reviewed_requests', 
+                                   on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.request_id:
+            self.request_id = f"REQ{str(uuid.uuid4())[:8]}".upper()
+            
+            while BookingRequest.objects.filter(request_id=self.request_id).exists():
+                self.request_id = f"REQ{str(uuid.uuid4())[:8]}".upper()
+                
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        if self.is_new_customer:
+            return f"{self.request_id} - {self.first_name} {self.last_name} - {self.service.name}"
+        elif self.existing_customer:
+            return f"{self.request_id} - {self.existing_customer.first_name} {self.existing_customer.last_name} - {self.service.name}"
+        else:
+            return f"{self.request_id} - {self.service.name}"

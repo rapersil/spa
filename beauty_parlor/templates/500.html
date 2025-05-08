@@ -73,14 +73,25 @@
 
         <img src="{% static 'img/500.svg' %}" alt="Server error illustration" class="error-image">
 
+        {% if user.user_type in "STAFF,ADMIN,SUPERADMIN" %}
         <div class="error-actions">
             <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
                 <i class="material-icons me-2">home</i>Go to Dashboard
             </a>
-            <button onclick="location.reload()" class="btn btn-outline-secondary btn-lg ms-2">
-                <i class="material-icons me-2">refresh</i>Try Again
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-lg ms-2">
+                <i class="material-icons me-2">arrow_back</i>Go Back
             </button>
         </div>
+        {% else %}
+        <div class="error-actions">
+            <a href="{% url 'public_landing' %}" class="btn btn-primary btn-lg">
+                <i class="material-icons me-2">home</i>Go to Home
+            </a>
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-lg ms-2">
+                <i class="material-icons me-2">arrow_back</i>Go Back
+            </button>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

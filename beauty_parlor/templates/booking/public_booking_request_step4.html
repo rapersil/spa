@@ -1,0 +1,252 @@
+{% extends 'public_base.html' %}
+{% load static %}
+
+{% block title %}Request Booking - Step 4{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .step.active {
+        font-weight: bold;
+        color: var(--color-700);
+    }
+    
+    .step.completed {
+        color: var(--color-500);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 50%;
+        background-color: var(--gray-200);
+        margin-right: 5px;
+    }
+    
+    .step.active .step-number, .step.completed .step-number {
+        background-color: var(--color-500);
+        color: white;
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 20px;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--gray-200);
+        z-index: -1;
+    }
+    
+    .step:last-child .step-line {
+        display: none;
+    }
+    
+    .step.completed .step-line, .step.active .step-line {
+        background-color: var(--color-300);
+    }
+    
+    .booking-summary-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .booking-summary-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: var(--color-700);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="material-icons me-2">event_available</i>Request a Booking</h2>
+            <p class="text-muted">Review and confirm your booking request</p>
+        </div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-body">
+            <div class="step-indicator">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Customer Info</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step completed">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Service & Time</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step completed">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Additional Services</span>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step active">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Confirm</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">check_circle</i>Step 4: Review & Confirm</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Customer Information -->
+                    <div class="booking-summary-section">
+                        <h5 class="section-title"><i class="material-icons me-2">person</i>Customer Information</h5>
+                        
+                        {% if is_new_customer %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ customer_data.first_name }} {{ customer_data.last_name }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Phone:</strong> {{ customer_data.phone }}</p>
+                                </div>
+                            </div>
+                            {% if customer_data.address %}
+                            <p><strong>Address:</strong> {{ customer_data.address }}</p>
+                            {% endif %}
+                            <div class="badge bg-info">New Customer</div>
+                        {% else %}
+                            <p><strong>Customer:</strong> {{ customer.first_name }} {{ customer.last_name }}</p>
+                            <p><strong>Phone:</strong> {{ customer.phone }}</p>
+                            <div class="badge bg-secondary">Existing Customer</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Service & Time -->
+                    <div class="booking-summary-section">
+                        <h5 class="section-title"><i class="material-icons me-2">spa</i>Service & Appointment Time</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Service:</strong> {{ service.name }}</p>
+                                <p><strong>Duration:</strong> {{ service.duration }} minutes</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Price:</strong> GHS{{ service.price }}</p>
+                                <p><strong>Date & Time:</strong> {{ date_time|date:"l, F d, Y h:i A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Services -->
+                    {% if additional_services %}
+                    <div class="booking-summary-section">
+                        <h5 class="section-title"><i class="material-icons me-2">add_circle</i>Additional Services</h5>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Duration</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for additional_service in additional_services %}
+                                    <tr>
+                                        <td>{{ additional_service.name }}</td>
+                                        <td>{{ additional_service.duration }} min</td>
+                                        <td>GHS{{ additional_service.price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Notes -->
+                    {% if notes %}
+                    <div class="booking-summary-section">
+                        <h5 class="section-title"><i class="material-icons me-2">note</i>Additional Notes</h5>
+                        <p>{{ notes }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Total Price -->
+                    <div class="booking-summary-section">
+                        <h5 class="section-title"><i class="material-icons me-2">monetization_on</i>Estimated Total</h5>
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>{{ service.name }}</td>
+                                        <td class="text-end">GHS{{ service.price }}</td>
+                                    </tr>
+                                    
+                                    {% for additional_service in additional_services %}
+                                    <tr>
+                                        <td>{{ additional_service.name }}</td>
+                                        <td class="text-end">GHS{{ additional_service.price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                    <tr class="table-active">
+                                        <th>Estimated Total</th>
+                                        <th class="text-end">GHS{{ total_price }}</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="material-icons me-2">info</i>
+                            This is only an estimate. Final pricing will be confirmed when your booking is processed.
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'public_booking_request_create' step=3 %}" class="btn btn-outline-secondary">
+                                <i class="material-icons me-2">arrow_back</i>Previous Step
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="material-icons me-2">check_circle</i>Submit Booking Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

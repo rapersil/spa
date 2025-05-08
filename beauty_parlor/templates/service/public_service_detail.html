@@ -71,6 +71,7 @@
                 </div>
             </div>
         </div>
+
         
         <!-- Service Details Column -->
         <div class="col-md-7 mb-4">
@@ -102,6 +103,22 @@
                     <h5 class="card-subtitle mb-3">Description</h5>
                     <div class="service-description mb-4">
                         <p>{{ service.description|linebreaks }}</p>
+                    </div>
+                </div>
+                <!-- Add this to the card-body section after the service-description div -->
+                <div class="d-grid mt-4">
+                    <a href="{% url 'public_booking_request_create' %}?service_id={{ service.id }}" class="btn btn-primary">
+                        <i class="material-icons me-2">event_add</i>Book this Service
+                    </a>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'public_service_list' %}" class="btn btn-outline-secondary">
+                            <i class="material-icons me-1">arrow_back</i>Back to Services
+                        </a>
+                        <a href="{% url 'public_booking_calendar' %}?date={{ current_date|date:'Y-m-d' }}" class="btn btn-primary">
+                            <i class="material-icons me-2">calendar_today</i>Check Availability for This Service
+                        </a>
                     </div>
                 </div>
             </div>
