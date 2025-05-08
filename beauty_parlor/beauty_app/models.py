@@ -4,7 +4,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from .validators import phone_validator, price_validator, discount_validator
+from .validators import phone_validator, price_validator, discount_validator, email_validator
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from .utils import generate_username
@@ -39,7 +39,7 @@ class Customer(AuditableMixin, models.Model):
     customer_id = models.CharField(max_length=15, unique=True, editable=False)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    # email = models.EmailField(validators=[email_validator])
+    email = models.EmailField(validators=[email_validator])
     phone = models.CharField(max_length=15, validators=[phone_validator])
     address = models.TextField(blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)

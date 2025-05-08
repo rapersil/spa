@@ -71,83 +71,73 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h2><i class="material-icons me-2">event_available</i>Request a Booking</h2>
-            <p class="text-muted">Fill out the form below to request an appointment</p>
-        </div>
-    </div>
-    
-    <!-- Step Indicator -->
-    <div class="card shadow-sm mb-2">
-        <div class="card-body">
-            <div class="step-indicator">
-                <div class="step active">
-                    <span class="step-number">1</span>
-                    <span class="step-label">Customer Info</span>
-                    <div class="step-line"></div>
-                </div>
-                <div class="step">
-                    <span class="step-number">2</span>
-                    <span class="step-label">Service & Time</span>
-                    <div class="step-line"></div>
-                </div>
-                <div class="step">
-                    <span class="step-number">3</span>
-                    <span class="step-label">Additional Services</span>
-                    <div class="step-line"></div>
-                </div>
-                <div class="step">
-                    <span class="step-number">4</span>
-                    <span class="step-label">Confirm</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0"><i class="material-icons me-2">person</i>Step 1: Customer Information</h4>
+                    <h4>Step 1: Customer Information</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" id="customerForm">
+                    <form method="post">
                         {% csrf_token %}
                         
-                        <div class="mb-4">
+                        <div class="mb-3">
                             {{ form.customer_choice|as_crispy_field }}
                         </div>
                         
-                        <div id="existingCustomerSection" class="mb-4" style="display: none;">
-                            {{ form.existing_customer|as_crispy_field }}
+                        <!-- Existing customer section -->
+                        <div id="existing-customer-section" class="mb-3" style="display: none;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Find Your Account</h5>
+                                    <p>Please enter your email address to look up your account</p>
+                                    {{ form.email|as_crispy_field }}
+                                    
+                                    <!-- This div will be populated with customer data once found -->
+                                    <div id="customer-details" class="mt-3" style="display: none;">
+                                        <h6>Your Information:</h6>
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <p><strong>Name:</strong> <span id="customer-name"></span></p>
+                                                <p><strong>Phone:</strong> <span id="customer-phone"></span></p>
+                                                <p><strong>Email:</strong> <span id="customer-email"></span></p>
+                                                <p><strong>Address:</strong> <span id="customer-address"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div id="newCustomerSection">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form.first_name|as_crispy_field }}
+                        <!-- New customer section -->
+                        <div id="new-customer-section" class="mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>New Customer Information</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.first_name|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.last_name|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.phone|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.email_new|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    {{ form.address|as_crispy_field }}
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form.last_name|as_crispy_field }}
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                {{ form.phone|as_crispy_field }}
-                            </div>
-                            
-                            <div class="mb-4">
-                                {{ form.address|as_crispy_field }}
                             </div>
                         </div>
                         
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'public_service_list' %}" class="btn btn-outline-secondary">
-                                <i class="material-icons me-2">arrow_back</i>Back to Services
-                            </a>
+                        <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="material-icons me-2">arrow_forward</i>Next Step
+                                Continue to Step 2 <i class="material-icons align-middle">arrow_forward</i>
                             </button>
                         </div>
                     </form>
@@ -158,53 +148,55 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get the radio buttons and sections
-        const customerChoiceRadios = document.querySelectorAll('input[name="customer_choice"]');
-        const existingCustomerSection = document.getElementById('existingCustomerSection');
-        const newCustomerSection = document.getElementById('newCustomerSection');
-        const existingCustomerSelect = document.getElementById('id_existing_customer');
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sections based on customer choice
+    const customerChoice = document.querySelectorAll('input[name="customer_choice"]');
+    const existingSection = document.getElementById('existing-customer-section');
+    const newSection = document.getElementById('new-customer-section');
+    
+    // Email lookup functionality
+    const emailField = document.getElementById('id_email');
+    const customerDetails = document.getElementById('customer-details');
+    
+    // Show/hide sections based on initial selection
+    function toggleSections() {
+        const selectedValue = document.querySelector('input[name="customer_choice"]:checked').value;
         
-        // Function to toggle sections based on selection
-        function toggleSections() {
-            const selectedValue = document.querySelector('input[name="customer_choice"]:checked').value;
-            
-            if (selectedValue === 'existing') {
-                existingCustomerSection.style.display = 'block';
-                newCustomerSection.style.display = 'none';
-                existingCustomerSelect.disabled = false;
-                
-                // Make existing customer field required
-                existingCustomerSelect.required = true;
-                
-                // Make new customer fields not required
-                document.getElementById('id_first_name').required = false;
-                document.getElementById('id_last_name').required = false;
-                document.getElementById('id_phone').required = false;
-            } else {
-                existingCustomerSection.style.display = 'none';
-                newCustomerSection.style.display = 'block';
-                existingCustomerSelect.disabled = true;
-                
-                // Make existing customer field not required
-                existingCustomerSelect.required = false;
-                
-                // Make new customer fields required
-                document.getElementById('id_first_name').required = true;
-                document.getElementById('id_last_name').required = true;
-                document.getElementById('id_phone').required = true;
-            }
+        if (selectedValue === 'existing') {
+            existingSection.style.display = 'block';
+            newSection.style.display = 'none';
+        } else {
+            existingSection.style.display = 'none';
+            newSection.style.display = 'block';
         }
-        
-        // Add event listeners to radio buttons
-        customerChoiceRadios.forEach(function(radio) {
-            radio.addEventListener('change', toggleSections);
-        });
-        
-        // Initialize sections based on default selection
-        toggleSections();
+    }
+    
+    // Add event listeners to radio buttons
+    customerChoice.forEach(function(radio) {
+        radio.addEventListener('change', toggleSections);
     });
+    
+    // Handle email lookup (optional - for better user experience)
+    emailField.addEventListener('blur', function() {
+        if (emailField.value.trim() !== '') {
+            // You can add AJAX lookup here to find customer by email
+            // and populate the customer details section
+            // This requires adding a view to handle the lookup
+            
+            // For now, we'll rely on form submission and validation
+        }
+    });
+    
+    // Call the function to set initial state
+    toggleSections();
+    
+    // If there's form errors, make sure the right section is shown
+    if (document.querySelector('.invalid-feedback')) {
+        toggleSections();
+    }
+});
 </script>
 {% endblock %}

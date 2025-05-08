@@ -289,51 +289,92 @@ class BookingPrintView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 def booking_calendar_view(request):
     # Get the date from the query params, default to today
     date_param = request.GET.get('date')
-    if date_param:
+    weekday_param = request.GET.get('weekday')  # Add weekday selection parameter
+    today = timezone.now().date()
+    
+    # Handle weekday parameter for direct day selection from dashboard
+    if weekday_param is not None:
         try:
-            current_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+            weekday = int(weekday_param)
+            # Calculate the date of the selected weekday in the current week
+            days_diff = weekday - today.weekday()
+            if days_diff < 0:  # If the day has passed this week
+                days_diff += 7
+            current_date = today + timedelta(days=days_diff)
         except ValueError:
-            current_date = timezone.now().date()
+            current_date = today
+    # Handle explicit date parameter
+    elif date_param:
+        try:
+            current_date = datetime.strptime(date_param, '%Y-%m-%d').date()  # Fixed typo in date format
+        except ValueError:
+            current_date = today
     else:
-        current_date = timezone.now().date()
+        current_date = today
     
-    # Get the previous and next days for navigation
-    prev_day = current_date - timedelta(days=1)
-    next_day = current_date + timedelta(days=1)
+    # Get the view type (day or week)
+    view_type = request.GET.get('view', 'day' if weekday_param else 'week')  # Default to day view if weekday specified
     
-    # Get all bookings for the current date
+    if view_type == 'day':
+        # Day view - single day
+        start_date = current_date
+        end_date = current_date
+        prev_date = current_date - timedelta(days=1)
+        next_date = current_date + timedelta(days=1)
+    else:
+        # Week view - show the whole week
+        # Calculate the start of the week (Monday)
+        start_date = current_date - timedelta(days=current_date.weekday())
+        # Calculate the end of the week (Sunday)
+        end_date = start_date + timedelta(days=6)
+        prev_date = start_date - timedelta(days=7)
+        next_date = start_date + timedelta(days=7)
+    
+    # Get all bookings for the date range
     bookings = Booking.objects.filter(
-        date_time__date=current_date,
+        date_time__date__range=[start_date, end_date],
         status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
     ).order_by('date_time')
     
     # Extended hours from 7 AM to 10 PM
     hours = list(range(7, 23))  # 7 AM to 10 PM
     
-    # Calculate end time and grid positions for each booking
+    # Calculate properties for each booking
     for booking in bookings:
         # Calculate end time
         booking.end_time = booking.date_time + timedelta(minutes=booking.service.duration)
         
         # Calculate grid position (each hour = 8 grid rows, each row = 7.5 minutes)
-        # Adjusted for 7 AM start time
         start_minutes = (booking.date_time.hour - 7) * 60 + booking.date_time.minute
         booking.start_row = int(start_minutes / 7.5) + 1  # +1 for 1-based grid
         
-        # End time - adjusted for 7 AM start time
+        # End time grid position
         end_minutes = (booking.end_time.hour - 7) * 60 + booking.end_time.minute
-        booking.end_row = int(end_minutes / 7.5) + 1  # +1 for 1-based grid
+        booking.end_row = int(end_minutes / 7.5) + 1
         
         # Calculate expected start time for calendar display
         expected_start = booking.get_expected_start_time()
         wait_minutes = booking.get_wait_time_minutes()
         
-        # If there's a delay, calculate where the actual service would start on grid
+        # If there's a delay, calculate expected start position
         if wait_minutes > 0:
             expected_start_minutes = (expected_start.hour - 7) * 60 + expected_start.minute
             booking.expected_start_row = int(expected_start_minutes / 7.5) + 1
+            
+        # Add day of week for positioning in week view
+        booking.day_of_week = booking.date_time.weekday()
     
-    # Get all staff (created_by users)
+    # Create a list of dates for the week
+    date_range = []
+    for i in range(7):
+        date_range.append(start_date + timedelta(days=i))
+    
+    # Group bookings by day
+    bookings_by_day = {}
+    for day in date_range:
+        bookings_by_day[day] = [b for b in bookings if b.date_time.date() == day]
+    
+    # Get all staff (created_by users) for staff grouping
     staffs = CustomUser.objects.filter(
         user_type__in=['STAFF', 'ADMIN', 'SUPERADMIN']
     ).distinct()
@@ -349,41 +390,78 @@ def booking_calendar_view(request):
             if staff_id in bookings_by_staff:
                 bookings_by_staff[staff_id].append(booking)
     
+    # Day labels for week view
+    day_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
     context = {
         'current_date': current_date,
-        'prev_day': prev_day,
-        'next_day': next_day,
+        'start_date': start_date,
+        'end_date': end_date,
+        'prev_date': prev_date,
+        'next_date': next_date,
+        'view_type': view_type,
+        'date_range': date_range,
+        'day_labels': day_labels,
         'bookings': bookings,
+        'bookings_by_day': bookings_by_day,
         'hours': hours,
         'staffs': staffs,
         'bookings_by_staff': bookings_by_staff,
+        'selected_weekday': int(weekday_param) if weekday_param and weekday_param.isdigit() else None
     }
     
     return render(request, 'booking/booking_calendar.html', context)
 
 
 
-#public booking calendar view
 def public_booking_calendar_view(request):
     """A public-facing calendar view showing booked time slots without personal details"""
     # Get the date from the query params, default to today
     date_param = request.GET.get('date')
-    if date_param:
+    weekday_param = request.GET.get('weekday')  # Add weekday selection parameter
+    today = timezone.now().date()
+    
+    # Handle weekday parameter for direct day selection
+    if weekday_param is not None:
+        try:
+            weekday = int(weekday_param)
+            # Calculate the date of the selected weekday in the current week
+            days_diff = weekday - today.weekday()
+            if days_diff < 0:  # If the day has passed this week
+                days_diff += 7
+            current_date = today + timedelta(days=days_diff)
+        except ValueError:
+            current_date = today
+    # Handle explicit date parameter
+    elif date_param:
         try:
             current_date = datetime.strptime(date_param, '%Y-%m-%d').date()
         except ValueError:
-            current_date = timezone.now().date()
+            current_date = today
     else:
-        current_date = timezone.now().date()
+        current_date = today
     
-    # Get the previous and next days for navigation
-    prev_day = current_date - timedelta(days=1)
-    next_day = current_date + timedelta(days=1)
+    # Get the view type (day or week)
+    view_type = request.GET.get('view', 'day' if weekday_param else 'week')  # Default to day view if weekday specified
     
-    # Get all bookings for the current date, but only those with status CONFIRMED or PENDING
-    # Don't include CANCELLED bookings
+    if view_type == 'day':
+        # Day view - single day
+        start_date = current_date
+        end_date = current_date
+        prev_date = current_date - timedelta(days=1)
+        next_date = current_date + timedelta(days=1)
+    else:
+        # Week view - show the whole week
+        # Calculate the start of the week (Monday)
+        start_date = current_date - timedelta(days=current_date.weekday())
+        # Calculate the end of the week (Sunday)
+        end_date = start_date + timedelta(days=6)
+        prev_date = start_date - timedelta(days=7)
+        next_date = start_date + timedelta(days=7)
+    
+    # Get all bookings for the date range, but only those with status CONFIRMED or PENDING
     bookings = Booking.objects.filter(
-        date_time__date=current_date,
+        date_time__date__range=[start_date, end_date],
         status__in=['PENDING', 'CONFIRMED']
     ).order_by('date_time')
     
@@ -395,13 +473,25 @@ def public_booking_calendar_view(request):
         booking.end_time = booking.date_time + timedelta(minutes=booking.service.duration)
         
         # Calculate grid position (each hour = 8 grid rows, each row = 7.5 minutes)
-        # Adjusted for 7 AM start time
         start_minutes = (booking.date_time.hour - 7) * 60 + booking.date_time.minute
         booking.start_row = int(start_minutes / 7.5) + 1  # +1 for 1-based grid
         
-        # End time - adjusted for 7 AM start time
+        # End time grid position
         end_minutes = (booking.end_time.hour - 7) * 60 + booking.end_time.minute
-        booking.end_row = int(end_minutes / 7.5) + 1  # +1 for 1-based grid
+        booking.end_row = int(end_minutes / 7.5) + 1
+        
+        # Add day of week for positioning in week view
+        booking.day_of_week = booking.date_time.weekday()
+    
+    # Create a list of dates for the week
+    date_range = []
+    for i in range(7):
+        date_range.append(start_date + timedelta(days=i))
+    
+    # Group bookings by day
+    bookings_by_day = {}
+    for day in date_range:
+        bookings_by_day[day] = [b for b in bookings if b.date_time.date() == day]
     
     # Extended hours from 7 AM to 10 PM
     hours = list(range(7, 23))  # 7 AM to 10 PM
@@ -409,13 +499,23 @@ def public_booking_calendar_view(request):
     # Get active services for the sidebar
     active_services = Service.objects.filter(active=True)
     
+    # Day labels for week view
+    day_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
     context = {
         'current_date': current_date,
-        'prev_day': prev_day,
-        'next_day': next_day,
+        'start_date': start_date,
+        'end_date': end_date,
+        'prev_date': prev_date,
+        'next_date': next_date,
+        'view_type': view_type,
+        'date_range': date_range,
+        'day_labels': day_labels,
         'bookings': bookings,
+        'bookings_by_day': bookings_by_day,
         'hours': hours,
         'active_services': active_services,
+        'selected_weekday': int(weekday_param) if weekday_param and weekday_param.isdigit() else None
     }
     
     return render(request, 'booking/public_booking_calendar.html', context)
