@@ -117,7 +117,7 @@ urlpatterns = [
     path('public/services/', PublicServiceListView.as_view(), name='public_service_list'),
     path('public/services/<int:pk>/', PublicServiceDetailView.as_view(), name='public_service_detail'),
     # Public booking calendar
-    path('calendar/', public_booking_calendar_view, name='public_booking_calendar'),
+    path('public/calendar/', public_booking_calendar_view, name='public_booking_calendar'),
 
 
 
