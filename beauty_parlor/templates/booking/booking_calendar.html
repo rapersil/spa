@@ -15,7 +15,7 @@
     <div class="row mb-4 align-items-center">
         <div class="col-md-8">
             <h2><span class="material-icons me-2">calendar_today</span>Booking Calendar</h2>
-            <p class="text-muted">View and manage daily appointments</p>
+            <p class="text-muted">View and manage appointments</p>
         </div>
         <div class="col-md-4 text-md-end">
             <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary ms-2">
@@ -31,13 +31,28 @@
     <div class="card shadow-sm mb-2">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <a href="?date={{ prev_day|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                {% if view_type == 'day' %}
+                <a href="?date={{ prev_date|date:'Y-m-d' }}&view=day" class="btn btn-outline-primary">
                     <span class="material-icons">chevron_left</span> Previous Day
                 </a>
                 <h5 class="mb-0">{{ current_date|date:"l, F d, Y" }}</h5>
-                <a href="?date={{ next_day|date:'Y-m-d' }}" class="btn btn-outline-primary">
-                    Next Day <span class="material-icons">chevron_right</span>
+                <div>
+                    <a href="?date={{ next_date|date:'Y-m-d' }}&view=day" class="btn btn-outline-primary">
+                        Next Day <span class="material-icons">chevron_right</span>
+                    </a>
+                    <a href="?date={{ current_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-secondary ms-2">
+                        <span class="material-icons">calendar_view_week</span> Week View
+                    </a>
+                </div>
+                {% else %}
+                <a href="?date={{ prev_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-primary">
+                    <span class="material-icons">chevron_left</span> Previous Week
                 </a>
+                <h5 class="mb-0">{{ start_date|date:"M d" }} - {{ end_date|date:"M d, Y" }}</h5>
+                <a href="?date={{ next_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-primary">
+                    Next Week <span class="material-icons">chevron_right</span>
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -46,38 +61,50 @@
     <div class="card shadow-sm">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><span class="material-icons me-2">schedule</span>Daily Schedule</h5>
-                <span class="badge bg-primary">{{ bookings|length }} Bookings</span>
+                <h5 class="mb-0">
+                    <span class="material-icons me-2">schedule</span>
+                    {% if view_type == 'day' %}
+                        {{ current_date|date:"l, F d, Y" }} Schedule
+                    {% else %}
+                        Weekly Schedule ({{ start_date|date:"M d" }} - {{ end_date|date:"M d, Y" }})
+                    {% endif %}
+                </h5>
+                <div>
+                    <a href="{% url 'booking_calendar' %}?date={{ current_date|date:'Y-m-d' }}&view=day" class="btn btn-sm {% if view_type == 'day' %}btn-primary{% else %}btn-outline-primary{% endif %} me-2">
+                        <span class="material-icons">today</span> Day
+                    </a>
+                    <a href="{% url 'booking_calendar' %}?date={{ current_date|date:'Y-m-d' }}&view=week" class="btn btn-sm {% if view_type == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        <span class="material-icons">date_range</span> Week
+                    </a>
+                    <span class="badge bg-primary ms-3">{{ bookings|length }} Bookings</span>
+                </div>
             </div>
         </div>
         <div class="card-body p-0">
-            <div class="booking-calendar-container">
-                <!-- Time Column -->
-                <div class="time-column">
-                    {% for hour in hours %}
-                    <div class="time-slot">
-                        <span class="time-label">
-                            {% if hour == 12 %}
-                                12 PM
-                            {% elif hour > 12 %}
-                                {{ hour|add:"-12" }} PM
-                            {% else %}
-                                {{ hour }} AM
-                            {% endif %}
-                        </span>
+            {% if view_type == 'day' %}
+                <!-- Day View -->
+                <div class="booking-calendar-container">
+                    <!-- Time Column -->
+                    <div class="time-column">
+                        {% for hour in hours %}
+                        <div class="time-slot">
+                            <span class="time-label">
+                                {% if hour == 12 %}
+                                    12 PM
+                                {% elif hour > 12 %}
+                                    {{ hour|add:"-12" }} PM
+                                {% else %}
+                                    {{ hour }} AM
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- Booking Columns -->
-                <div class="booking-columns">
-                    <!-- Staff/Service Columns -->
-                    {% for staff in staffs %}
+                    
+                    <!-- Booking Column for day view -->
                     <div class="booking-column">
-                        <div class="staff-header">{{ staff.get_full_name }}</div>
                         <div class="booking-slots">
-                            {% for booking in bookings_by_staff|get_item:staff.id %}
-                                {% if booking %}
+                            {% for booking in bookings_by_day|get_item:current_date %}
                                 <a href="{% url 'booking_detail' booking.pk %}" 
                                    class="booking-block service-type-{{ booking.service.id|modulo:5 }} booking-{{ booking.status|lower }}" 
                                    style="grid-row: {{ booking.start_row }} / {{ booking.end_row }};">
@@ -95,7 +122,6 @@
                                     </div>
                                 </a>
                                 
-                                <!-- Expected Start Timeline Marker -->
                                 {% with wait_minutes=booking.get_wait_time_minutes %}
                                     {% if wait_minutes > 0 %}
                                     <div class="expected-start-marker" style="grid-row: {{ booking.expected_start_row }};">
@@ -104,48 +130,54 @@
                                     </div>
                                     {% endif %}
                                 {% endwith %}
-                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>
-                    {% empty %}
-                    <!-- If no staff, just show all bookings in one column -->
-                    <div class="booking-column">
-                        <div class="staff-header">All Bookings</div>
-                        <div class="booking-slots">
-                            {% for booking in bookings %}
-                            <a href="{% url 'booking_detail' booking.pk %}" 
-                               class="booking-block service-type-{{ booking.service.id|modulo:5 }} booking-{{ booking.status|lower }}" 
-                               style="grid-row: {{ booking.start_row }} / {{ booking.end_row }};">
-                                <div class="booking-service">{{ booking.service.name }}</div>
-                                <div class="booking-client">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
-                                <div class="booking-time">
-                                    {{ booking.date_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}
-                                    {% with wait_minutes=booking.get_wait_time_minutes %}
-                                        {% if wait_minutes > 0 %}
-                                            <span class="expected-start-badge">
-                                                <span class="material-icons">hourglass_bottom</span> Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}
-                                            </span>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
-                            </a>
-                            
-                            <!-- Expected Start Timeline Marker -->
-                            {% with wait_minutes=booking.get_wait_time_minutes %}
-                                {% if wait_minutes > 0 %}
-                                <div class="expected-start-marker" style="grid-row: {{ booking.expected_start_row }};">
-                                    <div class="marker-line"></div>
-                                    <div class="marker-tooltip">Expected start for {{ booking.customer.first_name }}</div>
-                                </div>
-                                {% endif %}
-                            {% endwith %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endfor %}
                 </div>
-            </div>
+            {% else %}
+                <!-- Week View -->
+                <div class="week-calendar-container">
+                    <!-- Day Headers -->
+                    <div class="week-day-headers">
+                        {% for day in date_range %}
+                        <div class="day-header {% if day == current_date %}current-day{% endif %}">
+                            <a href="?date={{ day|date:'Y-m-d' }}&view=day" class="day-link">
+                                <div class="day-name">{{ day|date:"l" }}</div>
+                                <div class="day-date">{{ day|date:"M d" }}</div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Week Calendar Grid -->
+                    <div class="week-calendar-grid">
+                        {% for day in date_range %}
+                        <div class="day-column {% if day == current_date %}current-day-column{% endif %}">
+                            <div class="day-bookings">
+                                {% for booking in bookings_by_day|get_item:day %}
+                                <div class="week-booking booking-{{ booking.status|lower }}">
+                                    <a href="{% url 'booking_detail' booking.pk %}" class="booking-link">
+                                        <div class="booking-time">{{ booking.date_time|date:"g:i A" }}</div>
+                                        <div class="booking-service">{{ booking.service.name }}</div>
+                                        <div class="booking-client">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
+                                        {% with wait_minutes=booking.get_wait_time_minutes %}
+                                            {% if wait_minutes > 0 %}
+                                            <div class="booking-wait text-muted">
+                                                <small>Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}</small>
+                                            </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </a>
+                                </div>
+                                {% empty %}
+                                <div class="no-bookings">No bookings</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -153,12 +185,11 @@
 
 {% block extra_js %}
 <script>
-    // Initialize tooltips for expected start badges
     document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('.expected-start-badge'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                title: 'Scheduled time may be delayed due to earlier appointments'
+        // Enable day headers as clickable links in week view
+        document.querySelectorAll('.day-link').forEach(function(dayLink) {
+            dayLink.addEventListener('click', function(e) {
+                // Let the link handle navigation
             });
         });
     });

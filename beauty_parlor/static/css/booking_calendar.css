@@ -348,3 +348,130 @@
         width: 100%;
     }
 }
+
+/* Week Calendar Styles */
+.week-calendar-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.week-day-headers {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--gray-100);
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.day-header {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-right: 1px solid var(--gray-200);
+    cursor: pointer;
+}
+
+.day-header:last-child {
+    border-right: none;
+}
+
+.current-day {
+    background-color: var(--color-200);
+}
+
+.day-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.day-name {
+    font-weight: bold;
+}
+
+.day-date {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+.week-calendar-grid {
+    display: flex;
+    min-height: 600px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.day-column {
+    flex: 1;
+    border-right: 1px solid var(--gray-200);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.day-column:last-child {
+    border-right: none;
+}
+
+.current-day-column {
+    background-color: var(--color-50);
+}
+
+.week-booking {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-left: 4px solid var(--color-500);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.booking-pending {
+    background-color: var(--warning-light);
+    border-left-color: var(--warning);
+}
+
+.booking-confirmed {
+    background-color: var(--info-light);
+    border-left-color: var(--info);
+}
+
+.booking-completed {
+    background-color: var(--success-light);
+    border-left-color: var(--success);
+}
+
+.booking-cancelled {
+    background-color: var(--danger-light);
+    border-left-color: var(--danger);
+    text-decoration: line-through;
+}
+
+.booking-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.booking-time {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.booking-service {
+    margin-bottom: 3px;
+}
+
+.booking-client {
+    font-size: 0.9rem;
+    color: var(--gray-700);
+}
+
+.booking-wait {
+    margin-top: 5px;
+    font-size: 0.8rem;
+}
+
+.no-bookings {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-500);
+    font-style: italic;
+}

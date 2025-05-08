@@ -3,11 +3,11 @@
 from django.core.exceptions import ValidationError
 import re
 
-# def email_validator(value):
-#     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-#     if not re.match(pattern, value):
-#         raise ValidationError("Enter a valid email address.")
-#     return value
+def email_validator(value):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, value):
+        raise ValidationError("Enter a valid email address.")
+    return value
 
 def phone_validator(value):
     pattern = r'^\+?[0-9]{10,15}$'

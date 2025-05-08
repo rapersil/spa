@@ -30,13 +30,13 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('customer_id', 'full_name', 'phone', 'date_joined', 'created_by')
+    list_display = ('customer_id', 'full_name', 'phone', 'email','date_joined', 'created_by')
     list_filter = ('date_joined', 'created_by')
     search_fields = ('customer_id', 'first_name', 'last_name', 'phone')
     ordering = ('-date_joined',)
     
     fieldsets = (
-        ('Customer Information', {'fields': ('customer_id', 'first_name', 'last_name', 'phone')}),
+        ('Customer Information', {'fields': ('customer_id', 'first_name','email', 'last_name', 'phone')}),
         ('Additional Information', {'fields': ('address', 'notes')}),
         ('System Information', {'fields': ('date_joined', 'created_by')}),
     )

@@ -332,21 +332,25 @@
                 </div>
                 <div class="card-body">
                     {% for day in bookings_by_weekday %}
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>{{ day.name }}</span>
-                            <span class="fw-bold">{{ day.count }}</span>
-                        </div>
-                        <div class="progress" style="height: 6px;">
-                            {% with max_count=bookings_by_weekday|dictsortreversed:"count"|first %}
-                            <div class="progress-bar" role="progressbar" 
-                                style="width: {% if max_count.count > 0 %}{{ day.count|multiply:100|divide:max_count.count }}{% else %}0{% endif %}%">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <a href="{% url 'booking_calendar' %}?weekday={{ forloop.counter0 }}&view=day" class="text-decoration-none text-dark">
+                                    <span>{{ day.name }}</span>
+                                </a>
+                                <span class="fw-bold">{{ day.count }}</span>
                             </div>
-                            {% endwith %}
+                            <a href="{% url 'booking_calendar' %}?weekday={{ forloop.counter0 }}&view=day" class="text-decoration-none">
+                                <div class="progress" style="height: 6px; cursor: pointer;">
+                                    {% with max_count=bookings_by_weekday|dictsortreversed:"count"|first %}
+                                    <div class="progress-bar" role="progressbar" 
+                                        style="width: {% if max_count.count > 0 %}{{ day.count|multiply:100|divide:max_count.count }}{% else %}0{% endif %}%">
+                                    </div>
+                                    {% endwith %}
+                                </div>
+                            </a>
                         </div>
-                    </div>
                     {% empty %}
-                    <p class="text-center text-muted py-3 mb-0">No booking data available yet</p>
+                        <p class="text-center text-muted py-3 mb-0">No booking data available yet</p>
                     {% endfor %}
                 </div>
             </div>

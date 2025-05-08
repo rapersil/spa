@@ -96,7 +96,7 @@ class CustomerForm(forms.ModelForm):
     
     class Meta:
         model = Customer
-        fields = ('first_name', 'last_name', 'phone', 'address', 'notes')
+        fields = ('first_name', 'last_name', 'phone','email', 'address', 'notes')
         widgets = {
             'address': forms.Textarea(attrs={'rows': 3}),
             'notes': forms.Textarea(attrs={'rows': 3}),

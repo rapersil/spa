@@ -75,20 +75,57 @@ class PublicBookingRequestCreateView(View):
             
             # Get customer information
             customer_choice = step1_data.get('customer_choice')
+            customer = None
+            customer_display_data = {}
+            
             if customer_choice == 'existing':
-                customer_id = step1_data.get('existing_customer')
-                customer = get_object_or_404(Customer, pk=customer_id) if customer_id else None
-                is_new_customer = False
+                # Get customer ID for existing customers
+                customer_id = step1_data.get('existing_customer_id')
+                if customer_id:
+                    try:
+                        customer = get_object_or_404(Customer, pk=customer_id)
+                        is_new_customer = False
+                        
+                        # Prepare customer data for display
+                        customer_display_data = {
+                            'first_name': customer.first_name,
+                            'last_name': customer.last_name,
+                            'phone': customer.phone,
+                            'email': customer.email,
+                            'address': customer.address,
+                            'customer_id': customer.id
+                        }
+                    except Customer.DoesNotExist:
+                        messages.error(request, "Customer not found. Please start over.")
+                        return redirect('public_booking_request_create', step=1)
+                else:
+                    # Use the customer data we stored in step 1 if the customer object can't be retrieved
+                    customer_display_data = step1_data.get('customer_data', {})
+                    is_new_customer = False
             else:
-                customer = None
+                # For new customers, use the form data directly
                 is_new_customer = True
-                
-            # Get service information
+                customer_display_data = {
+                    'first_name': step1_data.get('first_name', ''),
+                    'last_name': step1_data.get('last_name', ''),
+                    'phone': step1_data.get('phone', ''),
+                    'email': step1_data.get('email', ''),  # This should be 'email' not 'email_new' as we rename it in the view
+                    'address': step1_data.get('address', '')
+
+                }
+            
+            # Get service information (convert ID to object if needed)
             service_id = step2_data.get('service')
             service = get_object_or_404(Service, pk=service_id) if service_id else None
             
-            # Get date_time
+            # Get date_time (handle string-to-datetime conversion if needed)
             date_time = step2_data.get('date_time')
+            if isinstance(date_time, str):
+                try:
+                    from dateutil import parser
+                    date_time = parser.parse(date_time)
+                except:
+                    pass
             
             # Get additional services
             additional_service_ids = step3_data.get('selected_services', [])
@@ -96,26 +133,22 @@ class PublicBookingRequestCreateView(View):
             
             # Get notes
             notes = step3_data.get('notes', '')
-            # Calculate total price
             total_price = service.price if service else 0
             for additional_service in additional_services:
                 total_price += additional_service.price
-            # step3_data['total_price'] = total_price
             
             return render(request, 'booking/public_booking_request_step4.html', {
                 'customer': customer,
                 'is_new_customer': is_new_customer,
-                'customer_data': step1_data,
+                'customer_data': customer_display_data,  # Use our new prepared display data
                 'service': service,
                 'date_time': date_time,
                 'additional_services': additional_services,
                 'notes': notes,
+                'customer_id': customer.id if customer else None,
                 'total_price': total_price,
             })
-            
-        else:
-            # Invalid step, redirect to step 1
-            return redirect('public_booking_request_create', step=1)
+    
     
     def post(self, request, *args, **kwargs):
         step = kwargs.get('step', 1)
@@ -220,8 +253,9 @@ class PublicBookingRequestCreateView(View):
                 
                 # Set customer information
                 customer_choice = step1_data.get('customer_choice')
+                # Creating a booking request in step 4
                 if customer_choice == 'existing':
-                    customer_id = step1_data.get('existing_customer')
+                    customer_id = step1_data.get('existing_customer_id')
                     if customer_id:
                         booking_request.existing_customer_id = customer_id
                         booking_request.is_new_customer = False
@@ -230,6 +264,7 @@ class PublicBookingRequestCreateView(View):
                     booking_request.first_name = step1_data.get('first_name')
                     booking_request.last_name = step1_data.get('last_name')
                     booking_request.phone = step1_data.get('phone')
+                    booking_request.email = step1_data.get('email')  # Add email
                     booking_request.address = step1_data.get('address')
                 
                 # Set service and time information

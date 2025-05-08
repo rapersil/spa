@@ -135,6 +135,9 @@
                                 <div class="col-md-6">
                                     <p><strong>Phone:</strong> {{ customer_data.phone }}</p>
                                 </div>
+                                <div class="col-md-6">
+                                    <p><strong>Email:</strong> {{ customer_data.email }}</p>
+                                </div>
                             </div>
                             {% if customer_data.address %}
                             <p><strong>Address:</strong> {{ customer_data.address }}</p>
@@ -143,6 +146,11 @@
                         {% else %}
                             <p><strong>Customer:</strong> {{ customer.first_name }} {{ customer.last_name }}</p>
                             <p><strong>Phone:</strong> {{ customer.phone }}</p>
+                            <p><strong>Email:</strong> {{ customer.email }}</p>
+                            {% if customer.address %}
+                            <p><strong>Address:</strong> {{ customer.address }}</p>
+                            {% endif %}
+                            <p><strong>Account ID:</strong> {{ customer.customer_id }}</p>
                             <div class="badge bg-secondary">Existing Customer</div>
                         {% endif %}
                     </div>

@@ -178,10 +178,10 @@ MESSAGE_TAGS = {
 
 # Custom settings for Beauty Parlor
 BEAUTY_PARLOR_NAME = 'Coded Spa'
-BEAUTY_PARLOR_ADDRESS = '123 Beauty Street, Beauty City'
-BEAUTY_PARLOR_PHONE = '+233591910726'
-BEAUTY_PARLOR_EMAIL = 'contact@beautyparlor.com'
-BEAUTY_PARLOR_OPENING_HOURS = '9:00 AM - 8:00 PM'
+BEAUTY_PARLOR_ADDRESS = 'House No. 3, Forest Link, Ashiorkor Street,Dzorwulu'
+BEAUTY_PARLOR_PHONE = '+233(0)244161543'
+BEAUTY_PARLOR_EMAIL = 'codedspa@gmail.com'
+BEAUTY_PARLOR_OPENING_HOURS = '7:00 AM - 10:00 PM'
 BEAUTY_PARLOR_WORKING_DAYS = 'Monday - Saturday'
 
 # Appointment settings

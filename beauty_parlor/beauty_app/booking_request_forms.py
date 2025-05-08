@@ -3,44 +3,131 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Customer, Service, BookingRequest
 
+# class CustomerSelectionForm(forms.Form):
+#     customer_choice = forms.ChoiceField(
+#         choices=(
+#             ('existing', 'I am an existing customer'),
+#             ('new', 'I am a new customer')
+#         ),
+#         widget=forms.RadioSelect,
+#         initial='new'
+#     )
+    
+#     existing_customer = forms.ModelChoiceField(
+#         queryset=Customer.objects.all().order_by('first_name', 'last_name'),
+#         required=False,
+#         empty_label="Select your name",
+#         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
+#     )
+    
+#     # Fields for new customer
+#     first_name = forms.CharField(max_length=100, required=False)
+#     last_name = forms.CharField(max_length=100, required=False)
+#     phone = forms.CharField(max_length=15, required=False)
+#     address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
+    
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         customer_choice = cleaned_data.get('customer_choice')
+        
+#         if customer_choice == 'existing':
+#             if not cleaned_data.get('existing_customer'):
+#                 raise ValidationError("Please select your name from the list.")
+#         elif customer_choice == 'new':
+#             # Validate new customer fields
+#             if not cleaned_data.get('first_name'):
+#                 raise ValidationError("First name is required for new customers.")
+#             if not cleaned_data.get('last_name'):
+#                 raise ValidationError("Last name is required for new customers.")
+#             if not cleaned_data.get('phone'):
+#                 raise ValidationError("Phone number is required for new customers.")
+                
+#         return cleaned_data
+
+
+# forms.py
 class CustomerSelectionForm(forms.Form):
     customer_choice = forms.ChoiceField(
-        choices=(
-            ('existing', 'I am an existing customer'),
-            ('new', 'I am a new customer')
-        ),
-        widget=forms.RadioSelect,
+        choices=[('existing', 'I am an existing customer'), ('new', 'I am a new customer')],
+        widget=forms.RadioSelect(),
         initial='new'
     )
     
-    existing_customer = forms.ModelChoiceField(
-        queryset=Customer.objects.all().order_by('first_name', 'last_name'),
+    # Email lookup field for existing customers
+    email = forms.EmailField(
         required=False,
-        empty_label="Select your name",
-        widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email address'})
     )
     
     # Fields for new customer
-    first_name = forms.CharField(max_length=100, required=False)
-    last_name = forms.CharField(max_length=100, required=False)
-    phone = forms.CharField(max_length=15, required=False)
-    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
+    first_name = forms.CharField(
+        max_length=100, 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    last_name = forms.CharField(
+        max_length=100, 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    phone = forms.CharField(
+        max_length=15, 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email_new = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    address = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
     
     def clean(self):
         cleaned_data = super().clean()
         customer_choice = cleaned_data.get('customer_choice')
         
         if customer_choice == 'existing':
-            if not cleaned_data.get('existing_customer'):
-                raise ValidationError("Please select your name from the list.")
+            email = cleaned_data.get('email')
+            if not email:
+                raise ValidationError("Please provide your email address.")
+            
+            # Check if customer with this email exists
+            try:
+                customer = Customer.objects.get(email=email)
+                # Store the customer ID for later use
+                cleaned_data['existing_customer_id'] = customer.id
+                # Add customer data for display purposes
+                cleaned_data['customer_data'] = {
+                    'first_name': customer.first_name,
+                    'last_name': customer.last_name,
+                    'phone': customer.phone,
+                    'email': customer.email,
+                    'address': customer.address
+                }
+            except Customer.DoesNotExist:
+                raise ValidationError("No customer found with this email. Please try again or register as a new customer.")
+                
         elif customer_choice == 'new':
             # Validate new customer fields
-            if not cleaned_data.get('first_name'):
+            first_name = cleaned_data.get('first_name')
+            last_name = cleaned_data.get('last_name')
+            phone = cleaned_data.get('phone')
+            email_new = cleaned_data.get('email_new')
+            
+            if not first_name:
                 raise ValidationError("First name is required for new customers.")
-            if not cleaned_data.get('last_name'):
+            if not last_name:
                 raise ValidationError("Last name is required for new customers.")
-            if not cleaned_data.get('phone'):
+            if not phone:
                 raise ValidationError("Phone number is required for new customers.")
+            if not email_new:
+                raise ValidationError("Email is required for new customers.")
+            
+            # Check if email is already in use
+            if Customer.objects.filter(email=email_new).exists():
+                raise ValidationError("This email is already registered. Please log in as an existing customer.")
                 
         return cleaned_data
 
