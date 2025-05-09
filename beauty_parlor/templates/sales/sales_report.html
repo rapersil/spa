@@ -7,7 +7,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sales.css' %}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
 {% endblock %}
 
 {% block content %}
@@ -132,6 +131,9 @@
                     <div class="sales-chart-container mb-3">
                         <canvas id="serviceChart"></canvas>
                     </div>
+                    <div class="text-end mt-2">
+                        <button class="btn btn-sm btn-outline-secondary" id="downloadServiceChart">Download Chart</button>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover mb-0">
                             <thead>
@@ -171,6 +173,9 @@
                     {% if sales_by_day %}
                     <div class="sales-chart-container mb-3">
                         <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="text-end mt-2">
+                        <button class="btn btn-sm btn-outline-secondary" id="downloadDailyChart">Download Chart</button>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover mb-0">
@@ -259,13 +264,13 @@
                         color900
                     ],
                     borderColor: [
-                    color300,
-                    color400,
-                    color500,
-                    color600,
-                    color700,
-                    color800,
-                    color900
+                        color300,
+                        color400,
+                        color500,
+                        color600,
+                        color700,
+                        color800,
+                        color900
                     ],
                     borderWidth: 1
                 }]
@@ -295,6 +300,14 @@
                     }
                 }
             }
+        });
+        // Add download button handler for service chart
+        document.getElementById('downloadServiceChart').addEventListener('click', function() {
+            const image = serviceChart.toBase64Image();
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'sales_by_service.png';
+            link.click();
         });
         {% endif %}
         
@@ -341,6 +354,14 @@
                     }
                 }
             }
+        });
+        // Add download button handler for daily chart
+        document.getElementById('downloadDailyChart').addEventListener('click', function() {
+            const image = dailyChart.toBase64Image();
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'daily_sales.png';
+            link.click();
         });
         {% endif %}
     });
