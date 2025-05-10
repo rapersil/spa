@@ -80,3 +80,35 @@ def get_item(dictionary, key):
     if not dictionary or not isinstance(dictionary, dict):
         return ""
     return dictionary.get(key, "")
+
+
+
+
+@register.filter
+def format_duration(minutes):
+    """
+    Convert minutes to a human-readable format.
+    If ≥ 60 minutes, display as "X hr Y minutes"
+    Otherwise, display as "X minutes"
+    """
+    try:
+        minutes = int(minutes)
+        if minutes < 60:
+            return f"{minutes} minutes"
+        else:
+            hours = minutes // 60
+            remaining_minutes = minutes % 60
+            
+            if hours == 1:
+                hours_display = "1 hr"
+            else:
+                hours_display = f"{hours} hrs"
+                
+            if remaining_minutes == 0:
+                return hours_display
+            elif remaining_minutes == 1:
+                return f"{hours_display} 1 minute"
+            else:
+                return f"{hours_display} {remaining_minutes} minutes"
+    except (ValueError, TypeError):
+        return "0 minutes"
