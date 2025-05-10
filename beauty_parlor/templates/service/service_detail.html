@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block title %}{{ service.name }} - Service Details{% endblock %}
 
 {% block extra_css %}
@@ -95,8 +95,8 @@
                             <span class="meta-value price">GHS{{ service.price }}</span>
                         </div>
                         <div class="service-duration">
-                            <span class="meta-label">Duration:</span>
-                            <span class="meta-value">{{ service.duration }} minutes</span>
+                            <span class="meta-label">Service Duration:</span>
+                            <span class="meta-value">{{ service.duration|format_duration }}</span>
                         </div>
                         <div class="service-status">
                             <span class="meta-label">Status:</span>

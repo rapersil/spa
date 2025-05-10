@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block title %}Booking Details - {{ booking.booking_id }}{% endblock %}
 
 {% block extra_css %}
@@ -142,9 +142,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Duration:</th>
-                                    <td>{{ booking.service.duration }} minutes</td>
-                                </tr>
+                                    <th>Service Duration:</th>
+                                        <td>{{ booking.service.duration|format_duration }}</td>
+                                    </tr>
                                 <tr>
                                     <th>Regular Price:</th>
                                     <td>GHS{{ booking.service.price }}</td>
