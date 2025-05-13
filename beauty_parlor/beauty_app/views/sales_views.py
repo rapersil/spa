@@ -150,7 +150,7 @@ class SaleDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         
         return context
 
-# sales_views.py - Update SaleCreateView
+
 class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     model = Sale
     form_class = SaleForm
@@ -158,7 +158,6 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     success_url = reverse_lazy('sales_list')
     
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         booking_id = self.request.GET.get('booking_id')
         
@@ -170,6 +169,9 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
             if selected_booking.custom_discount > 0:
                 context['has_existing_discount'] = True
                 context['existing_discount'] = selected_booking.custom_discount
+            
+            # Add existing additional services
+            context['existing_additional_services'] = AdditionalService.objects.filter(booking=selected_booking)
                 
         return context
     
@@ -180,10 +182,16 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
         if booking_id:
             booking = get_object_or_404(Booking, pk=booking_id)
             
-            # Initialize with booking and its price
+            # Calculate total price including additional services
+            booking_price = booking.get_final_price()
+            additional_services = AdditionalService.objects.filter(booking=booking)
+            additional_total = sum(service.final_price for service in additional_services)
+            total_price = booking_price + additional_total
+            
+            # Initialize with booking and its total price
             initial_data = {
                 'booking': booking,
-                'payment_amount': booking.get_final_price(),
+                'payment_amount': total_price,
                 'payment_discount': 0  # Start with 0 payment discount
             }
             
@@ -199,19 +207,23 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
             booking = form.cleaned_data['booking']
             payment_discount = form.cleaned_data.get('payment_discount') or 0
             
-            # Parse additional services from JSON
+            # Parse additional services from JSON (for any new services added at sale time)
             additional_services_json = self.request.POST.get('additional_services', '[]')
             try:
-                additional_services = json.loads(additional_services_json)
+                new_additional_services = json.loads(additional_services_json)
             except json.JSONDecodeError:
-                additional_services = []
+                new_additional_services = []
+            
+            # Get existing additional services from booking
+            existing_services = AdditionalService.objects.filter(booking=booking)
             
             # Calculate the subtotal (booking price + additional services)
             booking_price = booking.get_final_price()
+            existing_services_amount = sum(Decimal(str(service.final_price)) for service in existing_services)
             
             # Convert float values to Decimal for consistent arithmetic
-            additional_amount = sum(Decimal(str(service.get('finalPrice', 0))) for service in additional_services)
-            subtotal = booking_price + additional_amount
+            new_additional_amount = sum(Decimal(str(service.get('finalPrice', 0))) for service in new_additional_services)
+            subtotal = booking_price + existing_services_amount + new_additional_amount
             
             # Apply payment discount if provided
             if payment_discount > 0:
@@ -229,8 +241,13 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
             # Save the form but don't return yet
             self.object = form.save()
             
-            # Now create AdditionalService records
-            for service in additional_services:
+            # Update existing AdditionalService records to link to this sale
+            for service in existing_services:
+                service.sale = self.object
+                service.save()
+            
+            # Now create new AdditionalService records for any added at sale time
+            for service in new_additional_services:
                 AdditionalService.objects.create(
                     sale=self.object,
                     booking=booking,  # Link to both sale and booking

@@ -127,6 +127,34 @@
                     {% endif %}
                 </div>
             </div>
+            <!-- Add this after the main service section in booking_receipt.html -->
+            {% if additional_services %}
+            <div class="receipt-section mt-3">
+                <h6 class="section-title">Additional Services</h6>
+                {% for service in additional_services %}
+                <div class="row mb-1">
+                    <div class="col-7">{{ service.name }}</div>
+                    <div class="col-5 text-end">GHS{{ service.final_price }}</div>
+                </div>
+                {% if service.discount_percentage > 0 %}
+                <div class="row text-danger mb-1">
+                    <div class="col-7"><small>Discount ({{ service.discount_percentage }}%)</small></div>
+                    <div class="col-5 text-end"><small>-GHS{{ service.regular_price|subtract:service.final_price }}</small></div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <div class="row mt-2">
+                    <div class="col-7"><strong>Additional Services Total</strong></div>
+                    <div class="col-5 text-end"><strong>GHS{{ additional_services|sum_attr:'final_price' }}</strong></div>
+                </div>
+            </div>
+
+            <div class="row mt-3 mb-2">
+                <div class="col-7"><strong>Total Amount</strong></div>
+                <div class="col-5 text-end"><strong>GHS{{ total_price }}</strong></div>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Footer -->

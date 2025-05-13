@@ -18,7 +18,7 @@ class StaffListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     def get_queryset(self):
         # Only show staff and admin users, not superadmin
         queryset = CustomUser.objects.filter(
-            user_type__in=['STAFF', 'ADMIN']
+            user_type__in=['STAFF', 'ADMIN','COMMONSTAFF']
         ).order_by('user_type', 'first_name', 'last_name')
         
         # Apply search if provided

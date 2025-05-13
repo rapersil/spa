@@ -36,7 +36,8 @@ from .views.booking_request_views import (
     StaffBookingRequestListView, StaffBookingRequestDetailView,
     StaffBookingRequestApproveView, StaffBookingRequestRejectView
 )
-
+from .views.therapist_views import TherapistAssignmentView, RemoveTherapistAssignmentView  # Import the missing views
+from .views.api_views import therapists_for_service
 from .views.session_views import keep_session_alive
 
 
@@ -132,6 +133,13 @@ urlpatterns = [
     path('booking-requests/<int:pk>/', StaffBookingRequestDetailView.as_view(), name='staff_booking_request_detail'),
     path('booking-requests/<int:pk>/approve/', StaffBookingRequestApproveView.as_view(), name='staff_booking_request_approve'),
     path('booking-requests/<int:pk>/reject/', StaffBookingRequestRejectView.as_view(), name='staff_booking_request_reject'),
+    
+    path('bookings/<int:booking_id>/assign-therapist/', TherapistAssignmentView.as_view(), name='assign_therapist'),
+    path('therapist-assignment/<int:pk>/remove/', RemoveTherapistAssignmentView.as_view(), name='remove_therapist_assignment'),
+
+    
+    path('api/therapists-for-service/', therapists_for_service, name='therapists_for_service'),
+        
 
     
 ]

@@ -1,0 +1,1194 @@
+update the code below so that user can add more than one additional services and also when a service is selectd as main, it should not be included in the addtional servies.
+and also the name of the service too should be displayed not only the duration and price for the additional serives so i will give you the template code and the views, and forms code for this updates.
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}Edit Booking - {{ form.instance.booking_id }}{% else %}New Booking{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    /* Additional services styles */
+    .additional-service-item {
+        padding: 10px;
+        border: 1px solid var(--gray-200);
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background-color: var(--color-50);
+    }
+    .additional-service-item:hover {
+        background-color: var(--color-100);
+    }
+    .service-discount-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        margin-left: 0.5rem;
+    }
+    .remove-service-btn {
+        color: var(--danger);
+        cursor: pointer;
+    }
+    .additional-services-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .services-summary {
+        background-color: var(--gray-100);
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item active">
+                {% if form.instance.pk %}Edit Booking{% else %}New Booking{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Booking Form Column -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if form.instance.pk %}
+                        <span class="material-icons me-2">edit</span>Edit Booking
+                        {% else %}
+                        <span class="material-icons me-2">event_available</span>New Booking
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="booking-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Customer Section -->
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h5 class="form-section-title">Customer Information</h5>
+                                <div class="card form-section-card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {% if selected_customer %}
+                                                <input type="hidden" name="customer" value="{{ selected_customer.id }}">
+                                                <div class="selected-customer mb-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="selected-customer-avatar me-3">
+                                                            {{ selected_customer.first_name.0 }}{{ selected_customer.last_name.0 }}
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="mb-0">{{ selected_customer.first_name }} {{ selected_customer.last_name }}</h5>
+                                                            <p class="mb-0 text-muted">{{ selected_customer.phone }}</p>
+                                                            <div class="mt-2">
+                                                                <a href="#" id="changeCustomerBtn" class="btn btn-sm btn-outline-primary">
+                                                                    <span class="material-icons me-1">swap_horiz</span>Change Customer
+                                                                </a>
+                                                                <a href="{% url 'customer_detail' selected_customer.id %}" class="btn btn-sm btn-outline-secondary">
+                                                                    <span class="material-icons me-1">visibility</span>View Profile
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="customer-field d-none">
+                                                    {{ form.customer|as_crispy_field }}
+                                                </div>
+                                                {% else %}
+                                                <div class="customer-field">
+                                                    {{ form.customer|as_crispy_field }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Service & Appointment Section -->
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h5 class="form-section-title">Service & Appointment</h5>
+                                <div class="card form-section-card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                {% if selected_service %}
+                                                <input type="hidden" name="service" value="{{ selected_service.id }}" data-price="{{ selected_service.price }}">
+                                                <div class="selected-service mb-3">
+                                                    <label for="id_service" class="form-label">Service</label>
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h5 class="mb-1">{{ selected_service.name }}</h5>
+                                                            <p class="mb-1"><small>{{ selected_service.discount }}</small></p>
+                                                            <p class="mb-1"><small>GHS{{ selected_service.price }} - {{ selected_service.duration }} min</small></p>
+                                                            <a href="#" id="changeServiceBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                                                <span class="material-icons me-1">swap_horiz</span>Change Service
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="service-field d-none">
+                                                    {{ form.service|as_crispy_field }}
+                                                </div>
+                                                {% else %}
+                                                <div class="service-field">
+                                                    {{ form.service|as_crispy_field }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="date-time-field">
+                                                    {{ form.date_time|as_crispy_field }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                {{ form.status|as_crispy_field }}
+                                            </div>
+                                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                                            <div class="col-md-6 mb-3 d-none">
+                                                {{ form.custom_discount|as_crispy_field }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Services Section -->
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h5 class="form-section-title">
+                                    <span class="material-icons me-2">add_circle</span>Additional Services
+                                    <small class="text-muted">(Optional)</small>
+                                </h5>
+                                <div class="card form-section-card">
+                                    <div class="card-body">
+                                        <!-- Hidden field for additional services data -->
+                                        <input type="hidden" id="additional_services" name="additional_services" value="[]">
+                                        
+                                        <!-- Available Services Section -->
+                                        <div id="otherServicesSection" class="mb-3">
+                                            <div class="list-group">
+                                                {% for service in available_services %}
+                                                    {% if selected_service %}
+                                                        {% if service.id != selected_service.id %}
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>{{ service.name }}</strong>
+                                                                <div>
+                                                                    <small>{{ service.duration }} min | 
+                                                                    {% if service.has_discount %}
+                                                                        <span class="text-decoration-line-through">GHS{{ service.price }}</span>
+                                                                        <span class="text-success">GHS{{ service.discounted_price|floatformat:2 }}</span>
+                                                                        <span class="badge bg-primary">{{ service.discount_percentage }}% OFF</span>
+                                                                    {% else %}
+                                                                        GHS{{ service.price }}
+                                                                    {% endif %}
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary add-service-btn" 
+                                                                    data-service-id="{{ service.id }}" 
+                                                                    data-service-name="{{ service.name }}" 
+                                                                    data-duration="{{ service.duration }}"
+                                                                    data-regular-price="{{ service.price }}"
+                                                                    data-has-discount="{% if service.has_discount %}true{% else %}false{% endif %}"
+                                                                    {% if service.has_discount %}
+                                                                    data-discount-percentage="{{ service.discount_percentage }}"
+                                                                    data-discount-amount="{{ service.discount_amount }}"
+                                                                    data-discounted-price="{{ service.discounted_price }}"
+                                                                    {% endif %}">
+                                                                <span class="material-icons me-1">add</span>Add
+                                                            </button>
+                                                        </div>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center service-item" 
+                                                             id="service-item-{{ service.id }}">
+                                                            <div>
+                                                                <strong>{{ service.name }}</strong>
+                                                                <div>
+                                                                    <small>{{ service.duration }} min | 
+                                                                    {% if service.has_discount %}
+                                                                        <span class="text-decoration-line-through">GHS{{ service.price }}</span>
+                                                                        <span class="text-success">GHS{{ service.discounted_price|floatformat:2 }}</span>
+                                                                        <span class="badge bg-primary">{{ service.discount_percentage }}% OFF</span>
+                                                                    {% else %}
+                                                                        GHS{{ service.price }}
+                                                                    {% endif %}
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary add-service-btn" 
+                                                                    data-service-id="{{ service.id }}" 
+                                                                    data-service-name="{{ service.name }}" 
+                                                                    data-duration="{{ service.duration }}"
+                                                                    data-regular-price="{{ service.price }}"
+                                                                    data-has-discount="{% if service.has_discount %}true{% else %}false{% endif %}"
+                                                                    {% if service.has_discount %}
+                                                                    data-discount-percentage="{{ service.discount_percentage }}"
+                                                                    data-discount-amount="{{ service.discount_amount }}"
+                                                                    data-discounted-price="{{ service.discounted_price }}"
+                                                                    {% endif %}">
+                                                                <span class="material-icons me-1">add</span>Add
+                                                            </button>
+                                                        </div>
+                                                    {% endif %}
+                                                {% empty %}
+                                                <p class="text-muted">No other services available</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Container for selected additional services -->
+                                        <div id="selectedServicesContainer" class="d-none mt-3 mb-3">
+                                            <!-- Selected services will be displayed here by JavaScript -->
+                                        </div>
+                                        
+                                        <!-- Services Summary -->
+                                        <div class="services-summary p-3 mt-3 rounded">
+                                            <h6 class="mb-2">Services Summary</h6>
+                                            <div class="row mb-2">
+                                                <div class="col-8">
+                                                    <strong>Main Service:</strong> <span id="mainServiceName">--</span>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <span id="mainServicePrice">GHS0.00</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="additionalServicesSummary">
+                                                <!-- Additional services will be added here by JavaScript -->
+                                            </div>
+                                            
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-8">
+                                                    <strong>Total:</strong>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <strong id="totalPrice">GHS0.00</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes Section -->
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h5 class="form-section-title">Notes</h5>
+                                <div class="card form-section-card">
+                                    <div class="card-body">
+                                        {{ form.notes|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if form.instance.pk %}{% url 'booking_detail' form.instance.pk %}{% else %}{% url 'booking_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                <span class="material-icons me-2">close</span>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-icons me-2">save</span>
+                                {% if form.instance.pk %}Save Changes{% else %}Create Booking{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Help & Information Column -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Booking Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><span class="material-icons me-2">lightbulb</span>Quick Tips</h6>
+                        <ul class="mb-0">
+                            <li>Select an existing customer or <a href="{% url 'customer_create' %}" target="_blank">create a new one</a></li>
+                            <li>Only active services are available for selection</li>
+                            <li>You can add multiple additional services to a booking</li>
+                            <li>Appointments can't be scheduled in the past</li>
+                            <li>The salon's operating hours are from 9:00 AM to 8:00 PM</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6><span class="material-icons me-2">info</span>Expected Wait Times</h6>
+                        <p class="mb-1">The salon processes customers sequentially based on booking times and service durations.</p>
+                        <p class="mb-0">Your expected start time will be calculated and displayed after booking confirmation.</p>
+                    </div>
+                    
+                    {% if form.instance.pk %}
+                    <div class="booking-summary mt-4">
+                        <h6>Current Booking Summary</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Booking ID:</th>
+                                <td>{{ form.instance.booking_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created By:</th>
+                                <td>{{ form.instance.created_by.get_full_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created On:</th>
+                                <td>{{ form.instance.created_at|date:"M d, Y h:i A" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <h6>Need Assistance?</h6>
+                        <p class="text-muted mb-0">If you need help creating a booking, contact the system administrator.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin-only price calculator -->
+            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="material-icons me-2">calculate</span>Price Calculator</h5>
+                </div>
+                <div class="card-body">
+                    <div id="priceCalculator">
+                        <div class="mb-3">
+                            <label class="form-label">Service Price</label>
+                            <div class="input-group">
+                                <span class="input-group-text">GHS</span>
+                                <input type="number" id="servicePrice" class="form-control" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Service Discount (%)</label>
+                            <input type="number" id="serviceDiscount" class="form-control" value="0" min="0" max="100" readonly>
+                        </div>
+                        
+                        <div class="mb-3 d-none">
+                            <label class="form-label">Custom Discount (%)</label>
+                            <input type="number" id="customDiscount" class="form-control" value="0" min="0" max="100">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Additional Services Total</label>
+                            <div class="input-group">
+                                <span class="input-group-text">GHS</span>
+                                <input type="number" id="additionalServicesTotal" class="form-control" value="0" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="price-result p-3 rounded">
+                            <div class="d-flex justify-content-between">
+                                <span>Regular Price:</span>
+                                <span id="regularPrice">GHS0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>After Service Discount:</span>
+                                <span id="afterServiceDiscount">GHS0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between d-none">
+                                <span>After Custom Discount:</span>
+                                <span id="afterCustomDiscount">GHS0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Additional Services:</span>
+                                <span id="additionalServicesAmount">GHS0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Final Price:</span>
+                                <span id="finalPrice" class="fw-bold">GHS0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Total Savings:</span>
+                                <span id="totalSavings" class="text-success">GHS0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime picker
+        flatpickr("#id_date_time", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+            minTime: "09:00",
+            maxTime: "20:00",
+            time_24hr: true
+        });
+        
+        // Handle customer selection toggle
+        const changeCustomerBtn = document.getElementById('changeCustomerBtn');
+        if (changeCustomerBtn) {
+            changeCustomerBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('.selected-customer').classList.add('d-none');
+                document.querySelector('.customer-field').classList.remove('d-none');
+            });
+        }
+        
+        // Handle service selection toggle
+        const changeServiceBtn = document.getElementById('changeServiceBtn');
+        if (changeServiceBtn) {
+            changeServiceBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('.selected-service').classList.add('d-none');
+                document.querySelector('.service-field').classList.remove('d-none');
+            });
+        }
+        
+        // Additional Services functionality
+        const selectedServicesContainer = document.getElementById('selectedServicesContainer');
+        const additionalServicesSummary = document.getElementById('additionalServicesSummary');
+        const additionalServicesField = document.getElementById('additional_services');
+        const mainServiceName = document.getElementById('mainServiceName');
+        const mainServicePrice = document.getElementById('mainServicePrice');
+        const totalPrice = document.getElementById('totalPrice');
+        const serviceSelect = document.getElementById('id_service');
+        
+        // Initialize selected services array
+        const selectedServices = [];
+        
+        // Set initial main service name and price if a service is selected
+        if (serviceSelect) {
+            serviceSelect.addEventListener('change', function() {
+                if (this.selectedOptions.length > 0) {
+                    const selectedOption = this.selectedOptions[0];
+                    mainServiceName.textContent = selectedOption.text.split(' - ')[0] || selectedOption.text;
+                    updateTotalPrice();
+                }
+            });
+            
+            // Set initial values if a service is already selected
+            if (serviceSelect.selectedOptions.length > 0) {
+                const selectedOption = serviceSelect.selectedOptions[0];
+                mainServiceName.textContent = selectedOption.text.split(' - ')[0] || selectedOption.text;
+            }
+        }
+        
+        // Also check for a pre-selected service (hidden input)
+        const selectedServiceInput = document.querySelector('input[name="service"][type="hidden"]');
+        if (selectedServiceInput) {
+            const serviceName = document.querySelector('.selected-service h5.mb-1').textContent;
+            if (mainServiceName) {
+                mainServiceName.textContent = serviceName;
+            }
+        }
+        
+        // Handle adding services
+        document.querySelectorAll('.add-service-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const serviceId = this.getAttribute('data-service-id');
+                const serviceName = this.getAttribute('data-service-name');
+                const serviceDuration = this.getAttribute('data-duration');
+                const regularPrice = parseFloat(this.getAttribute('data-regular-price'));
+                const hasDiscount = this.getAttribute('data-has-discount') === 'true';
+                
+                // Service data object
+                const serviceData = {
+                    id: serviceId,
+                    name: serviceName,
+                    duration: serviceDuration,
+                    regularPrice: regularPrice,
+                    hasDiscount: hasDiscount,
+                    finalPrice: regularPrice // Default to regular price
+                };
+                
+                // Add discount info if available
+                if (hasDiscount) {
+                    serviceData.discountPercentage = parseFloat(this.getAttribute('data-discount-percentage'));
+                    serviceData.discountAmount = parseFloat(this.getAttribute('data-discount-amount'));
+                    serviceData.discountedPrice = parseFloat(this.getAttribute('data-discounted-price'));
+                    serviceData.finalPrice = serviceData.discountedPrice; // Use discounted price
+                }
+                
+                // Check if already added
+                if (selectedServices.find(s => s.id === serviceId)) {
+                    return;
+                }
+                
+                // Add to selected services
+                selectedServices.push(serviceData);
+                
+                // Update display
+                updateSelectedServicesDisplay();
+                
+                // Update payment amount
+                updateTotalPrice();
+                
+                // Disable this button
+                this.disabled = true;
+                this.innerHTML = '<span class="material-icons me-1">check</span>Added';
+                
+                // Update the hidden field with services data
+                updateAdditionalServicesField();
+            });
+        });
+        
+        // Event listener for the main service selection to hide matching additional services
+        if (serviceSelect) {
+            serviceSelect.addEventListener('change', function() {
+                const selectedServiceId = this.value;
+                
+                // For each service item in the additional services section
+                document.querySelectorAll('.service-item').forEach(item => {
+                    const serviceId = item.id.replace('service-item-', '');
+                    
+                    // If this is the same as the main service, hide it
+                    if (serviceId === selectedServiceId) {
+                        item.style.display = 'none';
+                    } else {
+                        item.style.display = 'flex';
+                    }
+                });
+            });
+            
+            // Trigger change event to hide the selected service initially
+            if (serviceSelect.value) {
+                const event = new Event('change');
+                serviceSelect.dispatchEvent(event);
+            }
+        }
+        
+        // Function to update the selected services display
+        function updateSelectedServicesDisplay() {
+            if (!selectedServicesContainer) return;
+            
+            // Clear container
+            selectedServicesContainer.innerHTML = '';
+            
+            if (selectedServices.length === 0) {
+                selectedServicesContainer.classList.add('d-none');
+                return;
+            }
+            
+            // Show container
+            selectedServicesContainer.classList.remove('d-none');
+            
+            // Create heading
+            const heading = document.createElement('h6');
+            heading.className = 'mb-3';
+            heading.textContent = 'Selected Additional Services:';
+            selectedServicesContainer.appendChild(heading);
+            
+            // Create list
+            const list = document.createElement('div');
+            list.className = 'list-group';
+            
+            // Add services
+            selectedServices.forEach(service => {
+                const serviceItem = document.createElement('div');
+                serviceItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                
+                let priceDisplay = `GHS${service.regularPrice.toFixed(2)}`;
+                
+                if (service.hasDiscount) {
+                    priceDisplay = `
+                        <span class="text-decoration-line-through">GHS${service.regularPrice.toFixed(2)}</span>
+                        <span class="text-success">GHS${service.discountedPrice.toFixed(2)}</span>
+                        <span class="badge bg-primary ms-1">${service.discountPercentage}% OFF</span>
+                    `;
+                }
+                
+                serviceItem.innerHTML = `
+                    <div>
+                        <strong>${service.name}</strong>
+                        <div><small>${service.duration} min</small></div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-2">${priceDisplay}</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-service-btn" data-service-id="${service.id}">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                `;
+                
+                list.appendChild(serviceItem);
+            });
+            
+            selectedServicesContainer.appendChild(list);
+            
+            // Update summary display
+            updateAdditionalServicesSummary();
+            
+            // Add remove event listeners
+            document.querySelectorAll('.remove-service-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const serviceId = this.getAttribute('data-service-id');
+                    
+                    // Remove from array
+                    const index = selectedServices.findIndex(s => s.id === serviceId);
+                    if (index !== -1) {
+                        selectedServices.splice(index, 1);
+                    }
+                    
+                    // Re-enable the add button
+                    const addButton = document.querySelector(`.add-service-btn[data-service-id="${serviceId}"]`);
+                    if (addButton) {
+                        addButton.disabled = false;
+                        addButton.innerHTML = '<span class="material-icons me-1">add</span>Add';
+                    }
+                    
+                    // Update display
+                    updateSelectedServicesDisplay();
+                    
+                    // Update totals
+                    updateTotalPrice();
+                    
+                    // Update hidden field
+                    updateAdditionalServicesField();
+                });
+            });
+        }
+        
+        // Function to update the additional services summary
+        function updateAdditionalServicesSummary() {
+            if (!additionalServicesSummary) return;
+            
+            // Clear summary
+            additionalServicesSummary.innerHTML = '';
+            
+            // Add each additional service
+            selectedServices.forEach(service => {
+                const row = document.createElement('div');
+                row.className = 'row mb-2';
+                
+                row.innerHTML = `
+                    <div class="col-8">
+                        <span>+ ${service.name}</span>
+                    </div>
+                    <div class="col-4 text-end">
+                        <span>GHS${service.finalPrice.toFixed(2)}</span>
+                    </div>
+                `;
+                
+                additionalServicesSummary.appendChild(row);
+            });
+        }
+        
+        // Function to update the hidden additional services field
+        function updateAdditionalServicesField() {
+            if (!additionalServicesField) return;
+            additionalServicesField.value = JSON.stringify(selectedServices);
+        }
+        
+        // Function to update the total price display
+        function updateTotalPrice() {
+            if (!totalPrice) return;
+            
+            // Get main service price
+            let mainPrice = 0;
+            
+            // Get from calculator if available
+            if (document.getElementById('finalPrice')) {
+                const finalPriceText = document.getElementById('finalPrice').textContent;
+                mainPrice = parseFloat(finalPriceText.replace('GHS', '')) || 0;
+                if (mainServicePrice) {
+                    mainServicePrice.textContent = `GHS${mainPrice.toFixed(2)}`;
+                }
+            } else if (serviceSelect && serviceSelect.selectedOptions.length > 0) {
+                // Otherwise get from service select
+                const selectedOption = serviceSelect.selectedOptions[0];
+                const serviceId = selectedOption.value;
+                mainPrice = parseFloat(serviceSelect.getAttribute(`data-price-${serviceId}`)) || 0;
+                if (mainServicePrice) {
+                    mainServicePrice.textContent = `GHS${mainPrice.toFixed(2)}`;
+                }
+            } else if (selectedServiceInput) {
+                // Or from hidden input for pre-selected service
+                mainPrice = parseFloat(selectedServiceInput.getAttribute('data-price')) || 0;
+                if (mainServicePrice) {
+                    mainServicePrice.textContent = `GHS${mainPrice.toFixed(2)}`;
+                }
+            }
+            
+            // Calculate additional services total
+            const additionalTotal = selectedServices.reduce((sum, service) => sum + service.finalPrice, 0);
+            
+            // Update total price
+            totalPrice.textContent = `GHS${(mainPrice + additionalTotal).toFixed(2)}`;
+            
+            // Update price calculator if it exists
+            if (document.getElementById('priceCalculator')) {
+                // Update additional services total in calculator if it exists
+                const additionalServicesTotal = document.getElementById('additionalServicesTotal');
+                if (additionalServicesTotal) {
+                    additionalServicesTotal.value = additionalTotal.toFixed(2);
+                }
+                
+                // Update final price calculation
+                updatePriceCalculator();
+            }
+        }
+        
+        // Price calculator (admin only)
+        const priceCalculator = document.getElementById('priceCalculator');
+        if (priceCalculator) {
+            const servicePrice = document.getElementById('servicePrice');
+            const serviceDiscount = document.getElementById('serviceDiscount');
+            const customDiscount = document.getElementById('customDiscount');
+            const customDiscountField = document.getElementById('id_custom_discount');
+            const regularPrice = document.getElementById('regularPrice');
+            const afterServiceDiscount = document.getElementById('afterServiceDiscount');
+            const afterCustomDiscount = document.getElementById('afterCustomDiscount');
+            const finalPrice = document.getElementById('finalPrice');
+            const totalSavings = document.getElementById('totalSavings');
+            const dateTimeField = document.getElementById('id_date_time');
+            const additionalServicesAmount = document.getElementById('additionalServicesAmount');
+            const additionalServicesTotal = document.getElementById('additionalServicesTotal');
+            
+            // Function to check for active discounts
+            function checkForActiveDiscounts() {
+                if (!serviceSelect || !serviceSelect.value || !dateTimeField || !dateTimeField.value) return;
+                
+                const serviceId = serviceSelect.value;
+                const bookingDate = dateTimeField.value;
+                
+                // Make AJAX request to check for discounts
+                fetch(`/check-service-discount/?service_id=${serviceId}&booking_date=${bookingDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (servicePrice) servicePrice.value = data.service_price;
+                        
+                        if (data.discount_available && serviceDiscount) {
+                            // Update the service discount field
+                            serviceDiscount.value = data.discount_percentage;
+                            
+                            // Add visual indicator that a discount is applied (if needed)
+                            const formGroupParent = serviceSelect.closest('.form-group');
+                            if (formGroupParent) {
+                                formGroupParent.classList.add('has-discount');
+                            }
+                            
+                            // Add a discount badge if needed
+                            const badgeContainer = document.querySelector('.discount-badge-container');
+                            if (badgeContainer) {
+                                const discountBadge = document.createElement('span');
+                                discountBadge.className = 'badge bg-primary discount-badge';
+                                discountBadge.textContent = `${data.discount_percentage}% OFF`;
+                                badgeContainer.innerHTML = '';
+                                badgeContainer.appendChild(discountBadge);
+                            }
+                        } else if (serviceDiscount) {
+                            // Reset the service discount field
+                            serviceDiscount.value = 0;
+                            
+                            // Remove discount indicators if needed
+                            const formGroupParent = serviceSelect.closest('.form-group');
+                            if (formGroupParent) {
+                                formGroupParent.classList.remove('has-discount');
+                            }
+                            
+                            const badgeContainer = document.querySelector('.discount-badge-container');
+                            if (badgeContainer) {
+                                badgeContainer.innerHTML = '';
+                            }
+                        }
+                        
+                        // Update the price calculator after getting discount info
+                        updatePriceCalculator();
+                    })
+                    .catch(error => {
+                        console.error('Error checking for discounts:', error);
+                        // Still update the calculator even if discount check fails
+                        updatePriceCalculator();
+                    });
+            }
+            
+            // Initialize calculator
+            function updatePriceCalculator() {
+                // Get service price from selected service
+                let price = 0;
+                if (serviceSelect && serviceSelect.selectedOptions && serviceSelect.selectedOptions.length > 0) {
+                    const selectedOption = serviceSelect.selectedOptions[0];
+                    const serviceId = selectedOption.value;
+                    // Get the price from the data attribute
+                    price = parseFloat(serviceSelect.getAttribute(`data-price-${serviceId}`) || 0);
+                }
+                
+                // If we have a pre-selected service, get its price
+                const selectedServiceInput = document.querySelector('input[name="service"][type="hidden"]');
+                if (selectedServiceInput) {
+                    price = parseFloat(selectedServiceInput.getAttribute('data-price') || 0);
+                }
+                
+                // Calculate discounts
+                const svcDisc = parseFloat(serviceDiscount.value || 0);
+                const custDisc = parseFloat(customDiscount.value || 0);
+                
+                // Update display
+                servicePrice.value = price.toFixed(2);
+                regularPrice.textContent = 'GHS' + price.toFixed(2);
+                
+                // Calculate after service discount
+                const afterSvcDisc = price * (1 - svcDisc / 100);
+                afterServiceDiscount.textContent = 'GHS' + afterSvcDisc.toFixed(2);
+
+                // Calculate after custom discount
+                const afterCustDisc = afterSvcDisc * (1 - custDisc / 100);
+                afterCustomDiscount.textContent = 'GHS' + afterCustDisc.toFixed(2);
+                
+                // Get additional services total
+                const additionalTotal = parseFloat(additionalServicesTotal?.value || 0);
+                
+                // Update additional services amount display
+                if (additionalServicesAmount) {
+                    additionalServicesAmount.textContent = 'GHS' + additionalTotal.toFixed(2);
+                }
+                
+                // Calculate final price including additional services
+                const final = afterCustDisc + additionalTotal;
+                finalPrice.textContent = 'GHS' + final.toFixed(2);
+                
+                // Calculate savings (only for main service)
+                const savings = price - afterCustDisc;
+                totalSavings.textContent = 'GHS' + savings.toFixed(2);
+                
+                // Update total in summary display
+                updateTotalPrice();
+            }
+            
+            // Add event listeners for service selection and date changes
+            if (serviceSelect) {
+                serviceSelect.addEventListener('change', function() {
+                    // Set the main service name in the summary section
+                    const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                    if (mainServiceName && selectedOption) {
+                        mainServiceName.textContent = selectedOption.text.split(' - ')[0] || selectedOption.text;
+                    }
+                    
+                    // When service changes, check for discounts first
+                    checkForActiveDiscounts();
+                });
+            }
+            
+            if (dateTimeField) {
+                dateTimeField.addEventListener('change', function() {
+                    // When date changes, check for discounts first
+                    checkForActiveDiscounts();
+                });
+            }
+            
+            // Handle discount changes
+            if (serviceDiscount) {
+                serviceDiscount.addEventListener('input', updatePriceCalculator);
+            }
+            
+            if (customDiscount && customDiscountField) {
+                customDiscount.addEventListener('input', function() {
+                    customDiscountField.value = this.value;
+                    updatePriceCalculator();
+                });
+                
+                customDiscountField.addEventListener('input', function() {
+                    customDiscount.value = this.value;
+                    updatePriceCalculator();
+                });
+            }
+            
+            // Run initial check if both service and date are already set
+            if (serviceSelect && serviceSelect.value && dateTimeField && dateTimeField.value) {
+                // Set the main service name in the summary section
+                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                if (mainServiceName && selectedOption) {
+                    mainServiceName.textContent = selectedOption.text.split(' - ')[0] || selectedOption.text;
+                }
+                
+                checkForActiveDiscounts();
+            } else {
+                // Otherwise just initialize the calculator
+                updatePriceCalculator();
+            }
+        }
+        
+        // Initialize additional services and total price
+        updateTotalPrice();
+        
+        // Prevent auto-dismissal of info alerts
+        document.querySelectorAll('.alert.alert-info').forEach(alert => {
+            // Remove any auto-dismiss functionality
+            if (alert._dismissElement) {
+                alert._dismissElement.removeEventListener('click', alert._dismissHandler);
+            }
+        });
+        
+        // Check for existing additional services
+        if (document.querySelectorAll('.additional-service-item').length > 0) {
+            // Initialize selected services from existing ones
+            document.querySelectorAll('.additional-service-item').forEach(item => {
+                const serviceId = item.getAttribute('data-service-id');
+                const serviceName = item.querySelector('strong').textContent;
+                const servicePriceElement = item.querySelector('small');
+                const regularPrice = parseFloat(servicePriceElement ? servicePriceElement.textContent.split(' ')[0] : 0);
+                const durationElement = item.querySelectorAll('small')[1];
+                const serviceDuration = durationElement ? durationElement.textContent.split(' ')[0] : '';
+                
+                // Check for discount
+                const discountBadge = item.querySelector('.badge');
+                const hasDiscount = discountBadge !== null;
+                
+                const serviceData = {
+                    id: serviceId,
+                    name: serviceName,
+                    duration: serviceDuration,
+                    regularPrice: regularPrice,
+                    hasDiscount: hasDiscount,
+                    finalPrice: regularPrice // Default
+                };
+                
+                if (hasDiscount) {
+                    serviceData.discountPercentage = parseFloat(discountBadge.textContent.replace('% OFF', ''));
+                    serviceData.discountAmount = regularPrice * (serviceData.discountPercentage / 100);
+                    serviceData.finalPrice = regularPrice - serviceData.discountAmount;
+                }
+                
+                selectedServices.push(serviceData);
+            });
+            
+            // Update display and totals
+            updateSelectedServicesDisplay();
+            updateTotalPrice();
+            updateAdditionalServicesField();
+        }
+    });
+</script>
+{% endblock %}
+
+
+class BookingCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+    model = Booking
+    template_name = 'booking/booking_form.html'
+    success_url = reverse_lazy('booking_list')
+    
+    def get_form_class(self):
+        # Admin users get the form with discount option
+        if self.request.user.user_type in ['ADMIN', 'SUPERADMIN']:
+            return AdminBookingForm
+        # Staff users get the standard form
+        return BookingForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        booking = form.instance
+        booking.created_by = self.request.user
+        booking.updated_by = self.request.user
+        
+        # Check for active service discounts at the time of booking
+        active_discounts = booking.service.discount_set.filter(
+            start_date__lte=booking.date_time,
+            end_date__gte=booking.date_time
+        ).order_by('-percentage')  # Get highest discount if multiple exist
+        
+        # Apply service discount if available
+        if active_discounts.exists():
+            booking.service_discount = active_discounts.first()
+        
+        # Save the booking first
+        response = super().form_valid(form)
+        
+        # Parse additional services from JSON
+        additional_services_json = self.request.POST.get('additional_services', '[]')
+        try:
+            additional_services_data = json.loads(additional_services_json)
+        except json.JSONDecodeError:
+            additional_services_data = []
+        
+        # Create additional service records
+        if additional_services_data:
+            for service_data in additional_services_data:
+                # Create additional service record
+                AdditionalService.objects.create(
+                    booking=booking,
+                    sale=None,  # Not associated with a sale yet
+                    name=service_data.get('name', ''),
+                    description='',  # Optional description
+                    regular_price=Decimal(str(service_data.get('regularPrice', 0))),
+                    discount_percentage=Decimal(str(service_data.get('discountPercentage', 0))),
+                    final_price=Decimal(str(service_data.get('finalPrice', 0))),
+                    created_by=self.request.user
+                )
+        
+        messages.success(self.request, "Booking created successfully.")
+        return response
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # If customer_id is in GET parameters, pre-select customer
+        customer_id = self.request.GET.get('customer_id')
+        if customer_id:
+            customer = get_object_or_404(Customer, pk=customer_id)
+            context['selected_customer'] = customer
+            
+        # If service_id is in GET parameters, pre-select service
+        service_id = self.request.GET.get('service_id')
+        if service_id:
+            service = get_object_or_404(Service, pk=service_id)
+            context['selected_service'] = service
+        
+        # Add available services for additional services selection
+        form = context['form']
+        context['available_services'] = form.get_available_services_with_discounts()
+        
+        return context
+
+class BookingForm(forms.ModelForm):
+    """Form for creating and updating bookings."""
+    
+    class Meta:
+        model = Booking
+        fields = ('customer', 'service', 'date_time', 'status', 'notes')
+        widgets = {
+            'date_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Add Bootstrap classes
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+            
+        # Filter active services only
+        services = Service.objects.filter(active=True)
+        choices = [(s.id, s.name) for s in services]
+        self.fields['service'].choices = choices
+        
+        # Add data-price and data-duration attributes to each service option
+        for service in services:
+            self.fields['service'].widget.attrs.update({
+                f'data-price-{service.id}': service.price,
+                f'data-duration-{service.id}': service.duration
+            })
+        
+        # Store the current booking for later use
+        self.current_booking = None
+        if self.instance and self.instance.pk:
+            self.current_booking = self.instance
+            
+    def clean(self):
+        cleaned_data = super().clean()
+        date_time = cleaned_data.get('date_time')
+        
+        # Validate booking time
+        if date_time and date_time < timezone.now() and not self.instance.pk:
+            raise ValidationError("Booking time cannot be in the past.")
+            
+        return cleaned_data
+    
+    def get_available_services_with_discounts(self):
+        """Get available services excluding the main service, with discount info."""
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Get all active services except main service (if selected)
+        main_service_id = None
+        if self.instance.pk and self.instance.service:
+            main_service_id = self.instance.service.id
+        elif 'service' in self.initial:
+            main_service_id = self.initial['service'].id
+        
+        if main_service_id:
+            services = Service.objects.filter(active=True).exclude(id=main_service_id)
+        else:
+            services = Service.objects.filter(active=True)
+        
+        # Get booking date_time for discount check
+        booking_date = now
+        if self.instance.pk and self.instance.date_time:
+            booking_date = self.instance.date_time
+        elif 'date_time' in self.initial:
+            booking_date = self.initial['date_time']
+        
+        # Prepare result list with discount info
+        result = []
+        for service in services:
+            # Check for active discounts at booking time
+            active_discount = Discount.objects.filter(
+                service=service,
+                start_date__lte=booking_date,
+                end_date__gte=booking_date
+            ).order_by('-percentage').first()  # Get highest discount if multiple exist
+            
+            # Calculate discounted price if applicable
+            regular_price = float(service.price)
+            discounted_price = regular_price
+            discount_amount = 0
+            
+            if active_discount:
+                discount_percentage = float(active_discount.percentage)
+                discount_amount = regular_price * (discount_percentage / 100)
+                discounted_price = regular_price - discount_amount
+            
+            service_data = {
+                'service': service,
+                'price': regular_price,
+                'duration': service.duration,
+                'has_discount': bool(active_discount),
+                'discount': active_discount,
+                'discount_percentage': discount_percentage if active_discount else 0,
+                'discount_amount': discount_amount,
+                'discounted_price': discounted_price
+            }
+            
+            result.append(service_data)
+        
+        return result
+
+
+class AdminBookingForm(BookingForm):
+    """Extended booking form with discount options for admins."""
+    
+    class Meta(BookingForm.Meta):
+        model = Booking
+        fields = ('customer', 'service', 'date_time', 'status', 'custom_discount', 'notes')
+        
+    def clean_custom_discount(self):
+        custom_discount = self.cleaned_data.get('custom_discount')
+        if custom_discount and (custom_discount < 0 or custom_discount > 100):
+            raise ValidationError("Discount must be between 0 and 100%.")
+        return custom_discount
+

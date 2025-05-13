@@ -3,30 +3,19 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
-from .models import CustomUser, Customer, Service, Booking, Discount, Sale, ServiceImage,AdditionalService,Audit, BookingRequest
+from .models import CustomUser, Customer, Service, Booking, Discount, Sale, ServiceImage,AdditionalService,Audit, BookingRequest,ServiceTherapist,BookingTherapistAssignment
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'user_id', 'first_name', 'last_name', 'user_type', 'is_active')
-    list_filter = ('user_type', 'is_active', 'date_joined')
-    search_fields = ('username', 'user_id', 'first_name', 'last_name', 'phone_number')
-    ordering = ('username',)
+    list_display = ('username', 'user_id', 'first_name', 'last_name', 'user_type', 'primary_service', 'is_active')
+    list_filter = ('user_type', 'primary_service', 'is_active', 'date_joined')
     
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'email', 'phone_number', 'profile_picture', 'password_change_required')}),
-        ('Permissions', {'fields': ('user_type', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('user_type', 'primary_service', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
-    
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'first_name', 'last_name', 'phone_number', 'user_type'),
-        }),
-    )
-    
-    readonly_fields = ('user_id', 'last_login', 'date_joined')
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -185,6 +174,7 @@ class SaleAdmin(admin.ModelAdmin):
 admin.site.register(AdditionalService)
 
 
+
 # Add to beauty_app/admin.py
 
 @admin.register(Audit)
@@ -195,6 +185,12 @@ class AuditAdmin(admin.ModelAdmin):
     readonly_fields = ('timestamp', 'user', 'action', 'model_name', 'object_id', 'object_repr', 'data', 'ip_address')
     date_hierarchy = 'timestamp'
 
+@admin.register(ServiceTherapist)
+class ServiceTherapistAdmin(admin.ModelAdmin):
+    list_display = ('service', 'therapist')
+    list_filter = ('service', 'therapist')
+    search_fields = ('service__name', 'therapist__first_name', 'therapist__last_name')
+    ordering = ('service', 'therapist')
 
 
 
@@ -224,3 +220,8 @@ class BookingRequestAdmin(admin.ModelAdmin):
     # def get_total_price(self, obj):
     #     return f"${obj.get_total_price()}"
     # get_total_price.short_description = 'Total Price'
+
+
+
+
+admin.site.register(BookingTherapistAssignment)

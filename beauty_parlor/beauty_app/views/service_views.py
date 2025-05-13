@@ -5,12 +5,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q
-
 from ..models import Service, Discount, ServiceImage
 from ..forms import ServiceForm
 from ..permissions import StaffRequiredMixin, AdminRequiredMixin
 
 from datetime import datetime
+from django.utils import timezone
 
 # Create your views here.
 # Add this to your views.py
@@ -163,42 +163,92 @@ class ServiceImageDeleteView(LoginRequiredMixin, AdminRequiredMixin, View):
 # Add this to your views.py
 from django.http import JsonResponse
 
-def check_service_discount(request):
-    service_id = request.GET.get('service_id')
-    booking_date = request.GET.get('booking_date')
+# def check_service_discount(request):
+#     service_id = request.GET.get('service_id')
+#     booking_date = request.GET.get('booking_date')
     
-    if not service_id or not booking_date:
+#     if not service_id or not booking_date:
+#         return JsonResponse({'error': 'Missing parameters'}, status=400)
+    
+#     try:
+#         service = Service.objects.get(id=service_id)
+#         booking_datetime = datetime.fromisoformat(booking_date.replace('Z', '+00:00'))
+#         print(service.price)
+        
+#         # Check for active discounts
+#         discount = Discount.objects.filter(
+#             service=service,
+#             start_date__lte=booking_datetime,
+#             end_date__gte=booking_datetime
+#         ).order_by('-percentage').first()
+        
+#         if discount:
+#             return JsonResponse({
+#                 'discount_available': True,
+#                 'discount_percentage': discount.percentage,
+#                 'discount_id': discount.pk,
+#                 'service_price': float(service.price),
+#             })
+#         else:
+#             return JsonResponse({
+#                 'discount_available': False,
+#                 'service_price': float(service.price),  # Added service price even when no discount
+#             })
+    
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)
+    
+# Add to your views (wherever check_service_discount is defined)
+def check_service_discount(request):
+    """Check if a service has active discounts for a given date"""
+    service_id = request.GET.get('service_id')
+    booking_date_str = request.GET.get('booking_date')
+    
+    if not service_id or not booking_date_str:
         return JsonResponse({'error': 'Missing parameters'}, status=400)
     
     try:
-        service = Service.objects.get(id=service_id)
-        booking_datetime = datetime.fromisoformat(booking_date.replace('Z', '+00:00'))
-        print(service.price)
+        service = Service.objects.get(pk=service_id)
+        
+        # Parse the datetime and make it timezone-aware
+        try:
+            # Try different formats
+            for format_str in ['%Y-%m-%d %H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%d']:
+                try:
+                    naive_datetime = datetime.strptime(booking_date_str, format_str)
+                    booking_date = timezone.make_aware(naive_datetime)
+                    break
+                except ValueError:
+                    continue
+            else:
+                # If no format worked
+                return JsonResponse({'error': 'Invalid date format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'Date parsing error: {str(e)}'}, status=400)
         
         # Check for active discounts
-        discount = Discount.objects.filter(
+        active_discount = Discount.objects.filter(
             service=service,
-            start_date__lte=booking_datetime,
-            end_date__gte=booking_datetime
+            start_date__lte=booking_date,
+            end_date__gte=booking_date
         ).order_by('-percentage').first()
         
-        if discount:
+        if active_discount:
             return JsonResponse({
-                'discount_available': True,
-                'discount_percentage': discount.percentage,
-                'discount_id': discount.pk,
                 'service_price': float(service.price),
+                'discount_available': True,
+                'discount_percentage': float(active_discount.percentage)
             })
         else:
             return JsonResponse({
-                'discount_available': False,
-                'service_price': float(service.price),  # Added service price even when no discount
+                'service_price': float(service.price),
+                'discount_available': False
             })
     
+    except Service.DoesNotExist:
+        return JsonResponse({'error': 'Service not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
-
 
 
 

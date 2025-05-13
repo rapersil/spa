@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Assign Therapists - {{ booking.booking_id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        border-left: 4px solid var(--color-500);
+        margin-bottom: 1rem;
+    }
+    
+    .assignment-section {
+        margin-bottom: 2rem;
+    }
+    
+    .assignment-item {
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        background-color: var(--gray-100);
+    }
+    
+    .assignment-item.has-warning {
+        background-color: var(--warning-light);
+        border-left: 4px solid var(--warning);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_detail' booking.pk %}">{{ booking.booking_id }}</a></li>
+            <li class="breadcrumb-item active">Assign Therapists</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="material-icons me-2">person_add</i>Assign Therapists</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Booking Summary -->
+                    <div class="booking-summary mb-4">
+                        <h5>Booking Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Customer:</strong> {{ booking.customer.first_name }} {{ booking.customer.last_name }}</p>
+                                <p><strong>Date & Time:</strong> {{ booking.date_time|date:"F d, Y h:i A" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> <span class="badge {% if booking.status == 'PENDING' %}bg-warning{% elif booking.status == 'CONFIRMED' %}bg-info{% elif booking.status == 'COMPLETED' %}bg-success{% else %}bg-danger{% endif %}">{{ booking.get_status_display }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service List -->
+                    <div class="service-list mb-4">
+                        <h5>Services</h5>
+                        <div class="service-card p-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ main_service.name }} <span class="badge bg-primary">Main Service</span></h6>
+                                    <p class="mb-0 text-muted">Duration: {{ main_service.duration }} min | Price: GHS{{ main_service.price }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% for service in additional_services %}
+                        <div class="service-card p-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ service.name }} <span class="badge bg-secondary">Additional Service</span></h6>
+                                    <p class="mb-0 text-muted">Duration: {{ service.duration }} min | Price: GHS{{ service.price }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Assignment Form -->
+                    <form method="post" id="therapistAssignmentForm">
+                        {% csrf_token %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">New Assignment</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.service|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.therapist|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.is_primary|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div id="therapistAvailability" class="mt-4">
+                                            <!-- Availability will be displayed here via JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="material-icons me-1">person_add</i> Assign Therapist
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Current Assignments -->
+                    <div class="assignment-section">
+                        <h5>Current Assignments</h5>
+                        {% if assignments %}
+                        <div class="current-assignments">
+                            {% for assignment in assignments %}
+                            <div class="assignment-item {% if assignment.warning %}has-warning{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ assignment.therapist.get_full_name }}</h6>
+                                        <p class="mb-0">
+                                            {{ assignment.service.name }}
+                                            {% if assignment.is_primary %}
+                                            <span class="badge bg-primary">Primary</span>
+                                            {% endif %}
+                                            {% if assignment.is_additional %}
+                                            <span class="badge bg-secondary">Additional</span>
+                                            {% endif %}
+                                        </p>
+                                        {% if assignment.warning %}
+                                        <p class="text-warning mb-0"><small><i class="material-icons me-1">warning</i>May have schedule conflicts</small></p>
+                                        {% endif %}
+                                    </div>
+                                    <form method="post" action="{% url 'remove_therapist_assignment' assignment.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="material-icons">delete</i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-0">No therapists have been assigned yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-secondary">
+                        <i class="material-icons me-2">arrow_back</i>Back to Booking
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">info</i>Assignment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="material-icons me-2">lightbulb</i>How Assignments Work</h6>
+                        <p>Each service can have one or more therapists assigned:</p>
+                        <ul>
+                            <li><strong>Primary therapist</strong>: The main therapist responsible for the service</li>
+                            <li><strong>Assistant therapists</strong>: Additional therapists who may help with the service</li>
+                        </ul>
+                        <p>When assigning therapists, the system will check for availability and warn you of potential conflicts.</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="material-icons me-2">warning</i>Availability Warnings</h6>
+                        <p>The system will check if therapists are already booked during this time slot, but you can still assign them even if there are conflicts.</p>
+                        <p>Watch for warnings that indicate a therapist might have schedule conflicts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceSelect = document.getElementById('id_service');
+        const therapistSelect = document.getElementById('id_therapist');
+        const availabilityDiv = document.getElementById('therapistAvailability');
+        const bookingId = '{{ booking.pk }}';
+        const bookingDateTime = '{{ booking.date_time|date:"Y-m-d H:i" }}';
+        
+        // Function to update therapist options based on selected service
+        function updateTherapistOptions() {
+            const serviceId = serviceSelect.value;
+            if (!serviceId) return;
+            
+            // Show loading indicator
+            therapistSelect.disabled = true;
+            therapistSelect.innerHTML = '<option value="">Loading therapists...</option>';
+            
+            // Make API request to get available therapists
+            fetch(`/api/therapists-for-service/?service_id=${serviceId}&date_time=${encodeURIComponent(bookingDateTime)}&booking_id=${bookingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    therapistSelect.innerHTML = '<option value="">Select a therapist</option>';
+                    
+                    if (data.therapists && data.therapists.length > 0) {
+                        data.therapists.forEach(therapist => {
+                            const option = document.createElement('option');
+                            option.value = therapist.id;
+                            option.textContent = therapist.name;
+                            
+                            // Add data attributes for availability
+                            option.dataset.available = therapist.available;
+                            if (!therapist.available) {
+                                option.dataset.nextAvailable = therapist.next_available;
+                            }
+                            
+                            therapistSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.disabled = true;
+                        option.textContent = 'No qualified therapists found';
+                        therapistSelect.appendChild(option);
+                    }
+                    
+                    therapistSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching therapists:', error);
+                    therapistSelect.innerHTML = '<option value="">Error loading therapists</option>';
+                    therapistSelect.disabled = false;
+                });
+        }
+        
+        // Function to check availability of selected therapist
+        function checkTherapistAvailability() {
+            const therapistId = therapistSelect.value;
+            if (!therapistId) {
+                availabilityDiv.innerHTML = '';
+                return;
+            }
+            
+            const option = therapistSelect.options[therapistSelect.selectedIndex];
+            const isAvailable = option.dataset.available === 'true';
+            const nextAvailable = option.dataset.nextAvailable;
+            
+            if (isAvailable) {
+                availabilityDiv.innerHTML = `
+                    <div class="alert alert-success mb-0">
+                        <i class="material-icons me-1">check_circle</i>
+                        Therapist is available during this time slot
+                    </div>
+                `;
+            } else {
+                availabilityDiv.innerHTML = `
+                    <div class="alert alert-warning mb-0">
+                        <i class="material-icons me-1">warning</i>
+                        Therapist has other bookings during this time
+                        ${nextAvailable ? `<br><small>Next available: ${nextAvailable}</small>
+                        To assigned this booking to this therapist choose ${nextAvailable} time for the booking` : ''}
+                    </div>
+                `;
+            }
+        }
+        
+        // Add event listeners
+        if (serviceSelect) {
+            serviceSelect.addEventListener('change', updateTherapistOptions);
+            
+            // Initialize therapist options
+            if (serviceSelect.value) {
+                updateTherapistOptions();
+            }
+        }
+        
+        if (therapistSelect) {
+            therapistSelect.addEventListener('change', checkTherapistAvailability);
+        }
+        document.querySelectorAll('.alert.alert-info').forEach(alert => {
+            if (alert._timeout) clearTimeout(alert._timeout); // Clear any timeout that might dismiss the alert
+            alert.addEventListener('close.bs.alert', (e) => e.preventDefault()); // Prevent dismissal via Bootstrap event
+            alert.style.display = 'block'; // Make alert visible
+        });
+    });
+</script>
+{% endblock %}
