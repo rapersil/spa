@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm, Password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db.models import Q
-from .models import CustomUser, Customer, Service, Discount, Booking, Sale
+from .models import CustomUser, Customer, Service, Discount, Booking, Sale, AdditionalService
 from .utils import generate_username
 
 # ============================
@@ -45,15 +45,26 @@ class StaffCreationForm(CustomUserCreationForm):
     
     class Meta(CustomUserCreationForm.Meta):
         model = CustomUser
-        fields = ('first_name', 'last_name', 'phone_number', 'user_type', 'profile_picture')
+        fields = ('first_name', 'last_name', 'phone_number', 'user_type', 'primary_service', 'profile_picture')
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Restrict user_type to staff or admin only
         self.fields['user_type'].choices = [
             choice for choice in CustomUser.USER_TYPE_CHOICES 
-            if choice[0] in ['STAFF', 'ADMIN']
+            if choice[0] in ['STAFF', 'ADMIN', 'COMMONSTAFF']
         ]
+        
+        # Show primary_service field only for COMMONSTAFF
+        # Add any needed attributes or styling
+        self.fields['primary_service'].queryset = Service.objects.filter(active=True)
+        self.fields['primary_service'].required = False
+        
+        # Add conditional visibility via JavaScript classes
+        self.fields['primary_service'].widget.attrs.update({
+            'class': 'form-control service-field',
+            'data-requires-usertype': 'COMMONSTAFF'
+        })
 
 class CustomUserUpdateForm(forms.ModelForm):
     """Form for updating existing users."""
@@ -182,6 +193,8 @@ class DiscountForm(forms.ModelForm):
         # Add Bootstrap classes
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+
+    
         
     def clean(self):
         cleaned_data = super().clean()
@@ -225,10 +238,7 @@ class DiscountForm(forms.ModelForm):
 
 # Booking Forms
 # ============================
-
 class BookingForm(forms.ModelForm):
-    """Form for creating and updating bookings."""
-    
     class Meta:
         model = Booking
         fields = ('customer', 'service', 'date_time', 'status', 'notes')
@@ -241,36 +251,99 @@ class BookingForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # Add Bootstrap classes
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
             
-        # Filter active services only
         services = Service.objects.filter(active=True)
-        choices = [(s.id, s.name) for s in services]
+        choices = [(s.id, f"{s.name} - {s.duration} min") for s in services]
         self.fields['service'].choices = choices
         
-        # Add data-price attribute to each service option
         for service in services:
             self.fields['service'].widget.attrs.update({
-                f'data-price-{service.id}': service.price
+                f'data-price-{service.id}': service.price,
+                f'data-duration-{service.id}': service.duration
             })
+        
+        self.current_booking = None
+        if self.instance and self.instance.pk:
+            self.current_booking = self.instance
             
     def clean(self):
         cleaned_data = super().clean()
         date_time = cleaned_data.get('date_time')
         
-        # # Validate booking time
-        # if date_time and date_time < timezone.now() and not self.instance.pk:
-            # raise ValidationError("Booking time cannot be in the past.")
+        if date_time and date_time < timezone.now() and not self.instance.pk:
+            raise ValidationError("Booking time cannot be in the past.")
             
         return cleaned_data
+    
+    def get_available_services_with_discounts(self):
+        now = timezone.now()
+        
+        # Determine main service ID
+        main_service_id = None
+        if self.data.get('service'):  # Check form submission first
+            main_service_id = self.data.get('service')
+        elif self.instance.pk and self.instance.service:  # Then existing booking
+            main_service_id = self.instance.service.id
+        elif 'service' in self.initial:  # Finally, initial data
+            main_service_id = self.initial['service'].id if hasattr(self.initial['service'], 'id') else self.initial['service']
+        
+        # Get active services, excluding the main service if specified
+        services = Service.objects.filter(active=True)
+        if main_service_id:
+            try:
+                # Ensure main_service_id is a valid integer
+                main_service_id = int(main_service_id)
+                services = services.exclude(id=main_service_id)
+            except (ValueError, TypeError):
+                pass  # If main_service_id is invalid, proceed without exclusion
+        
+        # Get booking date for discount checks
+        booking_date = now
+        if self.data.get('date_time'):
+            booking_date = self.data.get('date_time')
+        elif self.instance.pk and self.instance.date_time:
+            booking_date = self.instance.date_time
+        elif 'date_time' in self.initial:
+            booking_date = self.initial['date_time']
+        
+        result = []
+        for service in services:
+            active_discount = Discount.objects.filter(
+                service=service,
+                start_date__lte=booking_date,
+                end_date__gte=booking_date
+            ).order_by('-percentage').first()
+            
+            regular_price = float(service.price)
+            discounted_price = regular_price
+            discount_percentage = 0
+            discount_amount = 0
+            
+            if active_discount:
+                discount_percentage = float(active_discount.percentage)
+                discount_amount = regular_price * (discount_percentage / 100)
+                discounted_price = regular_price - discount_amount
+            
+            service_data = {
+                'service': service,
+                'price': regular_price,
+                'duration': service.duration,
+                'has_discount': bool(active_discount),
+                'discount': active_discount,
+                'discount_percentage': discount_percentage,
+                'discount_amount': discount_amount,
+                'discounted_price': discounted_price
+            }
+            
+            result.append(service_data)
+        
+        return result
+
 
 class AdminBookingForm(BookingForm):
-    """Extended booking form with discount options for admins."""
-    
     class Meta(BookingForm.Meta):
-        model = Booking
         fields = ('customer', 'service', 'date_time', 'status', 'custom_discount', 'notes')
         
     def clean_custom_discount(self):
@@ -605,3 +678,46 @@ class SaleSearchForm(forms.Form):
 # ============================
 
 
+class TherapistAssignmentForm(forms.Form):
+    """Form for assigning therapists to services in a booking"""
+    service = forms.ModelChoiceField(
+        queryset=Service.objects.none(),
+        label="Service",
+        widget=forms.Select(attrs={'class': 'form-control service-select'})
+    )
+    
+    therapist = forms.ModelChoiceField(
+        queryset=CustomUser.objects.none(),
+        label="Assign Therapist",
+        widget=forms.Select(attrs={'class': 'form-control therapist-select'})
+    )
+    
+    is_primary = forms.BooleanField(
+        required=False, 
+        initial=True,
+        label="Primary Therapist",
+        help_text="Check if this therapist is responsible for this service"
+    )
+    
+    def __init__(self, *args, **kwargs):
+        booking = kwargs.pop('booking', None)
+        super().__init__(*args, **kwargs)
+        
+        if booking:
+            # Collect all services (main + additional)
+            service_ids = [booking.service.id]
+            additional_services = AdditionalService.objects.filter(booking=booking)
+            for add_service in additional_services:
+                service_ids.append(add_service.id)
+                
+            # Set available services
+            self.fields['service'].queryset = Service.objects.filter(id__in=service_ids)
+            
+            # Default to main service
+            self.fields['service'].initial = booking.service
+            
+            # Set the initial therapist queryset
+            self.fields['therapist'].queryset = CustomUser.objects.filter(
+                user_type__in=[ 'COMMONSTAFF'],
+                is_active=True
+            )

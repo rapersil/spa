@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Customer, Service, BookingRequest
+from .models import Customer, Service, BookingRequest, CustomUser
 
 # class CustomerSelectionForm(forms.Form):
 #     customer_choice = forms.ChoiceField(
@@ -146,6 +146,13 @@ class ServiceSelectionForm(forms.Form):
     time = forms.TimeField(
         widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
         initial=timezone.now().time
+    )
+     # Add therapist field
+    therapist = forms.ModelChoiceField(
+        queryset=CustomUser.objects.none(),  # Will be populated via JS
+        required=False,
+        empty_label="Select a therapist (optional)",
+        widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
     )
     
     def clean(self):

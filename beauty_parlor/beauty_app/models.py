@@ -10,18 +10,29 @@ from django.contrib.contenttypes.models import ContentType
 from .utils import generate_username
 from .mixins import AuditableMixin
 
+# beauty_app/models.py
 class CustomUser(AuditableMixin, AbstractUser):
     USER_TYPE_CHOICES = (
         ('STAFF', 'Staff'),
         ('ADMIN', 'Admin'),
         ('SUPERADMIN', 'Super Admin'),
+        ('COMMONSTAFF', 'Common Staff'),
     )
     user_id = models.CharField(max_length=15, unique=True, editable=False)
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     phone_number = models.CharField(max_length=15, validators=[phone_validator])
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     password_change_required = models.BooleanField(default=False, 
                                                   help_text="User must change password at next login")
+    # New field for service assignment
+    primary_service = models.ForeignKey(
+        'Service', 
+        on_delete=models.SET_NULL,
+        null=True, 
+        blank=True,
+        related_name='primary_staff',
+        help_text="The primary service this staff member provides"
+    )
     
     def save(self, *args, **kwargs):
         # Generate user_id if it doesn't exist
@@ -170,6 +181,15 @@ class Booking(AuditableMixin, models.Model):
         blank=True,
         related_name='applied_bookings'
     )
+    therapist = models.ForeignKey(
+    CustomUser,
+    related_name='assigned_bookings',
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    limit_choices_to={'user_type': 'STAFF'}
+    )
+
     
     def save(self, *args, **kwargs):
         if not self.booking_id:
@@ -242,7 +262,15 @@ class Booking(AuditableMixin, models.Model):
                 latest_end_time = booking_end_time
         
         return latest_end_time
-
+    def get_total_price(self):
+        """Calculate total price including main service and additional services"""
+        main_service_price = self.get_final_price()
+        
+        # Get additional services
+        additional_services = self.additional_services.all()
+        additional_services_total = sum(service.final_price for service in additional_services)
+        
+        return main_service_price + additional_services_total
     def get_wait_time_minutes(self):
         """Calculate the wait time in minutes from scheduled time to expected start time"""
         expected_start = self.get_expected_start_time()
@@ -356,6 +384,15 @@ class AdditionalService(AuditableMixin, models.Model):
     # Meta information
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    therapist = models.ForeignKey(
+    CustomUser,
+    related_name='assigned_additional_services',
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    limit_choices_to={'user_type': 'STAFF'}
+    )
     
     class Meta:
         ordering = ['created_at']
@@ -449,3 +486,63 @@ class BookingRequest(models.Model):
             return f"{self.request_id} - {self.existing_customer.first_name} {self.existing_customer.last_name} - {self.service.name}"
         else:
             return f"{self.request_id} - {self.service.name}"
+        
+
+# class BookingTherapist(models.Model):
+#     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='therapist_assignments')
+#     therapist = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='booking_assignments')
+#     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+#     is_primary = models.BooleanField(default=True)
+#     assigned_at = models.DateTimeField(auto_now_add=True)
+#     assigned_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='therapist_assignments_made')
+    
+#     class Meta:
+#         unique_together = ('booking', 'therapist', 'service')
+        
+#     def __str__(self):
+#         return f"{self.therapist.get_full_name()} - {self.booking.booking_id}"
+    
+
+class ServiceTherapist(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='assigned_therapists')
+    therapist = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assigned_services')
+    is_primary = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('service', 'therapist')
+        
+    def __str__(self):
+        return f"{self.therapist.get_full_name()} - {self.service.name}"
+
+
+# Add to models.py or modify existing models
+
+class BookingTherapistAssignment(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='therapist_assignments')
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+    therapist = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='booking_assignments')
+    is_primary = models.BooleanField(default=True, help_text="Whether this therapist is the primary provider for the booking")
+    assigned_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='assigned_therapists')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('booking', 'therapist')
+        ordering = ['-is_primary', 'created_at']
+
+    def __str__(self):
+        return f"{self.booking.booking_id} - {self.therapist.get_full_name()}"
+# class ServiceTherapist(models.Model):
+#     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='therapists')
+#     therapist = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='services',
+#                                  limit_choices_to={'user_type': 'STAFF'})
+#     is_primary = models.BooleanField(default=False)
+#     active = models.BooleanField(default=True)
+    
+#     class Meta:
+#         unique_together = ('service', 'therapist')
+        
+#     def __str__(self):
+#         return f"{self.therapist.get_full_name()} - {self.service.name}"

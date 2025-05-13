@@ -6,7 +6,6 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils import timezone
-
 from ..models import Discount, Service, Booking
 from ..forms import DiscountForm
 from ..permissions import AdminRequiredMixin

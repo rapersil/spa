@@ -36,116 +36,91 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <!-- Display form errors if any -->
-                    {% if form.errors %}
-                    <div class="form-error-container">
-                        <strong>Please correct the following errors:</strong>
-                        {{ form.errors }}
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Main content container -->
-                    <div class="service-form-container">
-                        <!-- Main Service Form -->
-                        <form id="service-main-form" method="post" enctype="multipart/form-data" action="{{ request.path }}">
-                            {% csrf_token %}
-                            
-                            <div class="form-section">
-                                <h5 class="section-title">Basic Information</h5>
-                                <div class="row">
-                                    <!-- Service Name and Price -->
-                                    <div class="col-md-6 mb-3">
-                                        {{ form.name|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        {{ form.price|as_crispy_field }}
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <!-- Duration and Status -->
-                                    <div class="col-md-6 mb-3">
-                                        {{ form.duration|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        {{ form.active|as_crispy_field }}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-section">
-                                <h5 class="section-title">Service Details</h5>
-                                <!-- Description -->
-                                <div class="mb-4">
-                                    {{ form.description|as_crispy_field }}
-                                </div>
-                            </div>
-                            
-                            <div class="form-section">
-                                <h5 class="section-title">Images</h5>
-                                <!-- Primary Image -->
-                                <div class="mb-4">
-                                    {{ form.image|as_crispy_field }}
-                                    
-                                    {% if form.instance.pk and form.instance.image %}
-                                    <div class="current-image mt-3">
-                                        <div class="card">
-                                            <div class="card-header">Current Primary Image</div>
-                                            <div class="card-body text-center">
-                                                <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" class="img-fluid rounded" style="max-height: 200px;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Additional Images Upload -->
-                                <div class="mb-4">
-                                    <label for="additional_images" class="form-label">Additional Images</label>
-                                    <input type="file" name="additional_images" id="additional_images" class="form-control" multiple>
-                                    <div class="form-text">You can upload multiple additional images for this service</div>
-                                </div>
-                            </div>
-                        </form>
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
                         
-                        <!-- Current Additional Images with Delete Forms -->
-                        {% if form.instance.pk and form.instance.images.all %}
-                        <div class="image-gallery">
-                            <h5 class="section-title">Manage Additional Images</h5>
-                            <div class="row">
-                                {% for img in form.instance.images.all %}
-                                <div class="col-md-3 mb-3">
-                                    <!-- Independent delete form for each image -->
-                                    <form method="post" action="{% url 'service_image_delete' service_id=form.instance.pk image_id=img.pk %}">
-                                        {% csrf_token %}
-                                        <div class="card additional-image-card">
+                        <div class="row">
+                            <!-- Service Name and Price -->
+                            <div class="col-md-6 mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.price|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Duration and Status -->
+                            <div class="col-md-6 mb-3">
+                                {{ form.duration|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.active|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-4">
+                            {{ form.description|as_crispy_field }}
+                        </div>
+                        
+                        
+                        <!-- Service Image -->
+                        <div class="mb-4">
+                            {{ form.image|as_crispy_field }}
+                            
+                            {% if form.instance.pk and form.instance.image %}
+                            <div class="current-image mt-2">
+                                <div class="card">
+                                    <div class="card-header">Current Image</div>
+                                    <div class="card-body text-center">
+                                        <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" class="img-fluid rounded" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Additional Images -->
+                        <div class="mb-4">
+                            <label for="additional_images" class="form-label">Additional Images</label>
+                            <input type="file" name="additional_images" id="additional_images" class="form-control" multiple>
+                            <div class="form-text">You can upload multiple additional images for this service</div>
+                            
+                            {% if form.instance.pk and form.instance.images.all %}
+                            <div class="mt-3">
+                                <label class="form-label">Current Additional Images:</label>
+                                <div class="row">
+                                    {% for img in form.instance.images.all %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
                                             <img src="{{ img.image.url }}" class="card-img-top" alt="Additional image">
                                             <div class="card-body p-2 d-flex justify-content-between align-items-center">
                                                 <small class="text-muted">Image {{ forloop.counter }}</small>
-                                                <button type="submit" class="btn btn-sm btn-danger" title="Delete this image">
-                                                    <i class="material-icons">delete</i>
-                                                </button>
+                                                <form method="post" action="{% url 'service_image_delete' service_id=form.instance.pk image_id=img.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="material-icons">delete</i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
                             </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                         
-                        <!-- Action Buttons (below both forms) -->
-                        <div class="d-flex justify-content-between w-100 mt-4 pt-4 border-top">
+                        <div class="d-flex justify-content-between">
                             <a href="{% if form.instance.pk %}{% url 'service_detail' form.instance.pk %}{% else %}{% url 'service_list' %}{% endif %}" class="btn btn-outline-secondary">
-                                <i class="material-icons me-2">arrow_back</i>Cancel
+                                <i class="material-icons me-2">close</i>Cancel
                             </a>
-                            <button type="submit" form="service-main-form" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="material-icons me-2">save</i>
                                 {% if form.instance.pk %}Save Changes{% else %}Create Service{% endif %}
                             </button>
                         </div>
-                        
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -163,6 +138,7 @@
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
+                        // Create or update image preview
                         let previewContainer = document.querySelector('.image-preview');
                         if (!previewContainer) {
                             previewContainer = document.createElement('div');

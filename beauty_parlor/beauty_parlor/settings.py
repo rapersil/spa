@@ -1,5 +1,3 @@
-
-
 """
 Django settings for beauty_parlor project.
 
@@ -13,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,15 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*ih4h9^gios-(h*o-t@hx3l(*vme1#$m7=%xc)a!ad9qb_@i@u'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = False
 
-if not DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1','*']
-else:
-    ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'crispy_forms',
     'crispy_bootstrap5',
+    'easyaudit',
     
     # Local apps
     'beauty_app',
@@ -60,8 +61,7 @@ MIDDLEWARE = [
     'beauty_app.middleware.AuditMiddleware',
     'beauty_app.middleware.SessionTimeoutMiddleware',
     'beauty_app.middleware.UnauthorizedMiddleware',
-     
-
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'beauty_parlor.urls'
@@ -89,12 +89,24 @@ WSGI_APPLICATION = 'beauty_parlor.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+#         'NAME': os.environ.get('DB_NAME', 'beauty_parlor_db'),
+#         'USER': os.environ.get('DB_USER', 'beauty_admin'),
+#         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+#         'HOST': os.environ.get('DB_HOST', 'localhost'),
+#         'PORT': os.environ.get('DB_PORT', '5432'),
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -131,14 +143,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = os.environ.get('STATIC_URL', 'static/')
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (User uploaded files)
-MEDIA_URL = 'media/'
+MEDIA_URL = os.environ.get('MEDIA_URL', 'media/')
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
@@ -158,14 +170,14 @@ LOGOUT_REDIRECT_URL = 'login'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Email settings for password reset (configure for production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'smtp.example.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@example.com'
-EMAIL_HOST_PASSWORD = 'your-password'
-DEFAULT_FROM_EMAIL = 'Beauty Parlor <noreply@beautyparlor.com>'
+# Email settings for password reset
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.example.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Beauty Parlor <noreply@beautyparlor.com>')
 
 # Messages settings
 MESSAGE_TAGS = {
@@ -177,28 +189,25 @@ MESSAGE_TAGS = {
 }
 
 # Custom settings for Beauty Parlor
-BEAUTY_PARLOR_NAME = 'Coded Spa'
-BEAUTY_PARLOR_ADDRESS = 'House No. 3, Forest Link, Ashiorkor Street,Dzorwulu'
-BEAUTY_PARLOR_PHONE = '+233(0)244161543'
-BEAUTY_PARLOR_EMAIL = 'codedspa@gmail.com'
-BEAUTY_PARLOR_OPENING_HOURS = '7:00 AM - 10:00 PM'
-BEAUTY_PARLOR_WORKING_DAYS = 'Monday - Saturday'
+BEAUTY_PARLOR_NAME = os.environ.get('BEAUTY_PARLOR_NAME', 'Coded Spa')
+BEAUTY_PARLOR_ADDRESS = os.environ.get('BEAUTY_PARLOR_ADDRESS', 'House No. 3, Forest Link, Ashiorkor Street,Dzorwulu')
+BEAUTY_PARLOR_PHONE = os.environ.get('BEAUTY_PARLOR_PHONE', '+233(0)244161543')
+BEAUTY_PARLOR_EMAIL = os.environ.get('BEAUTY_PARLOR_EMAIL', 'codedspa@gmail.com')
+BEAUTY_PARLOR_OPENING_HOURS = os.environ.get('BEAUTY_PARLOR_OPENING_HOURS', '7:00 AM - 10:00 PM')
+BEAUTY_PARLOR_WORKING_DAYS = os.environ.get('BEAUTY_PARLOR_WORKING_DAYS', 'Monday - Saturday')
 
 # Appointment settings
-APPOINTMENT_DURATION_DEFAULT = 60  # minutes
-APPOINTMENT_BUFFER_TIME = 15  # minutes between appointments
-APPOINTMENT_START_TIME = 9  # 9 AM
-APPOINTMENT_END_TIME = 20  # 8 PM (20:00)
+APPOINTMENT_DURATION_DEFAULT = int(os.environ.get('APPOINTMENT_DURATION_DEFAULT', 60))  # minutes
+APPOINTMENT_BUFFER_TIME = int(os.environ.get('APPOINTMENT_BUFFER_TIME', 15))  # minutes between appointments
+APPOINTMENT_START_TIME = int(os.environ.get('APPOINTMENT_START_TIME', 9))  # 9 AM
+APPOINTMENT_END_TIME = int(os.environ.get('APPOINTMENT_END_TIME', 20))  # 8 PM (20:00)
 
 # Security settings
-SESSION_COOKIE_AGE = 600  # Session cookie age in seconds (10 minutes)
-SESSION_SAVE_EVERY_REQUEST = True
-# Whether the session cookie should expire when the browser is closed
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-# Whether to save the session data on every request
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', 600))  # Session cookie age in seconds (10 minutes)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = os.environ.get('SESSION_EXPIRE_AT_BROWSER_CLOSE', 'True').lower() == 'true'
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'  # Set to True in production with HTTPS
+SESSION_SAVE_EVERY_REQUEST = os.environ.get('SESSION_SAVE_EVERY_REQUEST', 'True').lower() == 'true'
 
 # Logging configuration
 LOGGING = {

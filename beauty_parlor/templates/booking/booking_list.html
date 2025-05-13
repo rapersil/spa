@@ -103,13 +103,25 @@
                     <tbody>
                         {% for booking in bookings %}
                         <tr class="{% if booking.date_time.date == today %}today-booking{% endif %}">
-                            <td>{{ booking.booking_id }}</td>
                             <td>
-                                <span class="booking-date">{{ booking.date_time|date:"M d, Y" }}</span>
-                                <span class="booking-time">{{ booking.date_time|date:"h:i A" }}</span>
-                                {% if booking.date_time.date == today %}
+                                <div class="d-flex align-items-center">
+                                    {{ booking.booking_id }}
+                                    {% if booking.date_time < current_time and booking.status in 'PENDING,CONFIRMED' %}
+                                        <span class="ms-2 badge rounded-pill bg-danger d-flex align-items-center justify-content-center" 
+                                            data-bs-toggle="tooltip" 
+                                            title="Booking time has passed"
+                                            style="width: 20px; height: 20px; padding: 0;">
+                                            <span class="material-icons" style="font-size: 12px;">warning</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="booking-date">{{ booking.created_at|date:"M d, Y" }}</span>
+                                <span class="booking-time">{{ booking.created_at|date:"h:i A" }}</span>
+                                {% comment %} {% if booking.date_time.date == today %}
                                 <span class="badge bg-info">Today</span>
-                                {% endif %}
+                                {% endif %} {% endcomment %}
                             </td>
                             <td>
                                 <a href="{% url 'customer_detail' booking.customer.pk %}" class="customer-link">
@@ -139,6 +151,7 @@
                                 </small>
                                 {% endif %}
                             </td>
+                            
                             <td>
                                 <span class="badge 
                                     {% if booking.status == 'PENDING' %}bg-warning
@@ -178,98 +191,102 @@
                                     <a href="{% url 'booking_update' booking.pk %}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit">
                                         <span class="material-icons">edit</span>
                                     </a>
+                                    {% endif %}
+                                    
                                     <a href="{% url 'booking_print' booking.pk %}" class="btn btn-outline-info" data-bs-toggle="tooltip" title="Print Receipt" target="_blank">
                                         <span class="material-icons">print</span>
                                     </a>
-                                    {% endif %}
+                                    
                                     
                                     <!-- Status Update Dropdown -->
-                                    <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="material-icons">assignment</span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        {% if booking.status != 'PENDING' %}
-                                        <li>
-                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="status" value="PENDING">
-                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                <button type="submit" class="dropdown-item">
-                                                    <span class="material-icons text-warning me-2">schedule</span>Mark as Pending
-                                                </button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        
-                                        {% if booking.status != 'CONFIRMED' %}
-                                        <li>
-                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="status" value="CONFIRMED">
-                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                <button type="submit" class="dropdown-item">
-                                                    <span class="material-icons text-info me-2">check</span>Mark as Confirmed
-                                                </button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        
-                                        {% if booking.status in 'PENDING,CONFIRMED' %}
-                                            {% with wait_minutes=booking.get_wait_time_minutes %}
-                                                {% if wait_minutes > 0 %}
-                                                    <div class="expected-start-info">
-                                                        <small class="text-muted">
-                                                            <span class="material-icons me-1">hourglass_bottom</span>Est. start: {{ booking.get_expected_start_time|date:"h:i A" }}
-                                                        </small>
-                                                    </div>
-                                                {% endif %}
-                                            {% endwith %}
-                                        {% endif %}
-                                        
-                                        {% if booking.status != 'COMPLETED' %}
-                                        <li>
-                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="status" value="COMPLETED">
-                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                <button type="submit" class="dropdown-item">
-                                                    <span class="material-icons text-success me-2">done_all</span>Mark as Completed
-                                                </button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        
-                                        {% if booking.status != 'CANCELLED' %}
-                                        <li>
-                                            <form method="post" action="{% url 'booking_status_update' booking.pk %}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="status" value="CANCELLED">
-                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                <button type="submit" class="dropdown-item">
-                                                    <span class="material-icons text-danger me-2">close</span>Mark as Cancelled
-                                                </button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        
-                                        <li><hr class="dropdown-divider"></li>
-                                        
-                                        {% if booking.status == 'COMPLETED' and request.user.user_type in 'ADMIN,SUPERADMIN' and not booking.sale %}
-                                        <li>
-                                            <a href="{% url 'sale_create' %}?booking_id={{ booking.pk }}" class="dropdown-item">
-                                                <span class="material-icons text-success me-2">monetization_on</span>Record Payment
-                                            </a>
-                                        </li>
-                                        {% endif %}
-                                        
-                                        {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
-                                        <li>
-                                            <a href="{% url 'booking_delete' booking.pk %}" class="dropdown-item text-danger">
-                                                <span class="material-icons me-2">delete</span>Delete Booking
-                                            </a>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
+                                    {% if booking.status != 'COMPLETED'%}
+                                        <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="material-icons">assignment</span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            {% if booking.status == 'CONFIRMED' %}
+                                            <li>
+                                                <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="PENDING">
+                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <span class="material-icons text-warning me-2">schedule</span>Mark as Pending
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% if booking.status == 'PENDING' %}
+                                            <li>
+                                                <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="CONFIRMED">
+                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <span class="material-icons text-info me-2">check</span>Mark as Confirmed
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% if booking.status in 'PENDING,CONFIRMED' %}
+                                                {% with wait_minutes=booking.get_wait_time_minutes %}
+                                                    {% if wait_minutes > 0 %}
+                                                        <div class="expected-start-info">
+                                                            <small class="text-muted">
+                                                                <span class="material-icons me-1">hourglass_bottom</span>Est. start: {{ booking.get_expected_start_time|date:"h:i A" }}
+                                                            </small>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% endif %}
+                                            
+                                            {% if booking.status == 'CONFIRMED' %}
+                                            <li>
+                                                <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="COMPLETED">
+                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <span class="material-icons text-success me-2">done_all</span>Mark as Completed
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% if booking.status not in 'COMPLETED,CANCELLED' %}
+                                            <li>
+                                                <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="CANCELLED">
+                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                    <button type="submit" class="dropdown-item">
+                                                        <span class="material-icons text-danger me-2">close</span>Mark as Cancelled
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            <li><hr class="dropdown-divider"></li>
+                                            
+                                            {% if booking.status == 'COMPLETED' and request.user.user_type in 'ADMIN,SUPERADMIN' and not booking.sale %}
+                                            <li>
+                                                <a href="{% url 'sale_create' %}?booking_id={{ booking.pk }}" class="dropdown-item">
+                                                    <span class="material-icons text-success me-2">monetization_on</span>Record Payment
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' and booking.status in 'PENDING,CONFIRMED,CANCELLED' %}
+                                            <li>
+                                                <a href="{% url 'booking_delete' booking.pk %}" class="dropdown-item text-danger">
+                                                    <span class="material-icons me-2">delete</span>Delete Booking
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -348,5 +365,6 @@
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     });
+    
 </script>
 {% endblock %}

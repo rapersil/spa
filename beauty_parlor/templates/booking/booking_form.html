@@ -164,7 +164,7 @@
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Booking Information</h5>
+                    <h5 class="mb-0"><i class="material-icons me-2">info</i>Booking Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
@@ -455,15 +455,16 @@
                 updatePriceCalculator();
             }
         }
-    
-        // Prevent auto-dismissal of info alerts
+       
         document.querySelectorAll('.alert.alert-info').forEach(alert => {
-            // Remove any auto-dismiss functionality
-            if (alert._dismissElement) {
-                alert._dismissElement.removeEventListener('click', alert._dismissHandler);
-            }
+            if (alert._timeout) clearTimeout(alert._timeout); // Clear any timeout that might dismiss the alert
+            alert.addEventListener('close.bs.alert', (e) => e.preventDefault()); // Prevent dismissal via Bootstrap event
+            alert.style.display = 'block'; // Make alert visible
         });
+        
     });
+    
+    
 
 </script>
 {% endblock %}
