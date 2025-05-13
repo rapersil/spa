@@ -112,3 +112,13 @@ def format_duration(minutes):
                 return f"{hours_display} {remaining_minutes} minutes"
     except (ValueError, TypeError):
         return "0 minutes"
+    
+
+
+@register.filter
+def sum_attr(queryset, attr_name):
+    """Sum the values of a specific attribute across all objects in a queryset"""
+    total = 0
+    for obj in queryset:
+        total += getattr(obj, attr_name) or 0
+    return total

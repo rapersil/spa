@@ -70,9 +70,15 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form.user_type|as_crispy_field }}
+                           <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.user_type|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6 mb-3 service-field-container" id="primaryServiceContainer">
+                                    {{ form.primary_service|as_crispy_field }}
+                                </div>
                             </div>
+
                             {%comment%}
                             {% if form.instance.pk %}
                             <div class="col-md-6 mb-3">
@@ -118,4 +124,31 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the user type select element
+    const userTypeSelect = document.getElementById('id_user_type');
+    const primaryServiceContainer = document.getElementById('primaryServiceContainer');
+    
+    // Function to check and toggle fields based on user type
+    function toggleServiceField() {
+        const selectedUserType = userTypeSelect.value;
+        
+        // Show/hide service field based on user type
+        if (selectedUserType === 'COMMONSTAFF') {
+            primaryServiceContainer.style.display = 'block';
+        } else {
+            primaryServiceContainer.style.display = 'none';
+        }
+    }
+    
+    // Add event listener for user type changes
+    userTypeSelect.addEventListener('change', toggleServiceField);
+    
+    // Run once on page load
+    toggleServiceField();
+});
+</script>
 {% endblock %}

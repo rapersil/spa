@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/material-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/material-icons-outlined.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flatpickr.min.css' %}">
     <script src="{% static 'js/session-timeout.js' %}"></script>
     
     {% block extra_css %}{% endblock %}
@@ -49,8 +50,7 @@
                             <span class="material-icons">event_available</span>Bookings
                         </a>
                     </li>
-                     <!-- Add this inside the navbar-nav list, perhaps after the Bookings link -->
-                     <li class="nav-item">
+                     {% comment %} <li class="nav-item">
                         <a class="nav-link {% if 'booking-requests' in request.path %}active{% endif %}" href="{% url 'staff_booking_request_list' %}">
                             <span class="position-relative">
                                 <span class="material-icons">notifications</span>
@@ -62,7 +62,7 @@
                             </span>
                             Booking Requests
                         </a>
-                    </li>
+                    </li> {% endcomment %}
                     
                     <li class="nav-item">
                         <a class="nav-link {% if 'customer' in request.path %}active{% endif %}" href="{% url 'customer_list' %}">
