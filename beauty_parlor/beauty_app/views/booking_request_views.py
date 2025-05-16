@@ -39,6 +39,10 @@ class PublicBookingRequestCreateView(View):
                 return redirect('public_booking_request_create', step=1)
                 
             form = ServiceSelectionForm(initial=form_data.get('step2', {}))
+
+            service_id = form_data.get('step2', {}).get('service')
+            if service_id:
+                form.update_therapists(service_id)
             return render(request, 'booking/public_booking_request_step2.html', {'form': form})
         
         elif step == 3:
@@ -148,151 +152,6 @@ class PublicBookingRequestCreateView(View):
                 'customer_id': customer.id if customer else None,
                 'total_price': total_price,
             })
-    
-    
-    # def post(self, request, *args, **kwargs):
-    #     step = kwargs.get('step', 1)
-        
-    #     # Get existing form data from session
-    #     form_data = request.session.get('booking_request_form_data', {})
-        
-    #     if step == 1:
-    #         # Process step 1: Customer information
-    #         form = CustomerSelectionForm(request.POST)
-            
-    #         if form.is_valid():
-    #             # Create a copy of cleaned_data to modify
-    #             cleaned_data = form.cleaned_data.copy()
-                
-    #             # Replace the Customer object with just its ID if present
-    #             if 'existing_customer' in cleaned_data and cleaned_data['existing_customer'] is not None:
-    #                 customer_obj = cleaned_data['existing_customer']
-    #                 if isinstance(customer_obj, Customer):  # Check if it's a Customer object
-    #                     cleaned_data['existing_customer'] = customer_obj.id  # Store just the ID
-                
-    #             # Store the modified data in session
-    #             form_data['step1'] = cleaned_data
-    #             request.session['booking_request_form_data'] = form_data
-                
-    #             # Proceed to step 2
-    #             return redirect('public_booking_request_create', step=2)
-    #         else:
-    #             return render(request, 'booking/public_booking_request_step1.html', {'form': form})
-        
-    #     elif step == 2:
-    #         # Process step 2: Service selection
-    #         form = ServiceSelectionForm(request.POST)
-            
-    #         if form.is_valid():
-    #             # Create a copy of cleaned_data to modify
-    #             cleaned_data = form.cleaned_data.copy()
-                
-    #             # Replace the Service object with just its ID
-    #             if 'service' in cleaned_data and cleaned_data['service'] is not None:
-    #                 service_obj = cleaned_data['service']
-    #                 cleaned_data['service'] = service_obj.id  # Store just the ID
-                
-    #             # Convert date and time objects to string format
-    #             if 'date' in cleaned_data and cleaned_data['date'] is not None:
-    #                 cleaned_data['date'] = cleaned_data['date'].isoformat()  # Convert to ISO format string
-                    
-    #             if 'time' in cleaned_data and cleaned_data['time'] is not None:
-    #                 cleaned_data['time'] = cleaned_data['time'].isoformat()  # Convert to ISO format string
-                    
-    #             # Handle the datetime object if it exists
-    #             if 'date_time' in cleaned_data and cleaned_data['date_time'] is not None:
-    #                 cleaned_data['date_time'] = cleaned_data['date_time'].isoformat()  # Convert to ISO format string
-                
-    #             # Store the modified data in session
-    #             form_data['step2'] = cleaned_data
-    #             request.session['booking_request_form_data'] = form_data
-                
-    #             # Proceed to step 3
-    #             return redirect('public_booking_request_create', step=3)
-    #         else:
-    #             return render(request, 'booking/public_booking_request_step2.html', {'form': form})    
-    #     elif step == 3:
-    #         # Process step 3: Additional services
-    #         # Get the main service selected in step 2
-    #         service_id = form_data.get('step2', {}).get('service')
-    #         if service_id:
-    #             main_service = get_object_or_404(Service, pk=service_id)
-    #             form = AdditionalServicesForm(request.POST, main_service=main_service)
-                
-    #             if form.is_valid():
-    #                 # Store form data in session
-    #                 form_data['step3'] = {
-    #                     'selected_services': form.get_selected_services(),
-    #                     'notes': form.cleaned_data.get('notes', '')
-    #                 }
-    #                 request.session['booking_request_form_data'] = form_data
-                    
-    #                 # Proceed to step 4
-    #                 return redirect('public_booking_request_create', step=4)
-    #             else:
-    #                 return render(request, 'booking/public_booking_request_step3.html', {
-    #                     'form': form,
-    #                     'main_service': main_service
-    #                 })
-    #         else:
-    #             messages.error(request, "Please select a service first.")
-    #             return redirect('public_booking_request_create', step=2)
-        
-    #     elif step == 4:
-    #         # Process step 4: Submit booking request
-    #         # Get data from previous steps
-    #         step1_data = form_data.get('step1', {})
-    #         step2_data = form_data.get('step2', {})
-    #         step3_data = form_data.get('step3', {})
-
-            
-            
-    #         # Create booking request
-    #         with transaction.atomic():
-    #             booking_request = BookingRequest()
-                
-    #             # Set customer information
-    #             customer_choice = step1_data.get('customer_choice')
-    #             # Creating a booking request in step 4
-    #             if customer_choice == 'existing':
-    #                 customer_id = step1_data.get('existing_customer_id')
-    #                 if customer_id:
-    #                     booking_request.existing_customer_id = customer_id
-    #                     booking_request.is_new_customer = False
-    #             else:
-    #                 booking_request.is_new_customer = True
-    #                 booking_request.first_name = step1_data.get('first_name')
-    #                 booking_request.last_name = step1_data.get('last_name')
-    #                 booking_request.phone = step1_data.get('phone')
-    #                 booking_request.email = step1_data.get('email')  # Add email
-    #                 booking_request.address = step1_data.get('address')
-                
-    #             # Set service and time information
-    #             booking_request.service_id = step2_data.get('service')
-    #             booking_request.date_time = step2_data.get('date_time')
-                
-    #             # Set additional services
-    #             booking_request.additional_services = step3_data.get('selected_services', [])
-                
-    #             # Set notes
-    #             booking_request.notes = step3_data.get('notes', '')
-                
-    #             # Save booking request
-    #             booking_request.save()
-            
-    #         # Clear session data
-    #         if 'booking_request_form_data' in request.session:
-    #             del request.session['booking_request_form_data']
-            
-    #         # Show success message
-    #         messages.success(request, "Your booking request has been submitted successfully. We will contact you shortly to confirm your appointment.")
-            
-    #         # Redirect to confirmation page
-    #         return redirect('public_booking_request_confirmation', request_id=booking_request.request_id)
-            
-    #     else:
-    #         # Invalid step, redirect to step 1
-    #         return redirect('public_booking_request_create', step=1)
     def post(self, request, *args, **kwargs):
         step = kwargs.get('step', 1)
         
@@ -305,6 +164,8 @@ class PublicBookingRequestCreateView(View):
             if form.is_valid():
                 # Create a copy of cleaned_data to modify
                 cleaned_data = form.cleaned_data.copy()
+
+                
                 
                 # Replace the Customer object with just its ID if present
                 if 'existing_customer' in cleaned_data and cleaned_data['existing_customer'] is not None:
@@ -352,6 +213,16 @@ class PublicBookingRequestCreateView(View):
                 # Handle the datetime object if it exists
                 if 'date_time' in cleaned_data and cleaned_data['date_time'] is not None:
                     cleaned_data['date_time'] = cleaned_data['date_time'].isoformat()  # Convert to ISO format string
+
+                
+                 # Handle service and therapist objects
+                if 'service' in cleaned_data and cleaned_data['service'] is not None:
+                    service_obj = cleaned_data['service']
+                    cleaned_data['service'] = service_obj.id
+                
+                if 'preferred_therapist' in cleaned_data and cleaned_data['preferred_therapist'] is not None:
+                    therapist_obj = cleaned_data['preferred_therapist']
+                    cleaned_data['preferred_therapist'] = therapist_obj.id
                 
                 # Store the modified data in session
                 form_data['step2'] = cleaned_data
@@ -567,6 +438,17 @@ class StaffBookingRequestApproveView(LoginRequiredMixin, StaffRequiredMixin, Vie
                 updated_by=request.user
             )
             
+            # Check for active service discounts at the time of booking
+            active_discounts = booking.service.discount_set.filter(
+                start_date__lte=booking.date_time,
+                end_date__gte=booking.date_time
+            ).order_by('-percentage')  # Get highest discount if multiple exist
+            
+            # Apply service discount if available
+            if active_discounts.exists():
+                booking.service_discount = active_discounts.first()
+                booking.save()  # Save again with the discount applied
+            
             # Add additional services if any
             if booking_request.additional_services:
                 # Handle additional services here
@@ -580,7 +462,6 @@ class StaffBookingRequestApproveView(LoginRequiredMixin, StaffRequiredMixin, Vie
         
         messages.success(request, "Booking request approved and converted to a booking successfully.")
         return redirect('booking_detail', pk=booking.pk)
-
 
 @method_decorator(require_POST, name='dispatch')
 class StaffBookingRequestRejectView(LoginRequiredMixin, StaffRequiredMixin, View):

@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Customer, Service, BookingRequest, CustomUser
+from .models import BookingTherapistAssignment, Customer, Service, BookingRequest, CustomUser
 
 # class CustomerSelectionForm(forms.Form):
 #     customer_choice = forms.ChoiceField(
@@ -131,51 +131,103 @@ class CustomerSelectionForm(forms.Form):
                 
         return cleaned_data
 
+
 class ServiceSelectionForm(forms.Form):
     service = forms.ModelChoiceField(
         queryset=Service.objects.filter(active=True),
-        empty_label="Select a service",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        label="Select Service",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
     )
-    
     date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        initial=timezone.now().date
+        label="Select Date",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True
     )
-    
     time = forms.TimeField(
-        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-        initial=timezone.now().time
+        label="Select Time",
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        required=True
     )
-     # Add therapist field
-    therapist = forms.ModelChoiceField(
-        queryset=CustomUser.objects.none(),  # Will be populated via JS
-        required=False,
-        empty_label="Select a therapist (optional)",
-        widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
+    preferred_therapist = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(user_type='COMMONSTAFF', is_active=True),
+        label="Preferred Therapist (Optional)",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
     )
     
-    def clean(self):
-        cleaned_data = super().clean()
-        date = cleaned_data.get('date')
-        time = cleaned_data.get('time')
+    # Add this method to dynamically update available therapists
+    def update_therapists(self, service_id, date_time=None):
+        """Dynamically update the therapist field based on the selected service and time"""
+        if not service_id:
+            self.fields['preferred_therapist'].queryset = CustomUser.objects.filter(
+                user_type='COMMONSTAFF', is_active=True
+            )
+            return
+            
+        # Filter therapists who can provide this service
+        therapists = CustomUser.objects.filter(
+            user_type='COMMONSTAFF', 
+            is_active=True
+        )
         
-        if date and time:
-            # Combine date and time into a datetime object
-            from datetime import datetime
-            date_time = datetime.combine(date, time)
+        # If we have date_time, we can filter available therapists
+        if date_time:
+            # Get therapists who don't have conflicting bookings
+            busy_therapists = BookingTherapistAssignment.objects.filter(
+                booking__date_time=date_time,
+                booking__status__in=['PENDING', 'CONFIRMED']
+            ).values_list('therapist_id', flat=True)
             
-            # Convert to timezone-aware datetime
-            from django.utils import timezone
-            date_time = timezone.make_aware(date_time)
+            # Exclude busy therapists
+            therapists = therapists.exclude(id__in=busy_therapists)
             
-            # Check if the date_time is in the past
-            if date_time < timezone.now():
-                raise ValidationError("Booking time cannot be in the past.")
+        self.fields['preferred_therapist'].queryset = therapists
+# class ServiceSelectionForm(forms.Form):
+#     service = forms.ModelChoiceField(
+#         queryset=Service.objects.filter(active=True),
+#         empty_label="Select a service",
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+    
+#     date = forms.DateField(
+#         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+#         initial=timezone.now().date
+#     )
+    
+#     time = forms.TimeField(
+#         widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+#         initial=timezone.now().time
+#     )
+#      # Add therapist field
+#     therapist = forms.ModelChoiceField(
+#         queryset=CustomUser.objects.none(),  # Will be populated via JS
+#         required=False,
+#         empty_label="Select a therapist (optional)",
+#         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
+#     )
+    
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         date = cleaned_data.get('date')
+#         time = cleaned_data.get('time')
+        
+#         if date and time:
+#             # Combine date and time into a datetime object
+#             from datetime import datetime
+#             date_time = datetime.combine(date, time)
             
-            cleaned_data['date_time'] = date_time
+#             # Convert to timezone-aware datetime
+#             from django.utils import timezone
+#             date_time = timezone.make_aware(date_time)
             
-        return cleaned_data
+#             # Check if the date_time is in the past
+#             if date_time < timezone.now():
+#                 raise ValidationError("Booking time cannot be in the past.")
+            
+#             cleaned_data['date_time'] = date_time
+            
+#         return cleaned_data
 
 class AdditionalServicesForm(forms.Form):
     """Form for selecting additional services"""
