@@ -36,13 +36,17 @@ def therapists_for_service(request):
     start_time = date_time
     end_time = start_time + timedelta(minutes=service_duration)
     
-    # Get all common staff therapists
-    therapists = CustomUser.objects.filter(user_type='COMMONSTAFF')
+    # Filter therapists to only include those whose primary service matches the requested service
+    therapists = CustomUser.objects.filter(
+        user_type='COMMONSTAFF',
+        primary_service_id=service_id
+    )
     
     # Prepare response data
     therapist_data = []
     
     for therapist in therapists:
+        primary_service = therapist.primary_service.name if hasattr(therapist, 'primary_service') and therapist.primary_service else None
         # Check for overlapping bookings
         overlapping_bookings = BookingTherapistAssignment.objects.filter(
             therapist=therapist,
@@ -139,7 +143,8 @@ def therapists_for_service(request):
             'available': is_available,
             'next_available': next_available,
             'conflicts': conflicting_bookings,
-            'schedule': schedule
+            'schedule': schedule,
+            'primary_service': primary_service
         })
     
     return JsonResponse({'therapists': therapist_data, 'service_duration': service_duration})

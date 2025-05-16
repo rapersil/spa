@@ -1,6 +1,6 @@
 
 
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -58,7 +58,7 @@ class TherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, FormView):
             )
             assignment.is_primary = is_primary
             assignment.assigned_by = self.request.user
-            assignment.updated_at = timezone.now()
+            assignment.updated_at = datetime.now()
             assignment.save()
             messages.success(self.request, f"Updated therapist assignment for this booking.")
         except BookingTherapistAssignment.DoesNotExist:
@@ -120,16 +120,16 @@ class TherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, FormView):
         return context
 
 class RemoveTherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
-    pass
-    # model = BookingTherapist
+    model = BookingTherapistAssignment
+    template_name = 'booking/booking_therapist_assignment_confirm_delete.html'
     
-    # def get_success_url(self):
-    #     return reverse('booking_detail', kwargs={'pk': self.object.booking.pk})
+    def get_success_url(self):
+        return reverse('booking_detail', kwargs={'pk': self.object.booking.pk})
     
-    # def delete(self, request, *args, **kwargs):
-    #     therapist_assignment = self.get_object()
-    #     booking = therapist_assignment.booking
-    #     therapist = therapist_assignment.therapist
+    def delete(self, request, *args, **kwargs):
+        therapist_assignment = self.get_object()
+        booking = therapist_assignment.booking
+        therapist = therapist_assignment.therapist
         
-    #     messages.success(request, f"Removed therapist {therapist.get_full_name()} from booking {booking.booking_id}.")
-    #     return super().delete(request, *args, **kwargs)
+        messages.success(request, f"Removed therapist {therapist.get_full_name()} from booking {booking.booking_id}.")
+        return super().delete(request, *args, **kwargs)

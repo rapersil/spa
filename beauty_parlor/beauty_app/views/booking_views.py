@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.db import transaction
 
-from ..models import Booking, Customer, Service, CustomUser, AdditionalService
+from ..models import Booking, BookingTherapistAssignment, Customer, Service, CustomUser, AdditionalService
 from ..forms import BookingForm, AdminBookingForm, BookingSearchForm
 from ..permissions import StaffRequiredMixin, AdminRequiredMixin
 import qrcode
@@ -85,6 +85,10 @@ class BookingDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         main_service_price = booking.get_final_price()
         additional_services_total = sum(service.final_price for service in context['additional_services'])
         context['total_price'] = main_service_price + additional_services_total
+
+        context['service_assignments'] = BookingTherapistAssignment.objects.filter(booking=booking)
+        print(context['service_assignments'])
+
         
         return context
     

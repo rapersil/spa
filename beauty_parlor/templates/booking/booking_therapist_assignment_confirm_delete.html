@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Remove Therapist Assignment{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_detail' object.booking.pk %}">{{ object.booking.booking_id }}</a></li>
+            <li class="breadcrumb-item active">Remove Therapist</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header text-center bg-danger text-white">
+                    <h4 class="mb-0"><span class="material-icons me-2">warning</span>Remove Therapist Assignment</h4>
+                </div>
+                <div class="card-body text-center p-4">
+                    <div class="delete-icon mb-4">
+                        <span class="material-icons" style="font-size: 3rem; color: var(--danger);">person_remove</span>
+                    </div>
+                    
+                    <h5>Are you sure you want to remove this therapist assignment?</h5>
+                    <p class="text-muted mb-4">This action cannot be undone.</p>
+                    
+                    <div class="assignment-summary p-3 mb-4 rounded text-start" style="background-color: var(--gray-100);">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p><strong>Booking ID:</strong> {{ object.booking.booking_id }}</p>
+                                <p><strong>Customer:</strong> {{ object.booking.customer.first_name }} {{ object.booking.customer.last_name }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Therapist:</strong> {{ object.therapist.get_full_name }}</p>
+                                <p><strong>Role:</strong> {% if object.is_primary %}Primary{% else %}Assistant{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center">
+                            <a href="{% url 'booking_detail' object.booking.pk %}" class="btn btn-outline-secondary me-3">
+                                <span class="material-icons me-2">close</span>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <span class="material-icons me-2">delete</span>Remove Assignment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

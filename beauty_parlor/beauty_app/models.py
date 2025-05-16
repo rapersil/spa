@@ -470,6 +470,14 @@ class BookingRequest(models.Model):
     reviewed_by = models.ForeignKey(CustomUser, related_name='reviewed_requests', 
                                    on_delete=models.SET_NULL, null=True, blank=True)
     
+    # preferred_therapist = models.ForeignKey(
+    #     CustomUser, 
+    #     on_delete=models.SET_NULL,
+    #     null=True, 
+    #     blank=True,
+    #     related_name='preferred_booking_requests'
+    # )
+    
     def save(self, *args, **kwargs):
         if not self.request_id:
             self.request_id = f"REQ{str(uuid.uuid4())[:8]}".upper()

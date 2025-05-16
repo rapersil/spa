@@ -135,7 +135,7 @@ urlpatterns = [
     path('booking-requests/<int:pk>/reject/', StaffBookingRequestRejectView.as_view(), name='staff_booking_request_reject'),
     
     path('bookings/<int:booking_id>/assign-therapist/', TherapistAssignmentView.as_view(), name='assign_therapist'),
-    path('therapist-assignment/<int:pk>/remove/', RemoveTherapistAssignmentView.as_view(), name='remove_therapist_assignment'),
+    path('booking/therapist-assignment/<int:pk>/remove/', RemoveTherapistAssignmentView.as_view(), name='remove_therapist_assignment'),
 
     
     path('api/therapists-for-service/', therapists_for_service, name='therapists_for_service'),

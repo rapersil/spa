@@ -379,23 +379,23 @@
                     {%endif%}
                 </div>
                 <div class="card-body p-0">
-                    {% if booking.service_assignments.exists %}
+                    {% if  service_assignments.exists %}
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th>Therapist</th>
                                     <th>Service</th>
-                                    <th>Role</th>
+                                    {% comment %} <th>Role</th> {% endcomment %}
                                     <th>Assigned By</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for assignment in booking.service_assignments.all %}
+                                 {% for assignment in service_assignments %}
                                 <tr>
                                     <td>{{ assignment.therapist.get_full_name }}</td>
-                                    <td>{{ assignment.service.name }}</td>
-                                    <td>{% if assignment.is_primary %}Primary{% else %}Assistant{% endif %}</td>
+                                    <td>{{ assignment.therapist.primary_service.name }}</td>
+                                    {% comment %} <td>{% if assignment.is_primary %}Primary{% else %}Assistant{% endif %}</td> {% endcomment %}
                                     <td>{{ assignment.assigned_by.get_full_name }}</td>
                                 </tr>
                                 {% endfor %}
