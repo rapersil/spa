@@ -16,7 +16,7 @@ class CustomUser(AuditableMixin, AbstractUser):
         ('STAFF', 'Staff'),
         ('ADMIN', 'Admin'),
         ('SUPERADMIN', 'Super Admin'),
-        ('COMMONSTAFF', 'Common Staff'),
+        ('STAFFLEVEL2', 'Common Staff'),
     )
     user_id = models.CharField(max_length=15, unique=True, editable=False)
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)

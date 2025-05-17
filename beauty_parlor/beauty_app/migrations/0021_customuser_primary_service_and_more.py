@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customuser',
             name='user_type',
-            field=models.CharField(choices=[('STAFF', 'Staff'), ('ADMIN', 'Admin'), ('SUPERADMIN', 'Super Admin'), ('COMMONSTAFF', 'Common Staff')], max_length=20),
+            field=models.CharField(choices=[('STAFF', 'Staff'), ('ADMIN', 'Admin'), ('SUPERADMIN', 'Super Admin'), ('STAFFLEVEL2', 'Common Staff')], max_length=20),
         ),
     ]

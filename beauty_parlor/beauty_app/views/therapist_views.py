@@ -95,7 +95,7 @@ class TherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, FormView):
         assignments = BookingTherapistAssignment.objects.filter(booking=self.booking)
         
         # Get all therapists
-        therapists = CustomUser.objects.filter(user_type='COMMONSTAFF')
+        therapists = CustomUser.objects.filter(user_type='STAFFLEVEL2')
         
         # Check availability for each therapist based on exact time match
         therapist_availability = {}

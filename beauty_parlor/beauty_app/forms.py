@@ -52,10 +52,10 @@ class StaffCreationForm(CustomUserCreationForm):
         # Restrict user_type to staff or admin only
         self.fields['user_type'].choices = [
             choice for choice in CustomUser.USER_TYPE_CHOICES 
-            if choice[0] in ['STAFF', 'ADMIN', 'COMMONSTAFF']
+            if choice[0] in ['STAFF', 'ADMIN', 'STAFFLEVEL2']
         ]
         
-        # Show primary_service field only for COMMONSTAFF
+        # Show primary_service field only for STAFFLEVEL2
         # Add any needed attributes or styling
         self.fields['primary_service'].queryset = Service.objects.filter(active=True)
         self.fields['primary_service'].required = False
@@ -63,7 +63,7 @@ class StaffCreationForm(CustomUserCreationForm):
         # Add conditional visibility via JavaScript classes
         self.fields['primary_service'].widget.attrs.update({
             'class': 'form-control service-field',
-            'data-requires-usertype': 'COMMONSTAFF'
+            'data-requires-usertype': 'STAFFLEVEL2'
         })
 
 class CustomUserUpdateForm(forms.ModelForm):
@@ -718,6 +718,6 @@ class TherapistAssignmentForm(forms.Form):
             
             # Set the initial therapist queryset
             self.fields['therapist'].queryset = CustomUser.objects.filter(
-                user_type__in=[ 'COMMONSTAFF'],
+                user_type__in=[ 'STAFFLEVEL2'],
                 is_active=True
             )

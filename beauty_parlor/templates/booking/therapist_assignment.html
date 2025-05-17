@@ -18,48 +18,27 @@
         margin-bottom: 2rem;
     }
     
-    /* Therapist card styling */
-    .therapist-card {
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 15px;
-        transition: all 0.3s ease;
-        position: relative;
-    }
+  
     
-    .therapist-card:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .therapist-card.selected {
-        border-color: var(--color-500);
-        background-color: var(--color-50);
-    }
-    
-    .therapist-card.unavailable {
-        opacity: 0.8;
-        background-color: var(--gray-100);
-    }
-    
+    /* Smaller avatar and headers */
     .therapist-header {
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     
     .therapist-avatar {
-        width: 48px;
-        height: 48px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background-color: var(--color-600);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 15px;
+        margin-right: 10px;
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     
     .therapist-info {
@@ -68,40 +47,32 @@
     
     .therapist-name {
         font-weight: bold;
-        margin-bottom: 4px;
-        font-size: 1.1rem;
+        margin-bottom: 2px;
+        font-size: 1rem;
     }
     
     .therapist-specialty {
         color: var(--gray-600);
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
     
     .therapist-selection {
-        margin-left: 16px;
+        margin-left: 10px;
     }
     
     .availability-indicator {
         display: flex;
         align-items: center;
-        margin-top: 8px;
-        font-size: 0.95rem;
+        margin-top: 6px;
+        font-size: 0.9rem;
     }
     
     .availability-indicator .material-icons {
-        margin-right: 8px;
-        font-size: 18px;
+        margin-right: 6px;
+        font-size: 16px;
     }
     
-    /* Timeline visualization */
-    .schedule-timeline {
-        margin-top: 16px;
-        position: relative;
-        height: 50px;
-        background-color: var(--gray-100);
-        border-radius: 4px;
-        overflow: hidden;
-    }
+    
     
     .schedule-hours {
         display: flex;
@@ -116,7 +87,7 @@
         position: absolute;
         height: 100%;
         border-left: 1px solid var(--gray-300);
-        font-size: 10px;
+        font-size: 9px;
         color: var(--gray-600);
     }
     
@@ -164,13 +135,25 @@
         display: block;
     }
     
+    /* Enhanced next available notice */
     .next-available-notice {
-        margin-top: 12px;
-        padding: 8px 12px;
+        margin-top: 8px;
+        padding: 8px 10px;
         background-color: var(--info-light);
         border-radius: 4px;
         border-left: 4px solid var(--info);
         font-size: 0.9rem;
+    }
+    
+    .next-available-notice.highlighted {
+        background-color: var(--info-light);
+        border-left: 4px solid var(--info);
+        font-weight: bold;
+    }
+    
+    /* Update booking button styling */
+    .update-booking-btn {
+        margin-top: 8px;
     }
     
     .legend {
@@ -237,6 +220,59 @@
         height: 18px;
         margin-right: 8px;
     }
+    
+    /* Updated therapist card styling to match public booking request */
+    .therapist-selection-container {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
+    }
+
+    .therapist-card {
+        border: 1px solid var(--gray-200);
+        border-radius: 6px;
+        padding: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        flex: 0 0 calc(50% - 8px);
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .therapist-card {
+            flex: 0 0 100%;
+        }
+    }
+
+    .therapist-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .therapist-card.selected {
+        border-color: var(--color-500);
+        background-color: var(--color-50);
+    }
+
+    .therapist-card.unavailable {
+        opacity: 0.8;
+        background-color: var(--gray-100);
+    }
+
+    /* Timeline visualization styling */
+    .schedule-timeline {
+        margin-top: 10px;
+        position: relative;
+        height: 40px;
+        background-color: var(--gray-100);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+        
+        
+    
 </style>
 {% endblock %}
 
@@ -391,7 +427,7 @@
                         </div>
                         
                         <div class="mt-3">
-                            <button type="submit" class="btn btn-primary" id="assignButton">
+                            <button type="submit" class="btn btn-primary" id="assignButton" disabled>
                                 <i class="material-icons me-1">person_add</i> Assign Therapist
                             </button>
                         </div>
@@ -418,13 +454,13 @@
                             <li><strong>Primary therapist</strong>: The main therapist responsible for the service</li>
                             <li><strong>Assistant therapists</strong>: Additional therapists who may help with the service</li>
                         </ul>
-                        <p>When assigning therapists, the system checks for availability and warns you of potential conflicts.</p>
+                        <p>When assigning therapists, the system checks for availability and prevents you from assigning unavailable therapists.</p>
                     </div>
                     
                     <div class="alert alert-warning">
                         <h6><i class="material-icons me-2">warning</i>Availability Warnings</h6>
-                        <p>The system will check if therapists are already booked during this time slot, but you can still assign them even if there are conflicts.</p>
-                        <p>Watch for warnings that indicate a therapist might have schedule conflicts.</p>
+                        <p>Therapists who are already booked during this time slot cannot be selected.</p>
+                        <p>If you need to assign a specific therapist who is currently unavailable, you can update the booking time to their next available slot.</p>
                     </div>
                     
                     <div class="alert alert-success">
@@ -432,7 +468,7 @@
                         <p>For the best customer experience:</p>
                         <ul>
                             <li>Always assign at least one primary therapist</li>
-                            <li>Try to avoid scheduling conflicts</li>
+                            <li>Try to maintain the scheduled time when possible</li>
                             <li>Consider therapist specialties when making assignments</li>
                         </ul>
                     </div>
@@ -484,6 +520,84 @@
             }
         });
         
+        // Helper function to format time
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        }
+        
+        // Function to handle therapist selection
+        function handleTherapistSelection(card, therapistId) {
+            // Check if this therapist is unavailable
+            if (card.classList.contains('unavailable')) {
+                // Prevent selection of unavailable therapists
+                const checkbox = card.querySelector('.therapist-checkbox');
+                checkbox.checked = false;
+                
+                // Find the next available time notice
+                const nextAvailableNotice = card.querySelector('.next-available-notice');
+                if (nextAvailableNotice) {
+                    // Highlight it to draw attention
+                    nextAvailableNotice.classList.add('highlighted');
+                    
+                    // If there's no update button already, add one
+                    if (!nextAvailableNotice.querySelector('.update-booking-btn')) {
+                        const nextTimeText = nextAvailableNotice.querySelector('strong').textContent;
+                        const updateBtn = document.createElement('button');
+                        updateBtn.className = 'btn btn-sm btn-primary update-booking-btn w-100';
+                        updateBtn.innerHTML = '<i class="material-icons me-1">update</i>Update Booking Time';
+                        
+                        updateBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            
+                            // Get booking and date information
+                            const bookingId = '{{ booking.pk }}';
+                            const selectedDate = '{{ booking.date_time|date:"Y-m-d" }}';
+                            const nextAvailableTime = nextTimeText;
+                            
+                            // Ask for confirmation
+                            if (confirm(`Would you like to update this booking to ${nextAvailableTime} to work with this therapist?`)) {
+                                // Redirect to booking edit page with new time prefilled
+                                window.location.href = `/bookings/${bookingId}/edit/?new_time=${selectedDate}T${nextAvailableTime}`;
+                            }
+                        });
+                        
+                        nextAvailableNotice.appendChild(updateBtn);
+                    }
+                }
+                
+                return; // Prevent further processing
+            }
+            
+            // If therapist is available, proceed with normal selection
+            const checkbox = card.querySelector('.therapist-checkbox');
+            const isSelected = checkbox.checked;
+            
+            // Clear all previous selections
+            document.querySelectorAll('.therapist-card').forEach(c => {
+                c.classList.remove('selected');
+                const cb = c.querySelector('.therapist-checkbox');
+                if (cb !== checkbox) {
+                    cb.checked = false;
+                }
+            });
+            
+            // Update the selection
+            if (isSelected) {
+                card.classList.add('selected');
+                selectedTherapistInput.value = therapistId;
+            } else {
+                selectedTherapistInput.value = '';
+            }
+            
+            // Update button state
+            updateAssignButtonState();
+        }
+        
+        // Function to load available therapists
         // Function to load available therapists
         function loadAvailableTherapists() {
             // Show loading indicator
@@ -499,7 +613,10 @@
                     therapistLoading.style.display = 'none';
                     
                     if (data.therapists && data.therapists.length > 0) {
-                        // Generate therapist cards
+                        // Update container class for consistent styling
+                        therapistCardsContainer.className = 'therapist-selection-container';
+                        
+                        // Create therapist cards
                         data.therapists.forEach(therapist => {
                             const isAvailable = therapist.available;
                             
@@ -515,12 +632,12 @@
                                 <div class="therapist-avatar">${therapist.name.charAt(0)}</div>
                                 <div class="therapist-info">
                                     <h5 class="therapist-name">${therapist.name}</h5>
-                                    <p class="therapist-specialty">${therapist.primary_service}</p>
+                                    <p class="therapist-specialty">${therapist.primary_service || 'Beauty Therapist'}</p>
                                 </div>
                                 <div class="therapist-selection">
                                     <div class="form-check">
                                         <input class="form-check-input therapist-checkbox" type="checkbox" 
-                                            id="therapist-${therapist.id}">
+                                            id="therapist-${therapist.id}" ${isAvailable ? '' : 'disabled'}>
                                         <label class="form-check-label" for="therapist-${therapist.id}">
                                             Select
                                         </label>
@@ -539,7 +656,7 @@
                             } else {
                                 availabilityIndicator.innerHTML = `
                                     <i class="material-icons text-warning">warning</i>
-                                    <span class="text-warning">Has potential schedule conflicts</span>
+                                    <span class="text-warning">Has schedule conflicts</span>
                                 `;
                             }
                             
@@ -632,6 +749,28 @@
                                     <i class="material-icons me-1">event_available</i>
                                     <span>Next available time: <strong>${therapist.next_available}</strong></span>
                                 `;
+                                
+                                // Add update booking button
+                                const updateBtn = document.createElement('button');
+                                updateBtn.className = 'btn btn-sm btn-primary update-booking-btn w-100';
+                                updateBtn.innerHTML = '<i class="material-icons me-1">update</i>Update Booking Time';
+                                
+                                updateBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    
+                                    // Get booking and date information
+                                    const bookingId = '{{ booking.pk }}';
+                                    const selectedDate = '{{ booking.date_time|date:"Y-m-d" }}';
+                                    const nextAvailableTime = therapist.next_available;
+                                    
+                                    // Ask for confirmation
+                                    if (confirm(`Would you like to update this booking to ${nextAvailableTime} to work with this therapist?`)) {
+                                        // Redirect to booking edit page with new time prefilled
+                                        window.location.href = `/bookings/${bookingId}/edit/?new_time=${selectedDate}T${nextAvailableTime}`;
+                                    }
+                                });
+                                
+                                nextAvailableNotice.appendChild(updateBtn);
                                 card.appendChild(nextAvailableNotice);
                             }
                             
@@ -645,16 +784,21 @@
                                 // Don't handle clicks if clicking on the checkbox directly
                                 if (e.target.classList.contains('therapist-checkbox') || 
                                     e.target.classList.contains('form-check-input') || 
-                                    e.target.classList.contains('form-check-label')) {
+                                    e.target.classList.contains('form-check-label') ||
+                                    e.target.classList.contains('update-booking-btn')) {
                                     return;
                                 }
                                 
                                 // Toggle selection
                                 const checkbox = this.querySelector('.therapist-checkbox');
-                                checkbox.checked = !checkbox.checked;
-                                
-                                // Handle selection
-                                handleTherapistSelection(this, therapist.id);
+                                if (!checkbox.disabled) {
+                                    checkbox.checked = !checkbox.checked;
+                                    // Handle therapist selection
+                                    handleTherapistSelection(this, therapist.id);
+                                } else {
+                                    // Handle unavailable therapist click
+                                    handleTherapistSelection(this, therapist.id);
+                                }
                             });
                             
                             // Add change event to the checkbox
@@ -665,7 +809,7 @@
                         });
                         
                         // Show the therapist cards
-                        therapistCardsContainer.style.display = 'block';
+                        therapistCardsContainer.style.display = 'flex';
                         noTherapistsMessage.style.display = 'none';
                     } else {
                         // No therapists available
@@ -688,48 +832,12 @@
                 });
         }
         
-        // Helper function to format time
-        function formatTime(date) {
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours % 12 || 12;
-            return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-        }
-        
-        // Function to handle therapist selection
-        function handleTherapistSelection(card, therapistId) {
-            // Check if this card is already selected
-            const checkbox = card.querySelector('.therapist-checkbox');
-            const isSelected = checkbox.checked;
-            
-            // Clear all previous selections
-            document.querySelectorAll('.therapist-card').forEach(c => {
-                c.classList.remove('selected');
-                const cb = c.querySelector('.therapist-checkbox');
-                if (cb !== checkbox) {
-                    cb.checked = false;
-                }
-            });
-            
-            // Update the selection
-            if (isSelected) {
-                card.classList.add('selected');
-                selectedTherapistInput.value = therapistId;
-            } else {
-                selectedTherapistInput.value = '';
-            }
-            
-            // Update button state
-            updateAssignButtonState();
-        }
-        
         // Initialize
         loadAvailableTherapists();
         updateAssignButtonState();
         
         // Make alerts non-dismissible
-        document.querySelectorAll('.alert.alert-info').forEach(alert => {
+        document.querySelectorAll('.alert.alert-info, .alert.alert-warning, .alert.alert-success').forEach(alert => {
             if (alert._timeout) clearTimeout(alert._timeout);
             alert.addEventListener('close.bs.alert', (e) => e.preventDefault());
             alert.style.display = 'block';

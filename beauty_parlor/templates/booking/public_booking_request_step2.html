@@ -8,24 +8,94 @@
 <link rel="stylesheet" href="{% static 'css/booking.css' %}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-    /* Existing step indicator styles */
+    /* Step indicator styles */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
     
-    /* Therapist selection styles */
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .step.active {
+        font-weight: bold;
+        color: var(--color-700);
+    }
+    
+    .step.completed {
+        color: var(--color-500);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 50%;
+        background-color: var(--gray-200);
+        margin-right: 5px;
+    }
+    
+    .step.active .step-number {
+        background-color: var(--color-500);
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background-color: var(--color-300);
+        color: white;
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 20px;
+        right: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--gray-200);
+        z-index: -1;
+    }
+    
+    .step:last-child .step-line {
+        display: none;
+    }
+    
+    .step.completed .step-line {
+        background-color: var(--color-300);
+    }
+    
+    /* Updated compact therapist selection styles */
     .therapist-selection-container {
-        margin-top: 20px;
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
     }
     
     .therapist-card {
         border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 20px;
+        border-radius: 6px;
+        padding: 12px;
         transition: all 0.3s ease;
         position: relative;
+        flex: 0 0 calc(50% - 8px);
+        margin-bottom: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .therapist-card {
+            flex: 0 0 100%;
+        }
     }
     
     .therapist-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .therapist-card.selected {
@@ -41,21 +111,21 @@
     .therapist-header {
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     
     .therapist-avatar {
-        width: 48px;
-        height: 48px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background-color: var(--color-600);
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 16px;
+        margin-right: 10px;
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     
     .therapist-info {
@@ -64,35 +134,36 @@
     
     .therapist-name {
         font-weight: bold;
-        margin-bottom: 4px;
-        font-size: 1.1rem;
+        margin-bottom: 2px;
+        font-size: 1rem;
     }
     
     .therapist-specialty {
         color: var(--gray-600);
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
     
     .therapist-selection {
-        margin-left: 16px;
+        margin-left: 10px;
     }
     
     .availability-indicator {
         display: flex;
         align-items: center;
-        margin-top: 10px;
-        font-size: 0.95rem;
+        margin-top: 6px;
+        font-size: 0.9rem;
     }
     
     .availability-indicator .material-icons {
-        margin-right: 8px;
-        font-size: 18px;
+        margin-right: 6px;
+        font-size: 16px;
     }
     
+    /* Smaller timeline visualization */
     .schedule-timeline {
-        margin-top: 16px;
+        margin-top: 10px;
         position: relative;
-        height: 50px;
+        height: 40px;
         background-color: var(--gray-100);
         border-radius: 4px;
         overflow: hidden;
@@ -111,7 +182,7 @@
         position: absolute;
         height: 100%;
         border-left: 1px solid var(--gray-300);
-        font-size: 10px;
+        font-size: 9px;
         color: var(--gray-600);
     }
     
@@ -159,13 +230,26 @@
         display: block;
     }
     
+    /* Enhanced next available notice */
     .next-available-notice {
-        margin-top: 12px;
-        padding: 8px 12px;
+        margin-top: 8px;
+        padding: 8px 10px;
         background-color: var(--info-light);
         border-radius: 4px;
         border-left: 4px solid var(--info);
         font-size: 0.9rem;
+    }
+    
+    .next-available-notice.highlighted {
+        background-color: var(--info-light);
+        border-left: 4px solid var(--info);
+        font-weight: bold;
+    }
+    
+    /* Update time button */
+    .update-time-btn {
+        margin-top: 8px;
+        width: 100%;
     }
     
     .legend {
@@ -423,7 +507,7 @@
                                 <div class="therapist-avatar">${therapist.name.charAt(0)}</div>
                                 <div class="therapist-info">
                                     <h5 class="therapist-name">${therapist.name}</h5>
-                                    <p class="therapist-specialty">Beauty Therapist</p>
+                                    <p class="therapist-specialty">${therapist.primary_service || 'Beauty Therapist'}</p>
                                 </div>
                                 <div class="therapist-selection">
                                     <div class="form-check">
@@ -538,6 +622,33 @@
                                     <i class="material-icons me-1">event_available</i>
                                     <span>Next available time: <strong>${therapist.next_available}</strong> on the selected date</span>
                                 `;
+                                
+                                 // Add update time button
+                                const updateBtn = document.createElement('button');
+                                updateBtn.type = 'button';
+                                updateBtn.className = 'btn btn-sm btn-primary update-time-btn mt-2';
+                                updateBtn.innerHTML = '<i class="material-icons me-1">update</i>Use This Time Instead';
+
+                                updateBtn.addEventListener('click', function() {
+                                    // Update the time input with the next available time properly
+                                    const timeInstance = timeInput._flatpickr;
+                                    const [hours, minutes] = therapist.next_available.split(':').map(Number);
+                                    
+                                    // Create a date object with the correct time
+                                    const newTime = new Date();
+                                    newTime.setHours(hours);
+                                    newTime.setMinutes(minutes);
+                                    
+                                    // Set the time in the Flatpickr instance
+                                    timeInstance.setDate(newTime);
+                                    
+                                    // Re-fetch therapists for this new time
+                                    setTimeout(() => {
+                                        updateAvailableTherapists();
+                                    }, 300);
+                                });
+
+                                nextAvailableNotice.appendChild(updateBtn);
                                 card.appendChild(nextAvailableNotice);
                             }
                             
@@ -551,7 +662,8 @@
                                 // Don't handle clicks on unavailable therapists or if clicking on the checkbox directly
                                 if (!isAvailable || e.target.classList.contains('therapist-checkbox') || 
                                     e.target.classList.contains('form-check-input') || 
-                                    e.target.classList.contains('form-check-label')) {
+                                    e.target.classList.contains('form-check-label') ||
+                                    e.target.classList.contains('update-time-btn')) {
                                     return;
                                 }
                                 
@@ -566,12 +678,14 @@
                             // Add change event to the checkbox
                             const checkbox = card.querySelector('.therapist-checkbox');
                             checkbox.addEventListener('change', function() {
-                                handleTherapistSelection(card, therapist.id);
+                                if (isAvailable) {
+                                    handleTherapistSelection(card, therapist.id);
+                                }
                             });
                         });
                         
                         // Show the therapist cards and legend
-                        therapistSelectionContainer.style.display = 'block';
+                        therapistSelectionContainer.style.display = 'flex';
                         noTherapistsMessage.style.display = 'none';
                         scheduleLegend.style.display = 'flex';
                     } else {

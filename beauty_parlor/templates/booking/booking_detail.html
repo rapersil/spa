@@ -307,7 +307,7 @@
                                 <span class="material-icons me-2">edit</span>Edit Booking
                             </a>
                             {% endif %}
-                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' and booking.status != 'COMPLETED'%}
                             <a href="{% url 'booking_delete' booking.pk %}" class="btn btn-danger">
                                 <span class="material-icons me-2">delete</span>Delete
                             </a>

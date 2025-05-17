@@ -32,13 +32,19 @@ class PublicBookingRequestCreateView(View):
             return render(request, 'booking/public_booking_request_step1.html', {'form': form})
         
         elif step == 2:
-            # Step 2: Service selection
-            # Only allow proceeding to step 2 if step 1 is complete
             if not form_data.get('step1'):
                 messages.error(request, "Please complete step 1 first.")
                 return redirect('public_booking_request_create', step=1)
+            
+            # Check if we have a time update request from the form
+            updated_time = request.GET.get('update_time')
+            
+            # Prepare initial data
+            initial_data = form_data.get('step2', {})
+            if updated_time:
+                initial_data['time'] = updated_time
                 
-            form = ServiceSelectionForm(initial=form_data.get('step2', {}))
+            form = ServiceSelectionForm(initial=initial_data)
 
             service_id = form_data.get('step2', {}).get('service')
             if service_id:
@@ -192,7 +198,6 @@ class PublicBookingRequestCreateView(View):
                 return render(request, 'booking/public_booking_request_step1.html', {'form': form})
         
         elif step == 2:
-            # Process step 2: Service selection
             form = ServiceSelectionForm(request.POST)
             if form.is_valid():
                 # Create a copy of cleaned_data to modify
@@ -215,7 +220,7 @@ class PublicBookingRequestCreateView(View):
                     cleaned_data['date_time'] = cleaned_data['date_time'].isoformat()  # Convert to ISO format string
 
                 
-                 # Handle service and therapist objects
+                # Handle service and therapist objects
                 if 'service' in cleaned_data and cleaned_data['service'] is not None:
                     service_obj = cleaned_data['service']
                     cleaned_data['service'] = service_obj.id

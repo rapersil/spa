@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 from .models import BookingTherapistAssignment, Customer, Service, BookingRequest, CustomUser
 
 # class CustomerSelectionForm(forms.Form):
@@ -150,39 +151,62 @@ class ServiceSelectionForm(forms.Form):
         required=True
     )
     preferred_therapist = forms.ModelChoiceField(
-        queryset=CustomUser.objects.filter(user_type='COMMONSTAFF', is_active=True),
+        queryset=CustomUser.objects.filter(user_type='STAFFLEVEL2', is_active=True),
         label="Preferred Therapist (Optional)",
         widget=forms.Select(attrs={'class': 'form-select'}),
         required=False
     )
     
-    # Add this method to dynamically update available therapists
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'initial' in kwargs and 'time' in kwargs['initial']:
+            # Check if we have a time value passed from AJAX update
+            self.fields['time'].initial = kwargs['initial']['time']
+    
+    # Update the therapist filtering method
     def update_therapists(self, service_id, date_time=None):
         """Dynamically update the therapist field based on the selected service and time"""
         if not service_id:
             self.fields['preferred_therapist'].queryset = CustomUser.objects.filter(
-                user_type='COMMONSTAFF', is_active=True
+                user_type='STAFFLEVEL2', is_active=True
             )
             return
             
         # Filter therapists who can provide this service
         therapists = CustomUser.objects.filter(
-            user_type='COMMONSTAFF', 
+            user_type='STAFFLEVEL2', 
             is_active=True
-        )
+        ).filter(Q(primary_service_id=service_id) | Q(assigned_services__service_id=service_id))
         
-        # If we have date_time, we can filter available therapists
+        # If we have date_time, we can filter available therapists but still show all
         if date_time:
-            # Get therapists who don't have conflicting bookings
-            busy_therapists = BookingTherapistAssignment.objects.filter(
-                booking__date_time=date_time,
-                booking__status__in=['PENDING', 'CONFIRMED']
-            ).values_list('therapist_id', flat=True)
-            
-            # Exclude busy therapists
-            therapists = therapists.exclude(id__in=busy_therapists)
+            # We'll just update the queryset without filtering out unavailable therapists
+            # The UI will handle showing availability status
+            pass
             
         self.fields['preferred_therapist'].queryset = therapists
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        time = cleaned_data.get('time')
+        
+        if date and time:
+            # Combine date and time into a datetime object
+            from datetime import datetime
+            date_time = datetime.combine(date, time)
+            
+            # Convert to timezone-aware datetime
+            from django.utils import timezone
+            date_time = timezone.make_aware(date_time)
+            
+            # Check if the date_time is in the past
+            if date_time < timezone.now():
+                raise ValidationError("Booking time cannot be in the past.")
+            
+            cleaned_data['date_time'] = date_time
+            
+        return cleaned_data
 # class ServiceSelectionForm(forms.Form):
 #     service = forms.ModelChoiceField(
 #         queryset=Service.objects.filter(active=True),
