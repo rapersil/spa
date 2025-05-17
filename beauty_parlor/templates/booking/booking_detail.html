@@ -372,12 +372,13 @@
             <div class="card shadow-sm mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="material-icons me-2">person</i>Assigned Therapists</h5>
-                    {% if booking.status in "PENDING,CONFIRMED" %}
+                    {% if booking.status in "PENDING,CONFIRMED" and booking.date_time >= current_time %}
                     <a href="{% url 'assign_therapist' booking.pk %}" class="btn btn-sm btn-primary">
                         <i class="material-icons me-2">person_add</i>Manage Therapists
                     </a>
                     {%endif%}
                 </div>
+                
                 <div class="card-body p-0">
                     {% if  service_assignments.exists %}
                     <div class="table-responsive">

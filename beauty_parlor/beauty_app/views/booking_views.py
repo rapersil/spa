@@ -79,7 +79,7 @@ class BookingDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         
         # Add additional services to context
         context['additional_services'] = AdditionalService.objects.filter(booking=booking)
-        print(context['additional_services'])
+        
         
         # Calculate total price (main service + additional services)
         main_service_price = booking.get_final_price()
@@ -87,7 +87,9 @@ class BookingDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         context['total_price'] = main_service_price + additional_services_total
 
         context['service_assignments'] = BookingTherapistAssignment.objects.filter(booking=booking)
-        print(context['service_assignments'])
+
+        context['current_time'] = timezone.now()
+        
 
         
         return context
