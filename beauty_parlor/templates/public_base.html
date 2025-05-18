@@ -49,6 +49,13 @@
                             <span class="material-icons">event_add</span>Book Appointment
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'therapist_list' %}active{% endif %}" 
+                        href="{% url 'public_therapist_list' %}">
+                            <span class="material-icons me-2">groups</span>
+                            Therapists
+                        </a>
+                    </li>
                     
                 </ul>
                 <!-- Add this inside the navbar-nav list, after the Services link -->

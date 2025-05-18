@@ -39,8 +39,14 @@ from .views.booking_request_views import (
 from .views.therapist_views import (
     TherapistListView, TherapistAssignmentView, RemoveTherapistAssignmentView, booking_calendar_therapist_view, therapist_detail_api,
   )  # Import the missing views
+from .views.public_therapist_views import (
+    PublicTherapistListView,
+    public_therapist_detail_api,public_booking_calendar_therapist_view
+    )
 from .views.api_views import therapists_for_service
 from .views.session_views import keep_session_alive
+
+
 
 
 
@@ -146,6 +152,10 @@ urlpatterns = [
     # Therapist URLs
     path('therapists/', TherapistListView.as_view(), name='therapist_list'),
     path('api/therapist/<int:therapist_id>/', therapist_detail_api, name='therapist_detail_api'),
+
+    path('therapists/public/', PublicTherapistListView.as_view(), name='public_therapist_list'),
+    path('api/public/therapist/<int:therapist_id>/', public_therapist_detail_api, name='therapist_detail_api_public'),
+    path('calendar/therapist/public/', public_booking_calendar_therapist_view, name='public_booking_calendar_therapist'),
 
     # Therapist Calendar URLs  
     path('calendar/therapist/', booking_calendar_therapist_view, name='booking_calendar_therapist'),
