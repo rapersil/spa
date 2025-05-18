@@ -1,334 +1,805 @@
-/* static/css/sales.css */
-
-/* Sales Summary Cards */
 .summary-card {
     border: none;
     border-radius: 0.8rem;
+    transition: all 0.3s ease;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    position: relative;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
     transition: transform 0.3s ease;
 }
 
 .summary-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--black-10) !important;
+    box-shadow: var(--shadow-lg);
+    background: var(--gradient-secondary);
+    border-color: var(--color-400);
+}
+
+.summary-card:hover::before {
+    transform: scaleX(1);
+}
+
+.summary-card-body {
+    padding: 2rem;
+    text-align: center;
 }
 
 .summary-icon {
-    width: 48px;
-    height: 48px;
-    background-color: var(--color-100);
-    color: var(--color-600);
-    border-radius: 12px;
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 24px;
+    margin: 0 auto 1rem;
+    box-shadow: 0 4px 15px rgba(193, 153, 49, 0.3);
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover .summary-icon {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(154, 112, 37, 0.4);
+}
+
+.summary-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.summary-label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.summary-change {
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.summary-change.positive {
+    color: var(--success);
+}
+
+.summary-change.negative {
+    color: var(--danger);
+}
+
+.summary-change i {
+    font-size: 0.8rem;
+}
+
+/* Enhanced sales table */
+.sales-table-container {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.sales-table-header {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sales-table-header h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.sales-filters {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sales-table {
+    background: var(--card-bg);
+    margin-bottom: 0;
 }
 
 .sales-table th {
-    background-color: var(--color-50);
-    color: var(--color-900);
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.sales-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sales-table tbody tr:hover {
+    background: var(--gradient-subtle);
+    transform: scale(1.01);
+}
+
+.sales-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: var(--text-primary);
+}
+
+.sale-date-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .sale-date {
     display: block;
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .sale-time {
     display: block;
     font-size: 0.85rem;
-    color: var(--gray-700);
+    color: var(--text-secondary);
 }
 
 .sale-amount {
     font-weight: 600;
     color: var(--color-700);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
+.sale-amount::before {
+    content: '';
+    width: 3px;
+    height: 16px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+.sale-customer {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.sale-items {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Enhanced receipt container */
 .receipt-container {
-    max-width: 190mm;        /* Wider for standard paper */
-    margin: 0 auto;
-    border: 1px dashed var(--gray-300);
-    padding: 10px;
-    background-color: var(--white);
+    max-width: 210mm;
+    margin: 2rem auto;
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.8rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.receipt-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
 }
 
 .receipt {
-    padding: 1rem;
-    font-family: Arial, sans-serif;  /* Better for standard printing */
-    max-width: none;                 /* Remove width restriction */
+    padding: 2rem;
+    font-family: 'Montserrat', sans-serif;
     width: 100%;
     margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Enhanced receipt header */
+.receipt-header {
+    text-align: center;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.receipt-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: var(--gradient-primary);
 }
 
 .receipt-header h4 {
-    color: var(--color-800);
-    margin-bottom: 5px;
-    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
     font-weight: bold;
 }
 
 .receipt-header p {
-    margin-bottom: 5px;
-    font-size: 12px;
-    color: var(--gray-700);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
 }
 
 .receipt-header h5 {
-    margin-top: 10px;
-    font-size: 16px;
-    border-top: 1px solid var(--gray-300);
-    border-bottom: 1px solid var(--gray-300);
-    padding: 5px 0;
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.2rem;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 0;
     color: var(--color-700);
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
 }
 
-.receipt-items hr {
-    margin: 0.5rem 0;
-    border-style: dashed;
+/* Receipt sections */
+.receipt-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
-.receipt-card .card-header {
-    background-color: var(--color-50);
+.receipt-section:last-child {
+    margin-bottom: 0;
 }
 
 /* Section headers */
-.customer-header, .service-header, .reference-header, .instruction-header {
+.customer-header,
+.service-header,
+.reference-header,
+.instruction-header {
     font-weight: 600;
-    color: var(--color-700);
-    font-size: 14px;
-    border-bottom: 1px dashed var(--gray-300);
-    padding-bottom: 3px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Discount styling */
+.customer-header i,
+.service-header i,
+.reference-header i,
+.instruction-header i {
+    color: var(--color-600);
+    font-size: 1.2rem;
+}
+
+/* Receipt customer info */
+.receipt-customer {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--color-500);
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.customer-details {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Receipt items */
+.receipt-items {
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.receipt-items-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.receipt-items-table th {
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.receipt-items-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.receipt-items-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.receipt-item {
+    display: flex;
+    justify-content: between;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.receipt-item:last-child {
+    border-bottom: none;
+}
+
+.item-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.item-details {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.item-price {
+    font-weight: 600;
+    color: var(--color-700);
+    white-space: nowrap;
+}
+
+/* Receipt discount styling */
 .receipt-item-discount {
     color: var(--danger);
     font-size: 0.9em;
+    font-weight: 500;
 }
 
-/* Total amount highlight */
+.discount-row {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
+}
+
+/* Receipt total */
+.receipt-total-section {
+    background: var(--gradient-secondary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--color-300);
+    margin-top: 1rem;
+}
+
+.receipt-subtotal {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-color);
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
 .receipt-total {
     font-weight: 600;
-    font-size: 1.1em;
+    font-size: 1.3rem;
+    color: var(--color-700);
+    text-align: right;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--color-500);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Thank you message styling */
+.receipt-total::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Thank you message */
 .thank-you {
+    text-align: center;
     font-weight: 600;
     color: var(--color-700);
-    font-size: 16px;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 /* Notes section */
 .notes {
-    background-color: var(--color-50);
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    border-left: 2px solid var(--color-400);
+    background: var(--gradient-subtle);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    border-left: 3px solid var(--color-500);
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
-/* Receipt payment info */
+/* Payment information */
+.payment-info {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
 .payment-instruction {
-    border-top: 1px dashed var(--gray-300);
-    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+    padding-top: 1rem;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .paid-status {
     color: var(--success);
     font-weight: 600;
+    background: var(--gradient-success);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin-top: 1rem;
 }
 
 .unpaid-status {
     color: var(--danger);
     font-weight: 600;
+    background: var(--gradient-danger);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin-top: 1rem;
 }
 
-/* Receipt body styling */
-.receipt-body {
-    border-radius: 8px;
-    background-color: var(--white);
-}
-
-.receipt-info, .receipt-customer, .receipt-items, .booking-reference {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--color-200);
-}
-
-/* Status badges */
+/* Status badges for sales table */
 .status-badge {
     display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .status-badge.pending {
-    background-color: var(--warning-light);
-    color: var(--warning);
+    background: var(--gradient-warning);
+    color: white;
 }
 
 .status-badge.confirmed {
-    background-color: var(--info-light);
-    color: var(--info);
+    background: var(--gradient-info);
+    color: white;
 }
 
 .status-badge.completed {
-    background-color: var(--success-light);
-    color: var(--success);
+    background: var(--gradient-success);
+    color: white;
 }
 
 .status-badge.cancelled {
-    background-color: var(--danger-light);
-    color: var(--danger);
+    background: var(--gradient-danger);
+    color: white;
 }
 
 /* QR code styling */
 .qr-code {
     text-align: center;
-    margin-top: 15px;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 .qr-code img {
-    max-width: 100px;
+    max-width: 120px;
     margin: 0 auto;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
 }
 
-/* Sale Detail Tables */
+.qr-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* Sale detail tables */
+.sale-details-table,
+.booking-details-table,
+.customer-details-table {
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
 .sale-details-table th,
 .booking-details-table th,
 .customer-details-table th {
     width: 40%;
     font-weight: 600;
-    color: var(--color-800);
+    color: var(--text-primary);
+    background: var(--gradient-subtle);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Payment Form */
-.payment-preview .card {
-    border: 1px solid var(--color-100);
+.sale-details-table td,
+.booking-details-table td,
+.customer-details-table td {
+    width: 60%;
+    padding: 1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Sales Report Form */
+/* Enhanced sales report form */
+.sales-report-container {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.sales-report-header {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sales-report-header h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.report-form {
+    padding: 1.5rem;
+}
+
 .report-form .form-control,
 .report-form .form-select {
-    border: 1px solid var(--color-200);
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .report-form .form-control:focus,
 .report-form .form-select:focus {
     border-color: var(--color-400);
-    box-shadow: 0 0 0 0.25rem var(--color-600-25);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
+    transform: translateY(-2px);
 }
 
 .report-form .input-group-text {
-    background-color: var(--color-50);
-    border: 1px solid var(--color-200);
-    color: var(--color-800);
+    background: var(--gradient-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
+/* Enhanced date preset buttons */
+.date-presets {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.date-preset {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.date-preset:hover {
+    background: var(--gradient-subtle);
+    border-color: var(--color-400);
+    transform: translateY(-2px);
+}
+
+.date-preset.active {
+    background: var(--gradient-primary);
+    border-color: var(--color-600);
+    color: white;
+}
+
+.date-preset.active:hover {
+    background: var(--gradient-button-hover);
+    border-color: var(--color-700);
+}
+
+/* Sales chart container */
 .sales-chart-container {
-    height: 250px;
+    height: 350px;
     position: relative;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    box-shadow: var(--shadow);
 }
 
-/* Filter form styling */
+/* Enhanced sale search form */
+.sale-search-form {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
 .sale-search-form .input-group-text {
-    background-color: var(--color-50);
-    border-color: var(--color-200);
-    color: var(--color-600);
+    background: var(--gradient-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 .sale-search-form .form-control:focus,
 .sale-search-form .form-select:focus {
     border-color: var(--color-400);
-    box-shadow: 0 0 0 0.25rem rgba(222, 17, 200, 0.25);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
 }
 
 .sale-search-form .btn-primary {
-    background-color: var(--color-600);
-    border-color: var(--color-700);
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
 }
 
 .sale-search-form .btn-primary:hover {
-    background-color: var(--color-700);
-    border-color: var(--color-800);
+    background: var(--gradient-button-hover);
+    transform: translateY(-2px);
 }
 
-/* Additional services styling */
-.additional-services {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.additional-services-header {
-    font-weight: bold;
-    margin-top: 15px;
-    margin-bottom: 10px;
-}
-
-.receipt-subtotal {
-    margin-top: 8px;
-    border-top: 1px dashed #ddd;
-    padding-top: 8px;
-}
-
-/* Button styling */
-.btn-group .date-preset.active,
-.btn-group .btn-primary.active {
-    background-color: var(--color-800);
-    border-color: var(--color-800) !important; /* Same as background to hide border */
-    color: var(--white) !important;
-    box-shadow: none !important; /* Remove the focus shadow */
-}
-
-/* Hover state for active button */
-.btn-group .date-preset.active:hover,
-.btn-group .btn-primary.active:hover {
-    background-color: var(--color-900) !important;
-    border-color: var(--color-900) !important;
-}
-
-/* Regular button styling */
-.btn-group .date-preset {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Custom styling for the active button */
-.btn-group .btn-primary,
-.btn-group .date-preset.btn-primary {
-    background-color: var(--color-900);
-    border-color: var(--color-900);
-}
-
-/* Make sure the non-active buttons maintain consistent styling */
-.btn-group .btn-outline-secondary {
-    border-color: var(--color-200);
-}
-
-.btn-group .btn-outline-secondary:hover {
-    background-color: var(--color-1000);
-    color: var(--color-900);
-    border-color: var(--white);
-}
-
+/* Enhanced toast notifications */
 .toast {
-    background-color: var(--white);
+    background: var(--gradient-card);
     border-left: 4px solid var(--color-600);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 .toast-header {
-    border-bottom: 1px solid var(--color-100);
-    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+}
+
+.toast-body {
+    color: var(--text-primary);
 }
 
 .toast-header .btn-close:focus {
     box-shadow: none;
 }
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .summary-card {
+        margin-bottom: 1rem;
+    }
+    
+    .summary-card-body {
+        padding: 1.5rem;
+    }
+    
+    .summary-value {
+        font-size: 1.8rem;
+    }
+    
+    .sales-table th,
+    .sales-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .receipt-container {
+        max-width: 100%;
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .receipt {
+        padding: 1rem;
+    }
+    
+    .receipt-header h4 {
+        font-size: 1.5rem;
+    }
+    
+    .receipt-section {
+        padding: 1rem;
+    }
+    
+    .sales-chart-container {
+        height: 250px;
+        padding: 0.5rem;
+    }
+    
+    .date-presets {
+        flex-direction: column;
+    }
+    
+    .date-preset {
+        width: 100%;
+    }
+    
+    .sales-report-header,
+    .report-form {
+        padding: 1rem;
+    }
+}
+
+/* Print styles */
 @media print {
     body {
         padding: 0;
@@ -344,9 +815,13 @@
     }
     
     .receipt {
-        position: relative;  /* Changed from absolute */
+        position: relative;
         width: 100%;
-        max-width: none;     /* Remove width restriction */
+        max-width: none;
+        background: white;
+        color: black;
+        border: none;
+        border-radius: 0;
     }
     
     .receipt-container {
@@ -354,14 +829,37 @@
         width: 100%;
         max-width: none;
         padding: 0;
+        background: white;
+        box-shadow: none;
+        border-radius: 0;
     }
     
-    .no-print {
+    .receipt-container::before {
         display: none;
     }
     
+    .no-print {
+        display: none !important;
+    }
+    
+    .receipt-section {
+        background: white;
+        border: 1px solid #ddd;
+    }
+    
+    .receipt-header h5 {
+        background: white;
+        color: black;
+    }
+    
+    .status-badge {
+        border: 1px solid #333;
+        color: #000 !important;
+        background: transparent !important;
+    }
+    
     @page {
-        size: auto;          /* Use standard paper */
+        size: auto;
         margin: 10mm;
     }
 }

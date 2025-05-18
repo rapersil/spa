@@ -27,7 +27,6 @@
            
             <a class="navbar-brand" href="{% url 'dashboard' %}">
                 <img src="{% static 'img/Coded_Spa_Logo.png' %}" alt="{{ settings.BEAUTY_PARLOR_NAME }}" class="logo" style="max-width: 100px; height: auto; filter: brightness(0) invert(1); opacity: 0.8;">
-                {% comment %} <span class="d-none d-lg-inline-block">{{ settings.BEAUTY_PARLOR_NAME }}</span> {% endcomment %}
             </a>
              
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -125,6 +124,13 @@
                 </ul>
                 
                 <ul class="navbar-nav">
+                    <!-- Theme Toggle Button -->
+                    <li class="nav-item me-3">
+                        <button class="theme-toggle" title="Toggle Theme">
+                            <span class="material-icons theme-toggle-icon">dark_mode</span>
+                        </button>
+                    </li>
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <span class="material-icons">account_circle</span>{{ user.get_full_name|default:user.username }}
@@ -192,11 +198,15 @@
         </div>
     </footer>
     {% endif %}
+    
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     
     <!-- jQuery -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script src="{% static 'js/theme.js' %}"></script>
     
     <!-- Custom JavaScript -->
     <script src="{% static 'js/main.js' %}"></script>

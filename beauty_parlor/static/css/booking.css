@@ -1,32 +1,48 @@
-/* static/css/booking.css */
-
-/* Booking List Styling */
+/* Booking List Styling with enhanced gradients */
 .booking-search-form .input-group-text {
-    background-color: var(--color-50);
-    border-color: var(--color-200);
-    color: var(--color-600);
+    background: var(--gradient-subtle);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 .booking-search-form .form-control:focus,
 .booking-search-form .form-select:focus {
     border-color: var(--color-400);
-    box-shadow: 0 0 0 0.25rem var(--color-600-25);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.booking-search-form .form-control,
+.booking-search-form .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
 }
 
 .booking-table th {
-    background-color: var(--color-50);
-    color: var(--color-900);
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.booking-table {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .booking-table .booking-date {
     display: block;
     font-weight: 500;
+    color: var(--text-primary);
 }
 
 .booking-table .booking-time {
     display: block;
     font-size: 0.85rem;
-    color: var(--gray-700);
+    color: var(--text-secondary);
 }
 
 .booking-table .booking-price {
@@ -38,6 +54,7 @@
     color: var(--color-700);
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .customer-link:hover {
@@ -46,43 +63,78 @@
 }
 
 .today-booking {
-    background-color: rgba(255, 203, 251, 0.1);
+    background: var(--gradient-alpha-light);
+    border-left: 3px solid var(--color-500);
 }
 
-/* Booking Detail Styling */
+/* Booking Detail Styling with enhanced gradients */
 .booking-detail-card .card-header,
 .customer-info-card .card-header {
-    background-color: var(--color-50);
+    background: var(--gradient-subtle);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.booking-detail-card,
+.customer-info-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
 }
 
 .detail-section-title {
-    color: var(--color-800);
-    border-bottom: 2px solid var(--color-100);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
+    position: relative;
+}
+
+.detail-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: var(--gradient-primary);
 }
 
 .booking-details-table th {
     width: 40%;
     font-weight: 600;
-    color: var(--color-800);
+    color: var(--text-primary);
+    background: var(--gradient-subtle);
+    padding: 12px;
 }
 
 .booking-details-table td {
     width: 60%;
+    padding: 12px;
+    color: var(--text-primary);
+}
+
+.booking-details-table {
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .booking-notes {
-    background-color: var(--color-50);
-    border: 1px solid var(--color-100);
+    background: var(--gradient-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--text-primary);
 }
 
-/* Customer Info Card */
+/* Customer Info Card enhancements */
 .customer-avatar {
     width: 80px;
     height: 80px;
-    background-color: var(--color-300);
-    color: var(--color-900);
+    background: var(--gradient-primary);
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -90,12 +142,26 @@
     font-size: 32px;
     font-weight: bold;
     margin: 0 auto 1rem;
+    box-shadow: 0 4px 15px rgba(193, 153, 49, 0.3);
+    transition: all 0.3s ease;
+}
+
+.customer-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(154, 112, 37, 0.4);
 }
 
 .customer-details .detail-item {
     margin-bottom: 0.75rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-100);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.customer-details .detail-item:hover {
+    background: var(--gradient-subtle);
+    border-radius: 6px;
+    padding: 0.5rem;
 }
 
 .customer-details i {
@@ -104,45 +170,81 @@
     text-align: center;
 }
 
-/* Booking Form Styling */
+/* Enhanced Booking Form Styling */
 .form-section-title {
-    color: var(--color-800);
+    color: var(--text-primary);
     margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.form-section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
 }
 
 .form-section-card {
-    border: 1px solid var(--color-100);
+    border: 1px solid var(--border-color);
     margin-bottom: 1.5rem;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.form-section-card .card-header {
+    background: var(--gradient-subtle);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .selected-customer-avatar {
     width: 50px;
     height: 50px;
-    background-color: var(--color-300);
-    color: var(--color-900);
+    background: var(--gradient-primary);
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     font-weight: bold;
+    box-shadow: 0 2px 8px rgba(193, 153, 49, 0.3);
 }
 
-/* Price Calculator */
+/* Enhanced Price Calculator */
 .price-result {
-    background-color: var(--color-50);
-    border: 1px solid var(--color-100);
+    background: var(--gradient-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
 }
 
 .price-result div:last-child {
-    border-top: 1px solid var(--color-200);
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: 1rem;
 }
 
-/* Delete Confirmation Page */
+.price-calculation {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid var(--color-400);
+}
+
+/* Delete Confirmation Page enhancements */
 .delete-icon {
     width: 80px;
     height: 80px;
-    background-color: rgba(244, 67, 54, 0.1);
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.2));
     color: var(--danger);
     border-radius: 50%;
     display: flex;
@@ -150,16 +252,46 @@
     justify-content: center;
     font-size: 32px;
     margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    }
 }
 
 .booking-summary {
-    background-color: rgba(244, 67, 54, 0.05);
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
     border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
 }
 
-/* Flatpickr customization */
+/* Enhanced Flatpickr customization */
 .flatpickr-calendar.open {
     z-index: 1050;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    background: var(--card-bg);
+}
+
+.flatpickr-day {
+    color: var(--text-primary);
+}
+
+.flatpickr-day:hover {
+    background: var(--gradient-subtle);
 }
 
 .flatpickr-day.selected,
@@ -180,8 +312,9 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: var(--color-600);
+    background: var(--gradient-primary);
     border-color: var(--color-600);
+    color: white;
 }
 
 .flatpickr-time .numInputWrapper span.arrowUp:after {
@@ -192,36 +325,139 @@
     border-top-color: var(--color-600);
 }
 
-/* Minimum height for cards */
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* Enhanced card minimum height */
 .card.shadow-sm.mb-4 {
     min-height: 250px;
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card.shadow-sm.mb-4:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .expected-start-info {
     margin-top: 4px;
     font-size: 0.85rem;
-    color: var(--color-700);
+    color: var(--text-secondary);
+    background: var(--gradient-subtle);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border-left: 3px solid var(--color-500);
 }
 
 .expected-start-info i {
     color: var(--color-600);
+    margin-right: 0.5rem;
 }
 
-/* Booking receipt styling */
+/* Enhanced booking receipt styling */
 .booking-receipt {
     max-width: 80mm;
     margin: 0 auto;
     padding: 15px;
-    border: 1px solid var(--color-200);
-    background-color: var(--white);
-    box-shadow: 0 4px 8px var(--black-10);
+    border: 1px solid var(--border-color);
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-lg);
     font-family: 'Courier New', monospace;
+    border-radius: 8px;
+}
+
+.booking-receipt .receipt-header {
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.booking-receipt .receipt-items {
+    margin-bottom: 1rem;
+}
+
+.booking-receipt .receipt-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+
+.booking-receipt .receipt-total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--border-color);
+    text-align: right;
 }
 
 .receipt-item-discount {
-    color: var(--color-600);
+    color: var(--danger);
+    font-weight: 500;
 }
 
+/* Status badge enhancements */
+.booking-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.booking-status.pending {
+    background: var(--gradient-warning);
+    color: white;
+}
+
+.booking-status.confirmed {
+    background: var(--gradient-info);
+    color: white;
+}
+
+.booking-status.completed {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.booking-status.cancelled {
+    background: var(--gradient-danger);
+    color: white;
+}
+
+/* Enhanced form styling */
+.booking-form .form-control,
+.booking-form .form-select {
+    transition: all 0.3s ease;
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+.booking-form .form-control:focus,
+.booking-form .form-select:focus {
+    background-color: var(--input-bg);
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
+    transform: translateY(-2px);
+}
+
+/* Enhanced input group styling */
+.input-group-text {
+    background: var(--gradient-subtle);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Print styles */
 @media print {
     body * {
         visibility: hidden;
@@ -240,9 +476,55 @@
         padding: 15px;
         border: none;
         box-shadow: none;
+        background: white;
+        color: black;
     }
     
     .no-print {
         display: none !important;
+    }
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .booking-detail-card,
+    .customer-info-card {
+        margin-bottom: 1rem;
+    }
+    
+    .booking-details-table th,
+    .booking-details-table td {
+        padding: 8px;
+    }
+    
+    .customer-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .form-section-card {
+        margin-bottom: 1rem;
+    }
+    
+    .booking-receipt {
+        max-width: 100%;
+        margin: 1rem;
+    }
+}
+
+/* Loading state animations */
+.booking-loading {
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
     }
 }

@@ -5,277 +5,25 @@
 {% block title %}Therapist Calendar - {{ current_date|date:"M d, Y" }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/booking.css' %}">
-<link rel="stylesheet" href="{% static 'css/booking_calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/therapist_calendar.css' %}">
 <style>
+    /* Dynamic grid template columns based on therapist count */
     .therapist-calendar-container {
-        display: grid;
         grid-template-columns: 80px repeat({{ therapists|length }}, 1fr);
-        gap: 1px;
-        background-color: var(--gray-200);
-        border-radius: 8px;
-        overflow: hidden;
-        min-height: 600px;
+        grid-template-rows: 60px repeat({{ hours|length }}, 60px);
     }
     
     .time-column {
-        background-color: var(--gray-50);
-        display: grid;
         grid-template-rows: 60px repeat({{ hours|length }}, 60px);
-        border-right: 2px solid var(--gray-300);
-    }
-    
-    .time-column-header {
-        background-color: var(--color-100);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        color: var(--color-700);
-        border-bottom: 1px solid var(--gray-300);
-    }
-    
-    .time-slot {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-bottom: 1px solid var(--gray-200);
-        font-size: 0.85rem;
-        color: var(--gray-600);
-        background-color: white;
     }
     
     .therapist-column {
-        background-color: white;
-        display: grid;
         grid-template-rows: 60px repeat({{ hours|length }}, 60px);
-        position: relative;
-        min-width: 200px;
     }
     
-    .therapist-header {
-        background: linear-gradient(135deg, var(--color-100), var(--color-200));
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 0.5rem;
-        border-bottom: 2px solid var(--color-300);
-        text-align: center;
-    }
-    
-    .therapist-avatar-small {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid var(--color-300);
-        margin-bottom: 0.25rem;
-    }
-    
-    .therapist-initials-small {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--color-400), var(--color-600));
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-        font-weight: bold;
-        margin-bottom: 0.25rem;
-        border: 2px solid var(--color-300);
-    }
-    
-    .therapist-name {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--color-700);
-        margin-bottom: 0.1rem;
-    }
-    
-    .therapist-specialty {
-        font-size: 0.7rem;
-        color: var(--color-600);
-    }
-    
-    .calendar-hour-slot {
-        border-bottom: 1px solid var(--gray-200);
-        position: relative;
-        display: grid;
-        grid-template-rows: repeat(8, 1fr);
-    }
-    
-    .half-hour-line {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background-color: var(--gray-100);
-        z-index: 1;
-    }
-    
-    .quarter-hour-line {
-        position: absolute;
-        height: 1px;
-        left: 0;
-        right: 0;
-        background-color: var(--gray-50);
-        z-index: 1;
-    }
-    
-    .quarter-hour-line:nth-child(3) {
-        top: 25%;
-    }
-    
-    .quarter-hour-line:nth-child(4) {
-        top: 75%;
-    }
-    
-    .therapist-booking {
-        position: absolute;
-        left: 2px;
-        right: 2px;
-        border-radius: 4px;
-        padding: 4px 6px;
-        color: white;
-        font-size: 0.7rem;
-        line-height: 1.2;
-        overflow: hidden;
-        z-index: 10;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-        border-left: 3px solid rgba(255,255,255,0.7);
-    }
-    
-    .therapist-booking:hover {
-        transform: scale(1.02);
-        z-index: 15;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    .therapist-booking.booking-pending {
-        background: linear-gradient(135deg, var(--warning), var(--warning-dark));
-    }
-    
-    .therapist-booking.booking-confirmed {
-        background: linear-gradient(135deg, var(--info), var(--info-dark));
-    }
-    
-    .therapist-booking.booking-completed {
-        background: linear-gradient(135deg, var(--success), var(--success-dark));
-    }
-    
-    .therapist-booking.booking-cancelled {
-        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
-    }
-    
-    .booking-service {
-        font-weight: 600;
-        margin-bottom: 1px;
-    }
-    
-    .booking-client-small {
-        opacity: 0.9;
-        font-size: 0.65rem;
-    }
-    
-    .booking-time-small {
-        font-size: 0.6rem;
-        opacity: 0.8;
-        margin-top: 1px;
-    }
-    
-    .expected-start-indicator {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background-color: var(--warning);
-        z-index: 5;
-        opacity: 0.8;
-    }
-    
-    .expected-start-indicator::before {
-        content: '';
-        position: absolute;
-        left: -4px;
-        top: -2px;
-        width: 0;
-        height: 0;
-        border-left: 4px solid var(--warning);
-        border-top: 3px solid transparent;
-        border-bottom: 3px solid transparent;
-    }
-    
-    .calendar-stats {
-        background: linear-gradient(135deg, var(--color-50), var(--color-100));
-        border: 1px solid var(--color-200);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .stat-item {
-        background: white;
-        padding: 0.75rem;
-        border-radius: 6px;
-        border-left: 3px solid var(--color-400);
-    }
-    
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--color-700);
-    }
-    
-    .stat-label {
-        font-size: 0.8rem;
-        color: var(--color-600);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .day-navigation {
-        background: white;
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .current-day-badge {
-        background: var(--color-500);
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        margin-left: 0.5rem;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .therapist-calendar-container {
-            grid-template-columns: 60px repeat({{ therapists|length }}, minmax(150px, 1fr));
-            overflow-x: auto;
-        }
-        
-        .therapist-name {
-            font-size: 0.7rem;
-        }
-        
-        .therapist-specialty {
-            display: none;
-        }
+    /* CSS custom property for responsive design */
+    :root {
+        --therapist-count: {{ therapists|length }};
     }
 </style>
 {% endblock %}
@@ -305,7 +53,7 @@
     <div class="day-navigation">
         <div class="d-flex justify-content-between align-items-center">
             <a href="?date={{ prev_date|date:'Y-m-d' }}" class="btn btn-outline-primary">
-                <span class="material-icons">chevron_left</span> Previous Day
+                <span class="material-icons me-1">chevron_left</span> Previous Day
             </a>
             <div class="text-center">
                 <h4 class="mb-0">
@@ -316,7 +64,7 @@
                 </h4>
             </div>
             <a href="?date={{ next_date|date:'Y-m-d' }}" class="btn btn-outline-primary">
-                Next Day <span class="material-icons">chevron_right</span>
+                Next Day <span class="material-icons ms-1">chevron_right</span>
             </a>
         </div>
     </div>
@@ -336,11 +84,21 @@
                 <div class="stat-value">{{ therapists|length }}</div>
                 <div class="stat-label">Total Therapists</div>
             </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ available_therapists|default:0 }}</div>
+                <div class="stat-label">Available Now</div>
+            </div>
         </div>
     </div>
 
     <!-- Calendar Grid -->
     <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <span class="material-icons me-2">calendar_view_week</span>
+                Daily Schedule
+            </h5>
+        </div>
         <div class="card-body p-1">
             <div class="therapist-calendar-container">
                 <!-- Time Column -->
@@ -367,10 +125,12 @@
                     <!-- Therapist Header -->
                     <div class="therapist-header">
                         {% if therapist.profile_picture %}
-                        <img src="{{ therapist.profile_picture.url }}" alt="{{ therapist.get_full_name }}" class="therapist-avatar-small">
+                        <img src="{{ therapist.profile_picture.url }}" 
+                             alt="{{ therapist.get_full_name }}" 
+                             class="therapist-avatar-small">
                         {% else %}
                         <div class="therapist-initials-small">
-                            {{ therapist.first_name|first }}{{ therapist.last_name|first }}
+                            {{ therapist.first_name|first|upper }}{{ therapist.last_name|first|upper }}
                         </div>
                         {% endif %}
                         <div class="therapist-name">{{ therapist.get_full_name }}</div>
@@ -398,14 +158,15 @@
                        class="therapist-booking booking-{{ booking.status|lower }}"
                        style="top: {{ booking.start_row|multiply:7.5 }}px; height: {{ booking.end_row|subtract:booking.start_row|multiply:7.5 }}px;"
                        data-bs-toggle="tooltip"
-                       title="{{ booking.customer.first_name }} {{ booking.customer.last_name }} - {{ booking.service.name }}">
+                       data-bs-placement="top"
+                       title="{{ booking.customer.first_name }} {{ booking.customer.last_name }} - {{ booking.service.name }} ({{ booking.date_time|date:'H:i' }} - {{ booking.end_time|date:'H:i' }})">
                         <div class="booking-service">{{ booking.service.name }}</div>
                         <div class="booking-client-small">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
                         <div class="booking-time-small">
                             {{ booking.date_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
                             {% with wait_minutes=booking.get_wait_time_minutes %}
                                 {% if wait_minutes > 0 %}
-                                    <br><small>Est: {{ booking.get_expected_start_time|date:"H:i" }}</small>
+                                    <br><small class="expected-time">Est: {{ booking.get_expected_start_time|date:"H:i" }}</small>
                                 {% endif %}
                             {% endwith %}
                         </div>
@@ -417,7 +178,8 @@
                         <div class="expected-start-indicator" 
                              style="top: {{ booking.expected_start_row|multiply:7.5 }}px;"
                              data-bs-toggle="tooltip"
-                             title="Expected start time: {{ booking.get_expected_start_time|date:'H:i' }}"></div>
+                             data-bs-placement="right"
+                             title="Expected start time: {{ booking.get_expected_start_time|date:'H:i' }} ({{ wait_minutes }} min delay)"></div>
                         {% endif %}
                     {% endwith %}
                     {% endfor %}
@@ -428,77 +190,65 @@
     </div>
     
     <!-- Legend -->
-    <div class="card mt-3">
+    <div class="card legend-card mt-3">
+        <div class="card-header">
+            <h6 class="card-title mb-0">
+                <span class="material-icons me-2">info</span>
+                Status Legend
+            </h6>
+        </div>
         <div class="card-body">
-            <h6 class="card-title">Status Legend</h6>
-            <div class="d-flex flex-wrap gap-3">
-                <div class="d-flex align-items-center">
-                    <div class="booking-status-legend booking-pending me-2"></div>
-                    <span>Pending</span>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap gap-4">
+                        <div class="legend-item">
+                            <div class="booking-status-legend booking-pending"></div>
+                            <span class="legend-text">Pending</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="booking-status-legend booking-confirmed"></div>
+                            <span class="legend-text">Confirmed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="booking-status-legend booking-completed"></div>
+                            <span class="legend-text">Completed</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="booking-status-legend booking-cancelled"></div>
+                            <span class="legend-text">Cancelled</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex align-items-center">
-                    <div class="booking-status-legend booking-confirmed me-2"></div>
-                    <span>Confirmed</span>
+                <div class="col-md-4">
+                    <div class="legend-item">
+                        <div class="expected-start-legend"></div>
+                        <span class="legend-text">Expected Start (when delayed)</span>
+                    </div>
                 </div>
-                <div class="d-flex align-items-center">
-                    <div class="booking-status-legend booking-completed me-2"></div>
-                    <span>Completed</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="booking-status-legend booking-cancelled me-2"></div>
-                    <span>Cancelled</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="expected-start-legend me-2"></div>
-                    <span>Expected Start (when delayed)</span>
-                </div>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <span class="material-icons me-1" style="font-size: 1rem;">info</span>
+                    Click on any booking to view details. Hover over delayed bookings to see expected start times.
+                </small>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .booking-status-legend {
-        width: 20px;
-        height: 12px;
-        border-radius: 3px;
-    }
-    
-    .booking-status-legend.booking-pending {
-        background: linear-gradient(135deg, var(--warning), var(--warning-dark));
-    }
-    
-    .booking-status-legend.booking-confirmed {
-        background: linear-gradient(135deg, var(--info), var(--info-dark));
-    }
-    
-    .booking-status-legend.booking-completed {
-        background: linear-gradient(135deg, var(--success), var(--success-dark));
-    }
-    
-    .booking-status-legend.booking-cancelled {
-        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
-    }
-    
-    .expected-start-legend {
-        width: 20px;
-        height: 2px;
-        background-color: var(--warning);
-        position: relative;
-    }
-    
-    .expected-start-legend::before {
-        content: '';
-        position: absolute;
-        left: -3px;
-        top: -2px;
-        width: 0;
-        height: 0;
-        border-left: 3px solid var(--warning);
-        border-top: 3px solid transparent;
-        border-bottom: 3px solid transparent;
-    }
-</style>
+    <!-- Empty State (if no bookings) -->
+    {% if total_bookings == 0 %}
+    <div class="card mt-3">
+        <div class="card-body text-center py-5">
+            <span class="material-icons" style="font-size: 4rem; color: var(--text-muted);">event_busy</span>
+            <h5 class="mt-3 text-muted">No appointments scheduled</h5>
+            <p class="text-muted">There are no appointments scheduled for {{ current_date|date:"F d, Y" }}.</p>
+            <a href="{% url 'booking_create' %}" class="btn btn-primary">
+                <span class="material-icons me-2">add</span>Schedule Appointment
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -507,8 +257,72 @@
         // Initialize tooltips for bookings
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                trigger: 'hover'
+            });
         });
+
+        // Enhanced hover effects for bookings
+        const bookings = document.querySelectorAll('.therapist-booking');
+        bookings.forEach(booking => {
+            booking.addEventListener('mouseenter', function() {
+                this.style.zIndex = '20';
+            });
+            
+            booking.addEventListener('mouseleave', function() {
+                this.style.zIndex = '10';
+            });
+        });
+
+        // Auto-refresh calendar every 5 minutes to update booking statuses
+        setInterval(function() {
+            const currentUrl = new URL(window.location);
+            const currentDate = currentUrl.searchParams.get('date');
+            
+            // Only refresh if we're still on the same date
+            if (currentDate === '{{ current_date|date:"Y-m-d" }}' || 
+                (!currentDate && '{{ current_date|date:"Y-m-d" }}' === '{{ today|date:"Y-m-d" }}')) {
+                window.location.reload();
+            }
+        }, 300000); // 5 minutes
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        document.querySelector('a[href*="date={{ prev_date|date:"Y-m-d" }}"]').click();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        document.querySelector('a[href*="date={{ next_date|date:"Y-m-d" }}"]').click();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        window.location.href = '{% url "booking_create" %}';
+                        break;
+                }
+            }
+        });
+
+        // Show keyboard shortcuts in tooltip on page load
+        setTimeout(function() {
+            if (!localStorage.getItem('calendar_shortcuts_shown')) {
+                const shortcutsTooltip = new bootstrap.Tooltip(document.body, {
+                    title: 'Keyboard shortcuts: Alt+← Previous day, Alt+→ Next day, Alt+N New booking',
+                    placement: 'top',
+                    trigger: 'manual'
+                });
+                shortcutsTooltip.show();
+                
+                setTimeout(() => {
+                    shortcutsTooltip.hide();
+                    localStorage.setItem('calendar_shortcuts_shown', 'true');
+                }, 3000);
+            }
+        }, 1000);
     });
 </script>
 {% endblock %}

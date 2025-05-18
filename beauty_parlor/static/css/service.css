@@ -1,28 +1,54 @@
-/* static/css/service.css */
-
-/* Service Cards */
 .service-card {
     overflow: hidden;
     transition: all 0.3s ease;
-    border: none;
+    border: 1px solid var(--border-color);
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
 .service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--black-10) !important;
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    background: var(--gradient-secondary);
+    border-color: var(--color-400);
 }
 
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Enhanced service image container */
 .service-image-container {
     position: relative;
     height: 200px;
     overflow: hidden;
-    background-color: var(--color-100);
+    background: var(--gradient-subtle);
+    border-radius: 0.8rem 0.8rem 0 0;
 }
 
 .service-image {
     width: 100%;
     height: 200px;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover .service-image {
+    transform: scale(1.05);
 }
 
 .service-image-placeholder {
@@ -31,53 +57,155 @@
     justify-content: center;
     align-items: center;
     height: 100%;
-    color: var(--color-400);
+    color: var(--text-muted);
+    background: var(--gradient-subtle);
+    transition: all 0.3s ease;
 }
 
-.inactive-service {
-    opacity: 0.7;
+.service-card:hover .service-image-placeholder {
+    background: var(--gradient-secondary);
+    color: var(--color-600);
 }
 
-.inactive-badge, .discount-badge {
-    position: absolute;
-    top: 10px;
+.service-image-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.6;
 }
 
-.inactive-badge {
-    right: 10px;
+.service-image-placeholder span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
-.discount-badge {
-    left: 10px;
+/* Service card content */
+.service-card .card-body {
+    padding: 1.5rem;
+    background: inherit;
+}
+
+.service-card .card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
 }
 
 .service-description {
     min-height: 72px;
-    color: var(--gray-700);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
 }
 
+/* Enhanced service meta information */
 .service-meta {
     display: flex;
     justify-content: space-between;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--color-100);
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+}
+
+.price-section, .duration-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    flex: 1;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.price-section:hover, .duration-section:hover {
+    background: var(--gradient-secondary);
+    transform: translateY(-2px);
 }
 
 .price-label, .duration-label {
-    font-size: 0.85rem;
-    color: var(--gray-600);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
 }
 
 .price-value {
     font-weight: bold;
     color: var(--color-700);
+    font-size: 1.2rem;
 }
 
-/* Service Detail Page */
+.duration-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+/* Service status badges */
+.inactive-service {
+    opacity: 0.7;
+    filter: grayscale(30%);
+}
+
+.inactive-badge, .discount-badge {
+    position: absolute;
+    top: 10px;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.inactive-badge {
+    right: 10px;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(176, 28, 28, 0.9));
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.discount-badge {
+    left: 10px;
+    background: var(--gradient-warning);
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(255, 152, 0, 0.5);
+    }
+}
+
+/* Enhanced service detail page */
+.service-detail-container {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
 .service-detail-image-container {
     position: relative;
-    background-color: var(--color-100);
+    background: var(--gradient-subtle);
     min-height: 300px;
+    overflow: hidden;
+}
+
+.service-detail-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
 }
 
 .service-detail-image-placeholder {
@@ -86,63 +214,346 @@
     justify-content: center;
     align-items: center;
     height: 300px;
+    color: var(--text-muted);
+    background: var(--gradient-subtle);
+}
+
+.service-detail-image-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
     color: var(--color-400);
 }
 
+.service-detail-image-placeholder span {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+/* Service detail meta grid */
 .service-detail-meta {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-100);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.meta-item {
+    background: var(--gradient-subtle);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--color-500);
+    transition: all 0.3s ease;
+}
+
+.meta-item:hover {
+    background: var(--gradient-secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .meta-label {
     display: block;
     font-size: 0.85rem;
-    color: var(--gray-600);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
 }
 
 .meta-value {
     font-weight: bold;
-    color: var(--gray-800);
+    color: var(--text-primary);
+    font-size: 1.1rem;
 }
 
 .meta-value.price {
     color: var(--color-700);
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Carousel Controls */
+.meta-value.price::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Service description section */
+.service-detail-description {
+    padding: 1.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    line-height: 1.7;
+}
+
+.service-detail-description h5 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.service-detail-description h5::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Enhanced carousel controls */
 .carousel-control-prev, 
 .carousel-control-next {
-    background-color: var(--black-25);
-    width: 40px;
-    height: 40px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    background: var(--gradient-primary);
+    border-color: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-control-prev {
+    left: 20px;
+}
+
+.carousel-control-next {
+    right: 20px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-size: 20px 20px;
+}
+
+.carousel-indicators {
+    bottom: 20px;
 }
 
 .carousel-indicators button {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin: 0 5px;
+    transition: all 0.3s ease;
 }
 
 .carousel-indicators button.active {
-    background-color: var(--white);
+    background-color: white;
+    border-color: var(--color-500);
+    transform: scale(1.2);
 }
 
-.discount-badge {
+.carousel-indicators button:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+}
+
+/* Service grid layout */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.services-header {
+    background: var(--gradient-subtle);
+    padding: 2rem;
+    border-radius: 0.8rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.services-header::before {
+    content: '';
     position: absolute;
-    left: 10px;
-    top: 10px;
-    background-color: var(--color-600-80);
-    border-radius: 4px;
-    padding: 5px 8px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-overlay);
+    z-index: 1;
+}
+
+.services-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+.services-header h2 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.services-header p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Service categories */
+.service-category {
+    margin-bottom: 3rem;
+}
+
+.category-header {
+    background: var(--gradient-secondary);
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.category-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.category-description {
+    color: var(--text-secondary);
+    margin: 0.5rem 0 0 0;
+    font-size: 0.95rem;
+}
+
+/* Service actions */
+.service-actions {
+    padding: 1rem 1.5rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column;
+    gap: 0.75rem;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.service-actions .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .service-detail-meta {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    .service-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .price-section, .duration-section {
+        margin: 0;
+        width: 100%;
+    }
+    
+    .service-card {
+        margin-bottom: 1rem;
+    }
+    
+    .services-header {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .service-actions {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+    }
+    
+    .service-actions .btn {
+        width: 100%;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .carousel-control-prev {
+        left: 10px;
+    }
+    
+    .carousel-control-next {
+        right: 10px;
+    }
+}
+
+/* Loading states */
+.service-loading {
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    border-radius: 0.8rem;
+    height: 300px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Print styles */
+@media print {
+    .service-card,
+    .service-detail-container {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .service-actions,
+    .carousel-control-prev,
+    .carousel-control-next,
+    .carousel-indicators {
+        display: none;
+    }
+    
+    .service-detail-image-container {
+        height: auto;
+        min-height: 200px;
+    }
 }

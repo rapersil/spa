@@ -1,0 +1,636 @@
+.therapist-calendar-container {
+    display: grid;
+    gap: 1px;
+    background-color: var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 600px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+/* Time column styling */
+.time-column {
+    background-color: var(--bg-secondary);
+    display: grid;
+    border-right: 2px solid var(--border-color);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-column-header {
+    background: var(--gradient-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem;
+}
+
+.time-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background-color: var(--card-bg);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.time-slot:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Therapist column styling */
+.therapist-column {
+    background-color: var(--card-bg);
+    display: grid;
+    position: relative;
+    min-width: 200px;
+    border-right: 1px solid var(--border-color);
+}
+
+.therapist-column:last-child {
+    border-right: none;
+}
+
+.therapist-header {
+    background: var(--gradient-subtle);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.therapist-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-overlay);
+    z-index: 1;
+}
+
+.therapist-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+.therapist-avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.therapist-avatar-small:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.therapist-initials-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(193, 153, 49, 0.3);
+    transition: all 0.3s ease;
+}
+
+.therapist-initials-small:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(154, 112, 37, 0.4);
+}
+
+.therapist-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.therapist-specialty {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Calendar hour slots */
+.calendar-hour-slot {
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    min-height: 60px;
+}
+
+.half-hour-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--bg-tertiary);
+    z-index: 1;
+}
+
+.quarter-hour-line {
+    position: absolute;
+    height: 1px;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-secondary);
+    z-index: 1;
+}
+
+.quarter-hour-line:nth-child(3) {
+    top: 25%;
+}
+
+.quarter-hour-line:nth-child(4) {
+    top: 75%;
+}
+
+/* Booking styling */
+.therapist-booking {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: white;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    overflow: hidden;
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+}
+
+.therapist-booking:hover {
+    transform: scale(1.02);
+    z-index: 15;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+.therapist-booking.booking-pending {
+    background: var(--gradient-warning);
+    border-left: 4px solid var(--warning-dark);
+}
+
+.therapist-booking.booking-confirmed {
+    background: var(--gradient-info);
+    border-left: 4px solid var(--info-dark);
+}
+
+.therapist-booking.booking-completed {
+    background: var(--gradient-success);
+    border-left: 4px solid var(--success-dark);
+}
+
+.therapist-booking.booking-cancelled {
+    background: var(--gradient-danger);
+    border-left: 4px solid var(--danger-dark);
+    opacity: 0.8;
+}
+
+.booking-service {
+    font-weight: 600;
+    margin-bottom: 2px;
+    font-size: 0.8rem;
+}
+
+.booking-client-small {
+    opacity: 0.95;
+    font-size: 0.7rem;
+    margin-bottom: 2px;
+}
+
+.booking-time-small {
+    font-size: 0.65rem;
+    opacity: 0.9;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+/* Expected start indicator */
+.expected-start-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--warning), var(--warning-dark));
+    z-index: 5;
+    opacity: 0.9;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(255, 152, 0, 0.3);
+}
+
+.expected-start-indicator::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid var(--warning);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+}
+
+/* Statistics section */
+.calendar-stats {
+    background: var(--gradient-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    text-align: center;
+}
+
+.stat-item {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--color-500);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.stat-item:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Day navigation */
+.day-navigation {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.current-day-badge {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    box-shadow: 0 2px 6px rgba(193, 153, 49, 0.3);
+}
+
+/* Legend section */
+.legend-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.booking-status-legend {
+    width: 24px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.booking-status-legend.booking-pending {
+    background: var(--gradient-warning);
+}
+
+.booking-status-legend.booking-confirmed {
+    background: var(--gradient-info);
+}
+
+.booking-status-legend.booking-completed {
+    background: var(--gradient-success);
+}
+
+.booking-status-legend.booking-cancelled {
+    background: var(--gradient-danger);
+}
+
+.expected-start-legend {
+    width: 24px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--warning), var(--warning-dark));
+    position: relative;
+    display: inline-block;
+    border-radius: 2px;
+}
+
+.expected-start-legend::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid var(--warning);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-text {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Dark mode specific improvements */
+[data-theme="dark"] .therapist-calendar-container {
+    background-color: #404040;
+    border-color: #555555;
+}
+
+[data-theme="dark"] .time-column {
+    background-color: #2d2d2d;
+    border-right-color: #555555;
+}
+
+[data-theme="dark"] .time-column-header {
+    background: linear-gradient(135deg, #404040, #555555);
+    color: #ffffff;
+    border-bottom-color: #555555;
+}
+
+[data-theme="dark"] .time-slot {
+    background-color: #2d2d2d;
+    color: #b0b0b0;
+    border-bottom-color: #404040;
+}
+
+[data-theme="dark"] .time-slot:hover {
+    background-color: #353535;
+}
+
+[data-theme="dark"] .therapist-column {
+    background-color: #2d2d2d;
+    border-right-color: #404040;
+}
+
+[data-theme="dark"] .therapist-header {
+    background: linear-gradient(135deg, #353535, #404040);
+    border-bottom-color: #555555;
+}
+
+[data-theme="dark"] .therapist-name {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .therapist-specialty {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .therapist-avatar-small {
+    border-color: #666666;
+}
+
+[data-theme="dark"] .therapist-initials-small {
+    border-color: #666666;
+    background: var(--gradient-primary);
+}
+
+[data-theme="dark"] .calendar-hour-slot {
+    border-bottom-color: #404040;
+}
+
+[data-theme="dark"] .half-hour-line {
+    background-color: #404040;
+}
+
+[data-theme="dark"] .quarter-hour-line {
+    background-color: #353535;
+}
+
+[data-theme="dark"] .calendar-stats {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    border-color: #404040;
+}
+
+[data-theme="dark"] .stat-item {
+    background-color: #2d2d2d;
+    border-left-color: var(--color-500);
+}
+
+[data-theme="dark"] .stat-item:hover {
+    background-color: #353535;
+}
+
+[data-theme="dark"] .stat-value {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .stat-label {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .day-navigation {
+    background: linear-gradient(135deg, #2d2d2d, #404040);
+    border-color: #555555;
+}
+
+[data-theme="dark"] .legend-card {
+    background: linear-gradient(135deg, #2d2d2d, #404040);
+    border-color: #555555;
+}
+
+[data-theme="dark"] .legend-text {
+    color: #e5e5e5;
+}
+
+[data-theme="dark"] .current-day-badge {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .therapist-calendar-container {
+        overflow-x: auto;
+        grid-template-columns: 80px repeat(var(--therapist-count, 3), minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .therapist-calendar-container {
+        grid-template-columns: 60px repeat(var(--therapist-count, 3), minmax(120px, 1fr));
+    }
+    
+    .therapist-name {
+        font-size: 0.75rem;
+    }
+    
+    .therapist-specialty {
+        display: none;
+    }
+    
+    .therapist-avatar-small,
+    .therapist-initials-small {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
+    
+    .booking-service {
+        font-size: 0.7rem;
+    }
+    
+    .booking-client-small {
+        font-size: 0.65rem;
+    }
+    
+    .booking-time-small {
+        font-size: 0.6rem;
+    }
+    
+    .calendar-stats {
+        padding: 1rem;
+    }
+    
+    .stat-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-item {
+        padding: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .day-navigation {
+        padding: 1rem;
+    }
+    
+    .day-navigation h4 {
+        font-size: 1.1rem;
+    }
+    
+    .current-day-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .therapist-booking {
+        left: 1px;
+        right: 1px;
+        padding: 4px 6px;
+        font-size: 0.7rem;
+    }
+    
+    .booking-service {
+        font-size: 0.65rem;
+    }
+    
+    .booking-client-small,
+    .booking-time-small {
+        font-size: 0.6rem;
+    }
+    
+    .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Print styles */
+@media print {
+    .day-navigation,
+    .calendar-stats,
+    .legend-card {
+        break-inside: avoid;
+    }
+    
+    .therapist-calendar-container {
+        border: 1px solid #333;
+        box-shadow: none;
+    }
+    
+    .therapist-booking {
+        border: 1px solid #333;
+        color: #000 !important;
+        background: white !important;
+    }
+    
+    .therapist-booking::before {
+        content: attr(title);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        color: black;
+        padding: 2px;
+        font-size: 0.6rem;
+    }
+}

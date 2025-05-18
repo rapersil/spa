@@ -175,14 +175,26 @@ def calculate_avg_availability(schedule):
     availability_percentage = ((total_slots - booked_slots) / total_slots) * 100
     return round(availability_percentage, 1)
 
-
 def public_booking_calendar_therapist_view(request):
-    """Public therapist calendar view with limited information"""
+    """Public therapist calendar view with limited information - updated to match internal view functionality"""
     # Get the date from the query params, default to today
     date_param = request.GET.get('date')
+    weekday_param = request.GET.get('weekday')  # Add weekday selection parameter
     today = timezone.now().date()
     
-    if date_param:
+    # Handle weekday parameter for direct day selection from dashboard
+    if weekday_param is not None:
+        try:
+            weekday = int(weekday_param)
+            # Calculate the date of the selected weekday in the current week
+            days_diff = weekday - today.weekday()
+            if days_diff < 0:  # If the day has passed this week
+                days_diff += 7
+            current_date = today + timedelta(days=days_diff)
+        except ValueError:
+            current_date = today
+    # Handle explicit date parameter
+    elif date_param:
         try:
             current_date = datetime.strptime(date_param, '%Y-%m-%d').date()
         except ValueError:
@@ -200,45 +212,62 @@ def public_booking_calendar_therapist_view(request):
         is_active=True
     ).select_related('primary_service').order_by('first_name', 'last_name')
     
-    # Get all bookings for the specific date (only confirmed ones for public view)
+    # Get all bookings for the specific date (including all statuses like internal view)
     bookings = Booking.objects.filter(
         date_time__date=current_date,
-        status='CONFIRMED'  # Only show confirmed bookings to public
-    ).select_related('service').prefetch_related('therapist_assignments__therapist')
+        status__in=['PENDING', 'CONFIRMED', 'COMPLETED']  # Match internal view statuses
+    ).select_related('customer', 'service').prefetch_related('therapist_assignments__therapist')
     
-    # Extended hours from 8 AM to 6 PM for public view
-    hours = list(range(8, 18))  # 8 AM to 6 PM
+    # Extended hours from 7 AM to 10 PM (match internal view)
+    hours = list(range(7, 23))  # 7 AM to 10 PM
     
-    # Calculate properties for each booking (anonymized)
+    # Calculate properties for each booking (including expected start times)
     for booking in bookings:
         # Calculate end time
         booking.end_time = booking.date_time + timedelta(minutes=booking.service.duration)
         
-        # Calculate grid position
-        start_minutes = (booking.date_time.hour - 8) * 60 + booking.date_time.minute
+        # Calculate grid position (each hour = 8 grid rows, each row = 7.5 minutes)
+        start_minutes = (booking.date_time.hour - 7) * 60 + booking.date_time.minute  # Changed from -8 to -7
         booking.start_row = int(start_minutes / 7.5) + 1
         
         # End time grid position
-        end_minutes = (booking.end_time.hour - 8) * 60 + booking.end_time.minute
+        end_minutes = (booking.end_time.hour - 7) * 60 + booking.end_time.minute  # Changed from -8 to -7
         booking.end_row = int(end_minutes / 7.5) + 1
         
-        # Anonymize booking for public view
+        # Calculate expected start time for calendar display (match internal view)
+        expected_start = booking.get_expected_start_time()
+        wait_minutes = booking.get_wait_time_minutes()
+        
+        # If there's a delay, calculate expected start position
+        if wait_minutes > 0:
+            expected_start_minutes = (expected_start.hour - 7) * 60 + expected_start.minute  # Changed from -8 to -7
+            booking.expected_start_row = int(expected_start_minutes / 7.5) + 1
+        
+        # Anonymize booking for public view (keep this for public display)
         booking.anonymous = True
     
-    # Group bookings by therapist
+    # Group bookings by therapist (use same logic as internal view)
     bookings_by_therapist = {}
     for therapist in therapists:
         bookings_by_therapist[therapist.id] = []
     
-    # Add bookings to their respective therapists
+    # Add bookings to their respective therapists (match internal view logic)
     for booking in bookings:
+        # Get primary therapist assignment
         primary_assignment = booking.therapist_assignments.filter(is_primary=True).first()
         if primary_assignment:
             therapist_id = primary_assignment.therapist.id
             if therapist_id in bookings_by_therapist:
                 bookings_by_therapist[therapist_id].append(booking)
+        else:
+            # If no primary assignment, assign to first therapist in the assignment
+            first_assignment = booking.therapist_assignments.first()
+            if first_assignment:
+                therapist_id = first_assignment.therapist.id
+                if therapist_id in bookings_by_therapist:
+                    bookings_by_therapist[therapist_id].append(booking)
     
-    # Calculate public statistics
+    # Calculate statistics (match internal view)
     total_bookings = bookings.count()
     therapists_with_bookings = sum(1 for bookings_list in bookings_by_therapist.values() if bookings_list)
     
@@ -252,8 +281,9 @@ def public_booking_calendar_therapist_view(request):
         'hours': hours,
         'total_bookings': total_bookings,
         'therapists_with_bookings': therapists_with_bookings,
-        'is_today': current_date == today,
-        'is_public_view': True,
+        'is_today': current_date == today,  # Add is_today flag like internal view
+        'is_public_view': True,  # Keep this flag to distinguish public view
+        'selected_weekday': int(weekday_param) if weekday_param and weekday_param.isdigit() else None  # Add weekday param
     }
     
     return render(request, 'therapist/public_booking_calendar_therapist.html', context)

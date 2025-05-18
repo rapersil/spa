@@ -13,6 +13,7 @@ from django.contrib import messages
 from beauty_app.models import Booking,AdditionalService, CustomUser, Service, BookingTherapistAssignment
 from beauty_app.permissions import StaffRequiredMixin
 from django.db.models import Count, Q
+from django.utils import timezone
 
 class TherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, FormView):
     template_name = 'booking/therapist_assignment.html'
@@ -161,7 +162,7 @@ class TherapistListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
                 'booking_assignments',
                 filter=Q(
                     booking_assignments__booking__status__in=['PENDING', 'CONFIRMED'],
-                    booking_assignments__booking__date_time__gt=datetime.now()
+                    booking_assignments__booking__date_time__gt=timezone.now()
                 )
             )
         ).order_by('first_name', 'last_name')
@@ -169,11 +170,14 @@ class TherapistListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get current datetime for real-time status checking
-        current_time = datetime.now()
+        # Get current timezone-aware datetime for real-time status checking
+        current_time = timezone.now()
         
         # Enhance each therapist with real-time status
         therapists = context['therapists']
+        available_count = 0
+        busy_count = 0
+        
         for therapist in therapists:
             # Check if therapist has a booking happening right now
             current_booking = BookingTherapistAssignment.objects.filter(
@@ -188,17 +192,22 @@ class TherapistListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
                 booking_end_time = current_booking.booking.date_time + timedelta(
                     minutes=current_booking.booking.service.duration
                 )
-                # Check if booking is currently active
+                # Check if booking is currently active (compare timezone-aware datetimes)
                 therapist.is_currently_busy = current_time <= booking_end_time
                 therapist.current_booking = current_booking.booking if therapist.is_currently_busy else None
+                
+                if therapist.is_currently_busy:
+                    busy_count += 1
+                else:
+                    available_count += 1
             else:
                 therapist.is_currently_busy = False
                 therapist.current_booking = None
+                available_count += 1
         
         # Add summary statistics
         total_therapists = len(therapists)
         active_therapists = sum(1 for t in therapists if hasattr(t, 'upcoming_bookings') and t.upcoming_bookings > 0)
-        currently_busy = sum(1 for t in therapists if getattr(t, 'is_currently_busy', False))
         
         # Get all services for filtering
         services = Service.objects.filter(active=True).order_by('name')
@@ -206,7 +215,8 @@ class TherapistListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         context.update({
             'total_therapists': total_therapists,
             'active_therapists': active_therapists,
-            'currently_busy': currently_busy,
+            'available_therapists': available_count,
+            'busy_therapists': busy_count,
             'services': services,
         })
         

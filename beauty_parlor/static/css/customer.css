@@ -1,106 +1,611 @@
-/* static/css/customer.css */
+.customer-list-container {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
 
-/* Customer List Styling */
+.customer-search-section {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.customer-search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.customer-search-form .form-control,
+.customer-search-form .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.customer-search-form .form-control:focus,
+.customer-search-form .form-select:focus {
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
+    transform: translateY(-2px);
+}
+
+/* Enhanced customer avatar */
 .customer-avatar {
-    width: 32px;
-    height: 32px;
-    background-color: var(--color-300);
-    color: var(--color-900);
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
+    box-shadow: 0 2px 8px rgba(193, 153, 49, 0.3);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
 
+.customer-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(154, 112, 37, 0.4);
+    border-color: var(--color-400);
+}
+
+.customer-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+.customer-avatar-small {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+}
+
+/* Enhanced customer contact information */
 .customer-contact {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.customer-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    transition: all 0.3s ease;
+}
+
+.customer-contact-item:hover {
+    color: var(--text-primary);
+    background: var(--gradient-subtle);
+    border-radius: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
 
 .customer-contact i {
     color: var(--color-600);
     width: 16px;
     text-align: center;
+    transition: all 0.3s ease;
+}
+
+.customer-contact-item:hover i {
+    color: var(--color-700);
+    transform: scale(1.1);
+}
+
+/* Enhanced customer table */
+.customer-table {
+    background: var(--card-bg);
+    border-radius: 0 0 0.8rem 0.8rem;
+    overflow: hidden;
 }
 
 .customer-table th {
-    background-color: var(--color-50);
-    color: var(--color-900);
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-/* Customer Detail Styling */
-.customer-profile-avatar {
-    width: 100px;
-    height: 100px;
-    background-color: var(--color-300);
-    color: var(--color-900);
-    border-radius: 50%;
+.customer-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.customer-table tbody tr:hover {
+    background: var(--gradient-subtle);
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.customer-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: var(--text-primary);
+}
+
+.customer-name-cell {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    font-weight: bold;
-    margin: 0 auto 1rem;
+    gap: 1rem;
 }
 
 .customer-name {
     font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
 
+.customer-email {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Enhanced customer detail styling */
+.customer-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.customer-profile-card {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    height: fit-content;
+}
+
+.customer-profile-header {
+    background: var(--gradient-subtle);
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.customer-profile-avatar {
+    width: 120px;
+    height: 120px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+    border: 4px solid white;
+    box-shadow: 0 4px 20px rgba(193, 153, 49, 0.3);
+    transition: all 0.3s ease;
+}
+
+.customer-profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(154, 112, 37, 0.4);
+}
+
+.customer-profile-name {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.customer-join-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.customer-join-date i {
+    color: var(--color-600);
+}
+
+/* Customer profile details */
+.customer-profile-body {
+    padding: 1.5rem;
+}
+
+.contact-section {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header i {
+    color: var(--color-600);
+    font-size: 1.2rem;
+}
+
 .contact-item {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-100);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--color-500);
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    background: var(--gradient-secondary);
+    transform: translateX(5px);
+    box-shadow: var(--shadow);
+}
+
+.contact-item:last-child {
+    margin-bottom: 0;
 }
 
 .contact-item i {
     color: var(--color-600);
     width: 20px;
     text-align: center;
+    margin-right: 0.75rem;
+}
+
+.contact-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.contact-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+/* Customer notes */
+.customer-notes-section {
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
 }
 
 .customer-notes {
-    color: var(--gray-700);
+    color: var(--text-primary);
     line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 0;
 }
 
-/* Customer Bookings Table */
+.notes-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Customer statistics */
+.customer-stats-card {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.customer-stats-header {
+    background: var(--gradient-secondary);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.customer-stats-header h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.customer-stats-body {
+    padding: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: var(--gradient-secondary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-700);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Customer bookings table */
+.customer-bookings-section {
+    background: var(--gradient-card);
+    border-radius: 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.customer-bookings-header {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.customer-bookings-header h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.bookings-filter {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.customer-bookings-table {
+    background: var(--card-bg);
+}
+
 .customer-bookings-table th {
-    background-color: var(--color-50);
-    color: var(--color-900);
+    background: var(--gradient-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.customer-bookings-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.customer-bookings-table tbody tr:hover {
+    background: var(--gradient-subtle);
+}
+
+.customer-bookings-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.booking-date-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.booking-date {
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .booking-time {
-    display: block;
     font-size: 0.85rem;
-    color: var(--gray-700);
+    color: var(--text-secondary);
 }
 
 .booking-price {
     font-weight: 600;
     color: var(--color-700);
+    font-size: 1.1rem;
 }
 
-/* Customer Statistics */
+.booking-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.booking-status-pending {
+    background: var(--gradient-warning);
+    color: white;
+}
+
+.booking-status-confirmed {
+    background: var(--gradient-info);
+    color: white;
+}
+
+.booking-status-completed {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.booking-status-cancelled {
+    background: var(--gradient-danger);
+    color: white;
+}
+
+/* Customer preferences and summary */
+.customer-preferences {
+    margin-top: 1.5rem;
+}
+
+.preference-item {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: var(--gradient-subtle);
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--color-500);
+}
+
+.preference-label {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.preference-value {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.preference-item .progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--bg-tertiary);
+    margin-top: 0.5rem;
+}
+
 .preference-item .progress-bar {
-    background-color: var(--color-600);
+    background: var(--gradient-primary);
+    border-radius: 3px;
 }
 
 .summary-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-100);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
 }
 
 .summary-label {
-    color: var(--gray-700);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .summary-value {
     font-weight: 600;
-    color: var(--color-800);
+    color: var(--text-primary);
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .customer-detail-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .customer-search-form {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .customer-profile-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 40px;
+    }
+    
+    .customer-profile-header {
+        padding: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .customer-bookings-table th,
+    .customer-bookings-table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .customer-table th,
+    .customer-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .customer-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .customer-contact {
+        font-size: 0.85rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .customer-profile-card,
+    .customer-stats-card,
+    .customer-bookings-section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .customer-profile-avatar {
+        filter: grayscale(100%);
+    }
+    
+    .booking-status-badge {
+        border: 1px solid #333;
+        color: #000 !important;
+        background: transparent !important;
+    }
 }

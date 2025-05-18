@@ -1,116 +1,493 @@
-/* static/css/discount.css */
+.discount-tabs {
+    background: var(--card-bg);
+    border-radius: 0.5rem 0.5rem 0 0;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+}
 
-/* Discount List Styling */
 .discount-tabs .nav-link {
-    color: var(--color-700);
+    color: var(--text-primary);
     border: none;
     padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    background: transparent;
+}
+
+.discount-tabs .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
 .discount-tabs .nav-link:hover {
-    color: var(--color-900);
-    background-color: var(--color-50);
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    transform: translateY(-2px);
+}
+
+.discount-tabs .nav-link:hover::before {
+    transform: scaleX(1);
 }
 
 .discount-tabs .nav-link.active {
-    color: var(--color-900);
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
     border-bottom: 3px solid var(--color-600);
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.discount-tabs .nav-link.active::before {
+    transform: scaleX(1);
+}
+
+/* Enhanced discount table with improved readability */
+.discount-table {
+    background: var(--card-bg);
+    border-radius: 0 0 0.5rem 0.5rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    border-top: none;
 }
 
 .discount-table th {
-    background-color: var(--color-50);
-    color: var(--color-900);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.discount-table th:last-child {
+    border-right: none;
+}
+
+.discount-table tbody tr {
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+}
+
+.discount-table tbody tr:nth-child(even) {
+    background: var(--bg-secondary);
+}
+
+.discount-table tbody tr:hover {
+    background: var(--bg-tertiary);
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.discount-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.discount-table td:last-child {
+    border-right: none;
+}
+
+/* Dark mode specific improvements for table */
+[data-theme="dark"] .discount-table th {
+    background: #404040;
+    color: #ffffff;
+    border-bottom: 2px solid #555555;
+    border-right: 1px solid #555555;
+}
+
+[data-theme="dark"] .discount-table tbody tr {
+    background: #2d2d2d;
+}
+
+[data-theme="dark"] .discount-table tbody tr:nth-child(even) {
+    background: #353535;
+}
+
+[data-theme="dark"] .discount-table tbody tr:hover {
+    background: #404040;
+    border-left: 3px solid var(--color-500);
+}
+
+[data-theme="dark"] .discount-table td {
+    color: #e5e5e5;
+    border-bottom: 1px solid #555555;
+    border-right: 1px solid #555555;
 }
 
 .discount-percentage {
     font-weight: 600;
     color: var(--color-700);
     font-size: 1.1rem;
+    background: var(--color-100);
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+    border: 1px solid var(--color-300);
+}
+
+/* Dark mode specific for discount percentage */
+[data-theme="dark"] .discount-percentage {
+    background: var(--color-800);
+    color: var(--color-100);
+    border: 1px solid var(--color-600);
+}
+
+.discount-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .discount-dates i {
     width: 16px;
     text-align: center;
+    color: var(--color-600);
+    margin-right: 0.5rem;
 }
 
-/* Service Cards */
+.discount-dates span {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Enhanced service cards */
 .service-card {
     transition: all 0.3s ease;
-    border: 1px solid var(--color-100);
+    border: 1px solid var(--border-color);
+    background: var(--gradient-card);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .service-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--black-10) !important;
+    box-shadow: var(--shadow-lg);
+    background: var(--gradient-secondary);
+    border-color: var(--color-400);
+}
+
+.service-card .card-header {
+    background: var(--gradient-subtle);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .service-card .card-title {
-    color: var(--color-900);
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.service-card .card-body {
+    padding: 1.25rem;
 }
 
 .service-price {
     font-weight: 600;
     color: var(--color-700);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.service-price::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
 }
 
 .service-duration {
-    color: var(--gray-700);
-    margin-left: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
-/* Discount Detail Styling */
+.service-duration i {
+    color: var(--color-600);
+}
+
+/* Enhanced discount detail styling */
+.discount-details-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.discount-details-table {
+    background: var(--card-bg);
+    margin-bottom: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
 .discount-details-table th {
     width: 40%;
     font-weight: 600;
-    color: var(--color-800);
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.discount-details-table td {
+    width: 60%;
+    padding: 1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+/* Dark mode specific for detail tables */
+[data-theme="dark"] .discount-details-table th {
+    background: #404040;
+    color: #ffffff;
+    border-bottom: 1px solid #555555;
+    border-right: 1px solid #555555;
+}
+
+[data-theme="dark"] .discount-details-table td {
+    background: #2d2d2d;
+    color: #e5e5e5;
+    border-bottom: 1px solid #555555;
+}
+
+.service-discount-section {
+    background: var(--gradient-subtle);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
 }
 
 .service-header {
-    border-bottom: 1px solid var(--color-100);
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 1rem;
     margin-bottom: 1rem;
+    position: relative;
+}
+
+.service-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--gradient-primary);
+}
+
+.service-header h6 {
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
 }
 
 .calculation-item {
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px dashed var(--color-100);
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--color-400);
+    transition: all 0.3s ease;
+}
+
+.calculation-item:hover {
+    background: var(--bg-secondary);
+    transform: translateX(5px);
+    box-shadow: var(--shadow);
+}
+
+.calculation-item:last-child {
+    border-bottom: none;
+}
+
+.calculation-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.calculation-value {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .final-price {
     color: var(--color-700);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: var(--color-100);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--color-300);
+    text-align: center;
+    margin-top: 1rem;
 }
 
-/* Discount Form Styling */
+/* Dark mode specific for final price */
+[data-theme="dark"] .final-price {
+    background: var(--color-800);
+    color: var(--color-100);
+    border: 2px solid var(--color-600);
+}
+
+/* Enhanced discount form styling */
+.discount-form {
+    background: var(--gradient-card);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
 .discount-preview .card {
-    border: 1px solid var(--color-100);
+    border: 1px solid var(--border-color);
+    background: var(--gradient-card);
+    box-shadow: var(--shadow);
+}
+
+.discount-preview .card-header {
+    background: var(--gradient-subtle);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.discount-strategy-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .strategy-card {
-    border: 1px solid var(--color-100);
+    border: 2px solid var(--border-color);
     border-radius: 0.5rem;
-    padding: 0.75rem;
-    background-color: var(--color-50);
+    padding: 1rem;
+    background: var(--gradient-subtle);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.strategy-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.strategy-card:hover {
+    border-color: var(--color-400);
+    background: var(--gradient-secondary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.strategy-card:hover::before {
+    transform: scaleY(1);
+}
+
+.strategy-card.selected {
+    border-color: var(--color-600);
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.strategy-card.selected::before {
+    transform: scaleY(1);
+    background: white;
 }
 
 .strategy-name {
     font-weight: 600;
-    color: var(--color-800);
-    margin-bottom: 0.25rem;
+    color: inherit;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.strategy-name i {
+    color: var(--color-600);
+}
+
+.strategy-card.selected .strategy-name i {
+    color: white;
 }
 
 .strategy-desc {
     font-size: 0.9rem;
-    color: var(--gray-700);
+    color: inherit;
+    opacity: 0.9;
+    line-height: 1.5;
 }
 
-/* Delete Confirmation */
+/* Enhanced form controls */
+.discount-form .form-control,
+.discount-form .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.discount-form .form-control:focus,
+.discount-form .form-select:focus {
+    background-color: var(--input-bg);
+    border-color: var(--color-400);
+    box-shadow: 0 0 0 0.25rem var(--color-500-25);
+    transform: translateY(-2px);
+}
+
+.discount-form .input-group-text {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Enhanced delete confirmation */
+.delete-confirmation-card {
+    background: var(--gradient-card);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
 .delete-icon {
     width: 80px;
     height: 80px;
-    background-color: rgba(244, 67, 54, 0.1);
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.2));
     color: var(--danger);
     border-radius: 50%;
     display: flex;
@@ -118,14 +495,76 @@
     justify-content: center;
     font-size: 32px;
     margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    }
 }
 
 .discount-summary {
-    background-color: rgba(244, 67, 54, 0.05);
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
     border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 1rem 0;
 }
 
-/* Flatpickr customization */
+.discount-summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed rgba(244, 67, 54, 0.2);
+}
+
+.discount-summary-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Enhanced flatpickr customization */
+.flatpickr-calendar.open {
+    z-index: 1050;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.flatpickr-months {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.flatpickr-month {
+    color: var(--text-primary);
+}
+
+.flatpickr-day {
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.flatpickr-day:hover {
+    background: var(--bg-secondary);
+    transform: scale(1.05);
+}
+
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
 .flatpickr-day.endRange,
@@ -144,6 +583,80 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: var(--color-600);
+    background: var(--gradient-primary);
     border-color: var(--color-600);
+    color: white;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--color-600);
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--color-600);
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .discount-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .discount-strategy-selector {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .strategy-card {
+        padding: 0.75rem;
+    }
+    
+    .service-card {
+        margin-bottom: 1rem;
+    }
+    
+    .discount-details-table th,
+    .discount-details-table td {
+        padding: 0.75rem;
+    }
+    
+    .discount-table th,
+    .discount-table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .calculation-item {
+        padding: 0.5rem;
+    }
+    
+    .final-price {
+        font-size: 1.1rem;
+        padding: 0.75rem;
+    }
+    
+    .delete-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+}
+
+/* Loading states */
+.discount-loading {
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    border-radius: 0.5rem;
+    height: 100px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
