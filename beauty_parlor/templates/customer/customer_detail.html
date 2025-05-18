@@ -6,6 +6,24 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/customer.css' %}">
+<style>
+    /* Pagination styling */
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        color: var(--color-600);
+        border-color: var(--gray-200);
+    }
+    .page-item.active .page-link {
+        background-color: var(--color-500);
+        border-color: var(--color-500);
+    }
+    .page-link:hover {
+        color: var(--color-700);
+        background-color: var(--gray-100);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -96,13 +114,16 @@
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm bookings-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="material-icons me-2">history</i>Booking History</h4>
+                    <h4 class="mb-0">
+                        <i class="material-icons me-2">history</i>Booking History
+                        <span class="badge bg-primary ms-2">{{ booking_count }}</span>
+                    </h4>
                     <a href="{% url 'booking_create' %}?customer_id={{ customer.pk }}" class="btn btn-sm btn-primary">
                         <i class="material-icons me-1">add</i>New Booking
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    {% if recent_bookings %}
+                    {% if booking_history %}
                     <div class="table-responsive">
                         <table class="table table-hover customer-bookings-table mb-0">
                             <thead>
@@ -116,7 +137,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for booking in recent_bookings %}
+                                {% for booking in booking_history %}
                                 <tr>
                                     <td>{{ booking.booking_id }}</td>
                                     <td>
@@ -155,6 +176,76 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Pagination Controls -->
+                    {% if booking_history.has_other_pages %}
+                    <div class="d-flex justify-content-center px-3 py-3 border-top">
+                        <nav aria-label="Booking history pagination">
+                            <ul class="pagination">
+                                {% if booking_history.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ booking_history.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for i in booking_history.paginator.page_range %}
+                                    {% if booking_history.number == i %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                    {% elif i > booking_history.number|add:'-3' and i < booking_history.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if booking_history.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ booking_history.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ booking_history.paginator.num_pages }}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
                     {% else %}
                     <div class="text-center py-5">
                         <i class="material-icons text-muted" style="font-size: 3em;">event_busy</i>
@@ -166,11 +257,11 @@
                     </div>
                     {% endif %}
                 </div>
-                {% if recent_bookings %}
+                {% if booking_count > 10 %}
                 <div class="card-footer text-center">
-                    <a href="{% url 'booking_list' %}" class="text-decoration-none">
-                        <i class="material-icons me-1">list</i>View All Bookings
-                    </a>
+                    <div class="text-muted small">
+                        Showing {{ booking_history.start_index }} - {{ booking_history.end_index }} of {{ booking_count }} bookings
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -214,7 +305,7 @@
                             <div class="customer-summary">
                                 <div class="summary-item">
                                     <div class="summary-label">Total Bookings</div>
-                                    <div class="summary-value">{{ customer.booking_set.count }}</div>
+                                    <div class="summary-value">{{ booking_count }}</div>
                                 </div>
                                 
                                 <div class="summary-item">

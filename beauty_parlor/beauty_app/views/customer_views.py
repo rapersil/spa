@@ -10,6 +10,12 @@ from ..models import Customer, Booking,Sale
 from ..forms import CustomerForm, CustomerSearchForm
 from ..permissions import StaffRequiredMixin, AdminRequiredMixin
 
+from django.db.models import Count
+from django.utils import timezone
+
+from django.db.models import Count, Sum
+from django.utils import timezone
+
 class CustomerListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     model = Customer
     template_name = 'customer/customer_list.html'
@@ -37,32 +43,52 @@ class CustomerListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         context['search_form'] = CustomerSearchForm(self.request.GET or None)
         return context
 
-from django.db.models import Count
-from django.utils import timezone
 
-from django.db.models import Count, Sum
-from django.utils import timezone
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class CustomerDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
     model = Customer
     template_name = 'customer/customer_detail.html'
     context_object_name = 'customer'
+    # Corrected attribute name (was "pagenated_by")
+    paginate_by = 5
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = timezone.now().date()
         
-        # Add recent bookings for this customer
-        context['recent_bookings'] = Booking.objects.filter(
+        # Get all bookings for this customer (ordered by date)
+        all_bookings = Booking.objects.filter(
             customer=self.object
-        ).order_by('-date_time')[:5]
+        ).order_by('-date_time')
+        
+        # Implement pagination for bookings
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(all_bookings, self.paginate_by)
+        
+        try:
+            paginated_bookings = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page
+            paginated_bookings = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results
+            paginated_bookings = paginator.page(paginator.num_pages)
+        
+        # Add paginated bookings to context
+        context['booking_history'] = paginated_bookings
+        context['booking_count'] = all_bookings.count()
+        
+        # Keep a small list of truly recent bookings for quick reference
+        context['recent_bookings'] = all_bookings[:5]
         
         # Calculate service preferences
         service_counts = Booking.objects.filter(
             customer=self.object
         ).values('service__name').annotate(
             count=Count('service')
-        ).order_by('-count')[:5]
+        ).order_by('-count')
         
         # Count completed bookings
         context['completed_bookings_count'] = Booking.objects.filter(
@@ -74,10 +100,10 @@ class CustomerDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         context['upcoming_bookings_count'] = Booking.objects.filter(
             customer=self.object,
             date_time__gte=today,
-            status__in=['PENDING', 'CONFIRMED'],  # Include 'PENDING' and 'CONFIRMED'
+            status__in=['PENDING', 'CONFIRMED'],
         ).count()
 
-        #count cancelled bookings
+        # Count cancelled bookings
         context['cancelled_bookings_count'] = Booking.objects.filter(
             customer=self.object,
             status='CANCELLED'
@@ -91,7 +117,7 @@ class CustomerDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
         
         context['last_completed_booking'] = last_completed
         
-        # Calculate total spent (if you need this)
+        # Calculate total spent (if user has permission)
         if hasattr(self.request.user, 'user_type') and self.request.user.user_type in ['ADMIN', 'SUPERADMIN']:
             context['total_spent'] = Sale.objects.filter(
                 booking__customer=self.object,

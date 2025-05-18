@@ -721,3 +721,38 @@ class TherapistAssignmentForm(forms.Form):
                 user_type__in=[ 'STAFFLEVEL2'],
                 is_active=True
             )
+
+
+class StaffUpdateForm(forms.ModelForm):
+    """Form specifically for updating staff users, including primary_service field."""
+    
+    class Meta:
+        model = CustomUser
+        fields = ('first_name', 'last_name', 'phone_number', 'user_type', 'primary_service', 'profile_picture')
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make sure required fields are marked as such
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['phone_number'].required = True
+        
+        # Restrict user_type to staff levels only
+        self.fields['user_type'].choices = [
+            choice for choice in CustomUser.USER_TYPE_CHOICES 
+            if choice[0] in ['STAFF', 'ADMIN', 'STAFFLEVEL2']
+        ]
+        
+        # Set up primary_service field
+        self.fields['primary_service'].queryset = Service.objects.filter(active=True)
+        self.fields['primary_service'].required = False
+        
+        # Add Bootstrap classes
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+            
+        # Add conditional visibility for primary_service field
+        self.fields['primary_service'].widget.attrs.update({
+            'class': 'form-control service-field',
+            'data-requires-usertype': 'STAFFLEVEL2'
+        })

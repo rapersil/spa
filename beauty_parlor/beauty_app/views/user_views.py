@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Q
 
 from ..models import CustomUser, Sale, Booking, Customer, Service,Discount
-from ..forms import StaffCreationForm, CustomUserUpdateForm, ProfileUpdateForm
+from ..forms import StaffCreationForm, StaffUpdateForm, CustomUserUpdateForm, ProfileUpdateForm
 from ..permissions import AdminRequiredMixin
 
 class StaffListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
@@ -150,11 +150,16 @@ class StaffCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
 
 class StaffUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = CustomUser
-    form_class = CustomUserUpdateForm
+    form_class = StaffUpdateForm  # Change this line
     template_name = 'user/staff_form.html'
+    success_url = reverse_lazy('staff_list')
+    
+    def get_queryset(self):
+        # Ensure only staff users can be edited through this view
+        return CustomUser.objects.filter(user_type__in=['STAFF', 'ADMIN', 'STAFFLEVEL2'])
     
     def form_valid(self, form):
-        messages.success(self.request, "Staff member updated successfully.")
+        messages.success(self.request, f"Staff member {form.instance.get_full_name()} updated successfully.")
         return super().form_valid(form)
     
     def get_success_url(self):

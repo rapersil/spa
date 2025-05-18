@@ -10,7 +10,7 @@ from django.utils.decorators import method_decorator
 from django.db import transaction
 from django.db.models import Q
 
-from ..models import Customer, Service, BookingRequest, Booking, CustomUser
+from ..models import BookingTherapistAssignment, Customer, Service, BookingRequest, Booking, CustomUser
 from ..booking_request_forms import (
     CustomerSelectionForm, ServiceSelectionForm, 
     AdditionalServicesForm, BookingRequestForm
@@ -205,8 +205,9 @@ class PublicBookingRequestCreateView(View):
                 
                 # Replace the Service object with just its ID
                 if 'service' in cleaned_data and cleaned_data['service'] is not None:
-                    service_obj = cleaned_data['service']
-                    cleaned_data['service'] = service_obj.id  # Store just the ID
+                    print("Service object:", cleaned_data['service'].id)
+                    # service_obj = cleaned_data['service']
+                    cleaned_data['service'] = cleaned_data['service'].id  # Store just the ID
                 
                 # Convert date and time objects to string format
                 if 'date' in cleaned_data and cleaned_data['date'] is not None:
@@ -221,9 +222,9 @@ class PublicBookingRequestCreateView(View):
 
                 
                 # Handle service and therapist objects
-                if 'service' in cleaned_data and cleaned_data['service'] is not None:
-                    service_obj = cleaned_data['service']
-                    cleaned_data['service'] = service_obj.id
+                # if 'service' in cleaned_data and cleaned_data['service'] is not None:
+                #     # service_obj = cleaned_data['service']
+                #     cleaned_data['service'] = cleaned_data['service'].id
                 
                 if 'preferred_therapist' in cleaned_data and cleaned_data['preferred_therapist'] is not None:
                     therapist_obj = cleaned_data['preferred_therapist']
@@ -311,6 +312,10 @@ class PublicBookingRequestCreateView(View):
                 
                 # Set additional services
                 booking_request.additional_services = step3_data.get('selected_services', [])
+
+                preferred_therapist_id = step2_data.get('preferred_therapist')
+                if preferred_therapist_id:
+                    booking_request.preferred_therapist_id = preferred_therapist_id
                 
                 # Set notes
                 booking_request.notes = step3_data.get('notes', '')
@@ -442,6 +447,16 @@ class StaffBookingRequestApproveView(LoginRequiredMixin, StaffRequiredMixin, Vie
                 created_by=request.user,
                 updated_by=request.user
             )
+
+            if hasattr(booking_request, 'preferred_therapist') and booking_request.preferred_therapist:
+                # Create therapist assignment
+                BookingTherapistAssignment.objects.create(
+                    booking=booking,
+                    therapist=booking_request.preferred_therapist,
+                    is_primary=True,  # Set as primary therapist
+                    assigned_by=request.user,
+                    created_at=timezone.now()
+                )
             
             # Check for active service discounts at the time of booking
             active_discounts = booking.service.discount_set.filter(
