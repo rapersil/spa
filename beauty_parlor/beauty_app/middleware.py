@@ -20,7 +20,7 @@ class SessionTimeoutMiddleware:
     def __call__(self, request):
         if request.user.is_authenticated:
             # Update the session expiry time
-            request.session.set_expiry(600)  # 10 minutes
+            request.session.set_expiry(1200) 
             
         response = self.get_response(request)
         return response

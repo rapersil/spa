@@ -1,5 +1,5 @@
 .customer-list-container {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -7,7 +7,7 @@
 }
 
 .customer-search-section {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -38,7 +38,7 @@
 .customer-avatar {
     width: 40px;
     height: 40px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -88,7 +88,7 @@
 
 .customer-contact-item:hover {
     color: var(--text-primary);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.25rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -114,7 +114,7 @@
 }
 
 .customer-table th {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     color: var(--text-primary);
     font-weight: 600;
     padding: 1rem;
@@ -130,7 +130,7 @@
 }
 
 .customer-table tbody tr:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     transform: scale(1.01);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -167,7 +167,7 @@
 }
 
 .customer-profile-card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -176,7 +176,7 @@
 }
 
 .customer-profile-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 2rem;
     text-align: center;
     border-bottom: 1px solid var(--border-color);
@@ -185,7 +185,7 @@
 .customer-profile-avatar {
     width: 120px;
     height: 120px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -251,14 +251,15 @@
 .contact-item {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     border-radius: 0.5rem;
     border-left: 3px solid var(--color-500);
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .contact-item:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateX(5px);
     box-shadow: var(--shadow);
 }
@@ -288,7 +289,7 @@
 
 /* Customer notes */
 .customer-notes-section {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
     padding: 1rem;
     border: 1px solid var(--border-color);
@@ -308,7 +309,7 @@
 
 /* Customer statistics */
 .customer-stats-card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -316,7 +317,7 @@
 }
 
 .customer-stats-header {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -341,14 +342,14 @@
 .stat-item {
     text-align: center;
     padding: 1rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .stat-item:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-3px);
     box-shadow: var(--shadow);
 }
@@ -370,7 +371,7 @@
 
 /* Customer bookings table */
 .customer-bookings-section {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -379,7 +380,7 @@
 }
 
 .customer-bookings-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -403,7 +404,7 @@
 }
 
 .customer-bookings-table th {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     color: var(--text-primary);
     font-weight: 600;
     padding: 1rem;
@@ -415,7 +416,7 @@
 }
 
 .customer-bookings-table tbody tr:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .customer-bookings-table td {
@@ -457,22 +458,22 @@
 }
 
 .booking-status-pending {
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     color: white;
 }
 
 .booking-status-confirmed {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
 }
 
 .booking-status-completed {
-    background: var(--gradient-success);
+    background: var(--success-color);
     color: white;
 }
 
 .booking-status-cancelled {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     color: white;
 }
 
@@ -484,8 +485,9 @@
 .preference-item {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    background: var(--gradient-subtle);
+    background: var(--color-50-25);
     border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
     border-left: 3px solid var(--color-500);
 }
 
@@ -509,7 +511,7 @@
 }
 
 .preference-item .progress-bar {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 3px;
 }
 

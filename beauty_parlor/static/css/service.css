@@ -2,7 +2,7 @@
     overflow: hidden;
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     box-shadow: var(--shadow);
     position: relative;
@@ -15,7 +15,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -23,7 +23,7 @@
 .service-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-lg);
-    background: var(--gradient-secondary);
+    /* background: var(--secondary-color); */
     border-color: var(--color-400);
 }
 
@@ -36,7 +36,7 @@
     position: relative;
     height: 200px;
     overflow: hidden;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.8rem 0.8rem 0 0;
 }
 
@@ -58,12 +58,12 @@
     align-items: center;
     height: 100%;
     color: var(--text-muted);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     transition: all 0.3s ease;
 }
 
 .service-card:hover .service-image-placeholder {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     color: var(--color-600);
 }
 
@@ -114,7 +114,7 @@
     flex-direction: column;
     align-items: center;
     padding: 0.5rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
     flex: 1;
     margin: 0 0.25rem;
@@ -122,7 +122,7 @@
 }
 
 .price-section:hover, .duration-section:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-2px);
 }
 
@@ -166,13 +166,13 @@
 
 .inactive-badge {
     right: 10px;
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(176, 28, 28, 0.9));
+    background: var(--danger-color);
     box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .discount-badge {
     left: 10px;
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
     animation: pulse-glow 2s infinite;
 }
@@ -188,7 +188,7 @@
 
 /* Enhanced service detail page */
 .service-detail-container {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -197,7 +197,7 @@
 
 .service-detail-image-container {
     position: relative;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     min-height: 300px;
     overflow: hidden;
 }
@@ -215,7 +215,7 @@
     align-items: center;
     height: 300px;
     color: var(--text-muted);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .service-detail-image-placeholder i {
@@ -240,7 +240,7 @@
 }
 
 .meta-item {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1rem;
     border-radius: 0.5rem;
     border-left: 3px solid var(--color-500);
@@ -248,7 +248,7 @@
 }
 
 .meta-item:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow);
 }
@@ -280,7 +280,7 @@
     content: '';
     width: 4px;
     height: 20px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
@@ -308,14 +308,14 @@
     transform: translateY(-50%);
     width: 4px;
     height: 20px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
 /* Enhanced carousel controls */
 .carousel-control-prev, 
 .carousel-control-next {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    background: rgba(0, 0, 0, 0.5);
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -328,7 +328,7 @@
 
 .carousel-control-prev:hover,
 .carousel-control-next:hover {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-color: white;
     transform: translateY(-50%) scale(1.1);
 }
@@ -380,7 +380,7 @@
 }
 
 .services-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 2rem;
     border-radius: 0.8rem;
     margin-bottom: 2rem;
@@ -397,7 +397,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--gradient-overlay);
+    background: var(--overlay-color);
     z-index: 1;
 }
 
@@ -423,7 +423,7 @@
 }
 
 .category-header {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     padding: 1rem 1.5rem;
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
@@ -521,8 +521,7 @@
 /* Loading states */
 .service-loading {
     animation: shimmer 1.5s infinite;
-    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
-    background-size: 200% 100%;
+    background: var(--bg-secondary);
     border-radius: 0.8rem;
     height: 300px;
 }

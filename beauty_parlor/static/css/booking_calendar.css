@@ -11,7 +11,7 @@
     flex-shrink: 0;
     border-right: 1px solid var(--border-color);
     position: relative;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .time-slot {
@@ -49,7 +49,7 @@
     padding: 10px;
     text-align: center;
     font-weight: bold;
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -104,66 +104,65 @@
     opacity: 0.8;
 }
 
-/* Enhanced service type colors with gradients based on the project's gold/brown color scheme */
+/* Enhanced service type colors with solid colors */
 .service-type-0 {
-    background: linear-gradient(135deg, var(--color-100-80), var(--color-200-80));
+    background: var(--color-100);
     border-left: 4px solid var(--color-300);
 }
 
 .service-type-1 {
-    background: linear-gradient(135deg, var(--color-200-80), var(--color-300-80));
+    background: var(--color-200);
     border-left: 4px solid var(--color-400);
 }
 
 .service-type-2 {
-    background: linear-gradient(135deg, var(--color-300-80), var(--color-400-80));
+    background: var(--color-300);
     border-left: 4px solid var(--color-500);
 }
 
 .service-type-3 {
-    background: linear-gradient(135deg, var(--color-400-80), var(--color-500-80));
+    background: var(--color-400);
     border-left: 4px solid var(--color-600);
 }
 
 .service-type-4 {
-    background: linear-gradient(135deg, var(--color-500-80), #b5883e);
+    background: var(--color-500);
     border-left: 4px solid var(--color-700);
+    color: white;
 }
 
 .service-type-5 {
-    background: linear-gradient(135deg, var(--color-400-50), var(--color-500-50));
+    background: var(--color-400);
     border-left: 4px solid var(--color-600);
 }
 
 .service-type-6 {
-    background: linear-gradient(135deg, var(--color-500-50), #a67c42);
+    background: var(--color-500);
     border-left: 4px solid var(--color-700);
+    color: white;
 }
 
 .service-type-7 {
-    background: linear-gradient(135deg, var(--color-300-50), var(--color-400-50));
+    background: var(--color-300);
     border-left: 4px solid var(--color-500);
 }
 
 /* Status-specific styling with enhanced patterns */
 .booking-block.booking-pending {
     opacity: 0.8;
-    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, transparent 75%, transparent);
-    background-size: 15px 15px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0, 0, 0, 0.05) 10px, rgba(0, 0, 0, 0.05) 15px);
 }
 
 .booking-block.booking-confirmed {
     opacity: 1;
     border: 2px solid var(--color-600);
     box-shadow: 0 3px 6px rgba(193, 153, 49, 0.2);
-    background-image: linear-gradient(45deg, rgba(193, 153, 49, 0.1) 25%, transparent 25%, transparent 50%, rgba(193, 153, 49, 0.1) 50%, rgba(193, 153, 49, 0.1) 75%, transparent 75%, transparent);
-    background-size: 20px 20px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(193, 153, 49, 0.1) 15px, rgba(193, 153, 49, 0.1) 20px);
 }
 
 .booking-block.booking-completed {
     opacity: 0.8;
-    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1) 75%, transparent 75%, transparent);
-    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0, 0, 0, 0.1) 8px, rgba(0, 0, 0, 0.1) 10px);
 }
 
 .booking-block.booking-cancelled {
@@ -179,7 +178,7 @@
     margin-top: 2px;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.9);
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 3px;
     padding: 1px 4px;
     max-width: fit-content;
@@ -233,7 +232,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--warning), var(--warning-dark));
+    background: var(--warning-color);
     border-left: 3px solid var(--warning-dark);
     z-index: 4;
 }
@@ -242,7 +241,7 @@
     position: absolute;
     left: 5px;
     top: -20px;
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     color: white;
     font-size: 0.7rem;
     padding: 2px 6px;
@@ -261,7 +260,7 @@
 /* Highlight specific hours for better visual organization */
 .time-slot:nth-child(5), /* Noon - 12 PM */
 .time-slot:nth-child(12) /* Evening - 7 PM */ {
-    background-color: var(--gradient-alpha-light);
+    background-color: var(--color-50);
 }
 
 .time-slot:nth-child(5)::after,
@@ -276,7 +275,7 @@
     z-index: 2;
 }
 
-/* Week Calendar Styles with enhanced gradients */
+/* Week Calendar Styles with solid colors */
 .week-calendar-container {
     display: flex;
     flex-direction: column;
@@ -290,7 +289,7 @@
 .week-day-headers {
     display: flex;
     justify-content: space-between;
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -305,7 +304,7 @@
 }
 
 .day-header:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .day-header:last-child {
@@ -313,7 +312,7 @@
 }
 
 .current-day {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -352,7 +351,7 @@
 }
 
 .current-day-column {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .week-booking {
@@ -361,33 +360,33 @@
     border-radius: 4px;
     border-left: 4px solid var(--color-500);
     box-shadow: var(--shadow);
-    background: var(--gradient-card);
+    background: var(--card-color);
     transition: all 0.3s ease;
 }
 
 .week-booking:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
 
 .booking-pending {
-    background: linear-gradient(135deg, var(--warning-light), rgba(255, 183, 77, 0.1));
+    background: var(--warning-light);
     border-left-color: var(--warning);
 }
 
 .booking-confirmed {
-    background: linear-gradient(135deg, var(--info-light), rgba(79, 195, 247, 0.1));
+    background: var(--info-light);
     border-left-color: var(--info);
 }
 
 .booking-completed {
-    background: linear-gradient(135deg, var(--success-light), rgba(129, 199, 132, 0.1));
+    background: var(--success-light);
     border-left-color: var(--success);
 }
 
 .booking-cancelled {
-    background: linear-gradient(135deg, var(--danger-light), rgba(229, 115, 115, 0.1));
+    background: var(--danger-light);
     border-left-color: var(--danger);
     text-decoration: line-through;
     opacity: 0.7;
@@ -426,7 +425,7 @@
     padding: 20px;
     color: var(--text-muted);
     font-style: italic;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 8px;
     margin: 10px;
 }
@@ -471,7 +470,7 @@
         display: block;
         text-align: center;
         padding: 10px;
-        background: var(--gradient-subtle);
+        background: var(--subtle-color);
         font-size: 0.8rem;
         position: sticky;
         bottom: 0;

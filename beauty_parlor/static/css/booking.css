@@ -1,6 +1,5 @@
-/* Booking List Styling with enhanced gradients */
 .booking-search-form .input-group-text {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-color: var(--border-color);
     color: var(--text-primary);
 }
@@ -21,7 +20,7 @@
 }
 
 .booking-table th {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     color: var(--text-primary);
     border-bottom: 2px solid var(--border-color);
 }
@@ -63,21 +62,21 @@
 }
 
 .today-booking {
-    background: var(--gradient-alpha-light);
+    background: var(--color-50);
     border-left: 3px solid var(--color-500);
 }
 
-/* Booking Detail Styling with enhanced gradients */
+/* Booking Detail Styling with solid colors */
 .booking-detail-card .card-header,
 .customer-info-card .card-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
 }
 
 .booking-detail-card,
 .customer-info-card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
 }
@@ -97,14 +96,14 @@
     left: 0;
     width: 50px;
     height: 2px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 .booking-details-table th {
     width: 40%;
     font-weight: 600;
     color: var(--text-primary);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 12px;
 }
 
@@ -122,7 +121,7 @@
 }
 
 .booking-notes {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1rem;
@@ -133,7 +132,7 @@
 .customer-avatar {
     width: 80px;
     height: 80px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -159,7 +158,7 @@
 }
 
 .customer-details .detail-item:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 6px;
     padding: 0.5rem;
 }
@@ -186,28 +185,28 @@
     transform: translateY(-50%);
     width: 4px;
     height: 20px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
 .form-section-card {
     border: 1px solid var(--border-color);
     margin-bottom: 1.5rem;
-    background: var(--gradient-card);
+    background: var(--card-color);
     box-shadow: var(--shadow);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .form-section-card .card-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-bottom: 1px solid var(--border-color);
 }
 
 .selected-customer-avatar {
     width: 50px;
     height: 50px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -220,7 +219,7 @@
 
 /* Enhanced Price Calculator */
 .price-result {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1rem;
@@ -244,7 +243,7 @@
 .delete-icon {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.2));
+    background: var(--danger-light);
     color: var(--danger);
     border-radius: 50%;
     display: flex;
@@ -272,7 +271,7 @@
 }
 
 .booking-summary {
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
+    background: var(--danger-light);
     border: 1px solid rgba(244, 67, 54, 0.2);
     border-radius: 8px;
     padding: 1rem;
@@ -291,7 +290,7 @@
 }
 
 .flatpickr-day:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
 }
 
 .flatpickr-day.selected,
@@ -312,7 +311,7 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-color: var(--color-600);
     color: white;
 }
@@ -335,7 +334,7 @@
 /* Enhanced card minimum height */
 .card.shadow-sm.mb-4 {
     min-height: 250px;
-    background: var(--gradient-card);
+    background: var(--card-color);
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
@@ -349,7 +348,7 @@
     margin-top: 4px;
     font-size: 0.85rem;
     color: var(--text-secondary);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 0.5rem;
     border-radius: 6px;
     border-left: 3px solid var(--color-500);
@@ -366,7 +365,7 @@
     margin: 0 auto;
     padding: 15px;
     border: 1px solid var(--border-color);
-    background: var(--gradient-card);
+    background: var(--card-color);
     box-shadow: var(--shadow-lg);
     font-family: 'Courier New', monospace;
     border-radius: 8px;
@@ -414,22 +413,22 @@
 }
 
 .booking-status.pending {
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     color: white;
 }
 
 .booking-status.confirmed {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
 }
 
 .booking-status.completed {
-    background: var(--gradient-success);
+    background: var(--success-color);
     color: white;
 }
 
 .booking-status.cancelled {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     color: white;
 }
 
@@ -452,7 +451,7 @@
 
 /* Enhanced input group styling */
 .input-group-text {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-color: var(--border-color);
     color: var(--text-primary);
 }
@@ -516,7 +515,7 @@
 /* Loading state animations */
 .booking-loading {
     animation: shimmer 1.5s infinite;
-    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+    background: var(--bg-secondary);
     background-size: 200% 100%;
 }
 

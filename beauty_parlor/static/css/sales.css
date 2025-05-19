@@ -2,7 +2,7 @@
     border: none;
     border-radius: 0.8rem;
     transition: all 0.3s ease;
-    background: var(--gradient-card);
+    background: var(--card-color);
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
     overflow: hidden;
@@ -16,7 +16,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -24,7 +24,7 @@
 .summary-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-color: var(--color-400);
 }
 
@@ -40,7 +40,7 @@
 .summary-icon {
     width: 60px;
     height: 60px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -95,7 +95,7 @@
 
 /* Enhanced sales table */
 .sales-table-container {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -103,7 +103,7 @@
 }
 
 .sales-table-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -132,7 +132,7 @@
 }
 
 .sales-table th {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     color: var(--text-primary);
     font-weight: 600;
     padding: 1rem;
@@ -148,7 +148,7 @@
 }
 
 .sales-table tbody tr:hover {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     transform: scale(1.01);
 }
 
@@ -189,7 +189,7 @@
     content: '';
     width: 3px;
     height: 16px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
@@ -210,7 +210,7 @@
     margin: 2rem auto;
     border: 1px solid var(--border-color);
     padding: 2rem;
-    background: var(--gradient-card);
+    background: var(--card-color);
     box-shadow: var(--shadow-lg);
     border-radius: 0.8rem;
     position: relative;
@@ -224,7 +224,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 .receipt {
@@ -254,7 +254,7 @@
     transform: translateX(-50%);
     width: 80px;
     height: 2px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 .receipt-header h4 {
@@ -277,7 +277,7 @@
     border-bottom: 1px solid var(--border-color);
     padding: 0.75rem 0;
     color: var(--color-700);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
 }
 
@@ -285,7 +285,7 @@
 .receipt-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
 }
@@ -353,7 +353,7 @@
 }
 
 .receipt-items-table th {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     color: var(--text-primary);
     font-weight: 600;
     padding: 1rem;
@@ -407,12 +407,12 @@
 }
 
 .discount-row {
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
+    background: var(--danger-light);
 }
 
 /* Receipt total */
 .receipt-total-section {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     padding: 1.5rem;
     border-radius: 0.5rem;
     border: 2px solid var(--color-300);
@@ -444,7 +444,7 @@
     content: '';
     width: 4px;
     height: 20px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
@@ -456,14 +456,14 @@
     font-size: 1.2rem;
     margin: 2rem 0;
     padding: 1rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
 }
 
 /* Notes section */
 .notes {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1rem;
     border-radius: 0.5rem;
     font-size: 0.9rem;
@@ -492,7 +492,7 @@
 .paid-status {
     color: var(--success);
     font-weight: 600;
-    background: var(--gradient-success);
+    background: var(--success-color);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -503,7 +503,7 @@
 .unpaid-status {
     color: var(--danger);
     font-weight: 600;
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -523,22 +523,22 @@
 }
 
 .status-badge.pending {
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     color: white;
 }
 
 .status-badge.confirmed {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
 }
 
 .status-badge.completed {
-    background: var(--gradient-success);
+    background: var(--success-color);
     color: white;
 }
 
 .status-badge.cancelled {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     color: white;
 }
 
@@ -582,7 +582,7 @@
     width: 40%;
     font-weight: 600;
     color: var(--text-primary);
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -598,7 +598,7 @@
 
 /* Enhanced sales report form */
 .sales-report-container {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -607,7 +607,7 @@
 }
 
 .sales-report-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -638,7 +638,7 @@
 }
 
 .report-form .input-group-text {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
 }
@@ -659,19 +659,19 @@
 }
 
 .date-preset:hover {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-color: var(--color-400);
     transform: translateY(-2px);
 }
 
 .date-preset.active {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-color: var(--color-600);
     color: white;
 }
 
 .date-preset.active:hover {
-    background: var(--gradient-button-hover);
+    background: var(--button-hover-color);
     border-color: var(--color-700);
 }
 
@@ -689,7 +689,7 @@
 
 /* Enhanced sale search form */
 .sale-search-form {
-    background: var(--gradient-subtle);
+    /* background: var(--subtle-color); */
     padding: 1.5rem;
     border-radius: 0.8rem;
     border: 1px solid var(--border-color);
@@ -697,7 +697,7 @@
 }
 
 .sale-search-form .input-group-text {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-color: var(--border-color);
     color: var(--text-primary);
 }
@@ -709,19 +709,19 @@
 }
 
 .sale-search-form .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border: none;
     color: white;
 }
 
 .sale-search-form .btn-primary:hover {
-    background: var(--gradient-button-hover);
+    background: var(--button-hover-color);
     transform: translateY(-2px);
 }
 
 /* Enhanced toast notifications */
 .toast {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-left: 4px solid var(--color-600);
     box-shadow: var(--shadow-lg);
     border-radius: 0.5rem;
@@ -730,7 +730,7 @@
 
 .toast-header {
     border-bottom: 1px solid var(--border-color);
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     color: var(--text-primary);
 }
 

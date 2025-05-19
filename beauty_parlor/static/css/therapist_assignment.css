@@ -1,15 +1,16 @@
+
 .service-card {
     border-left: 4px solid var(--color-500);
     margin-bottom: 1rem;
     border-radius: 8px;
-    background: var(--gradient-subtle);
+    background: var(--card-color);
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     box-shadow: var(--shadow);
 }
 
 .service-card:hover {
-    background: var(--gradient-secondary);
+    background: var(--subtle-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
@@ -21,7 +22,7 @@
 
 /* Booking summary styling */
 .booking-summary {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 8px;
     padding: 1.5rem;
     border: 1px solid var(--border-color);
@@ -39,7 +40,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     display: flex;
     align-items: center;
@@ -95,12 +96,12 @@
 }
 
 .availability-indicator.available {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+    background: var(--success-light);
     border-color: var(--success);
 }
 
 .availability-indicator.unavailable {
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+    background: var(--warning-light);
     border-color: var(--warning);
 }
 
@@ -153,17 +154,17 @@
 }
 
 .schedule-slot.available {
-    background: var(--gradient-success);
+    background: var(--success-color);
     opacity: 0.8;
 }
 
 .schedule-slot.booked {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     opacity: 0.8;
 }
 
 .schedule-slot.current-booking {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     opacity: 1;
     border: 2px solid var(--color-800);
     box-shadow: 0 2px 8px rgba(193, 153, 49, 0.4);
@@ -210,7 +211,7 @@
 .next-available-notice {
     margin-top: 1rem;
     padding: 1rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-radius: 6px;
     border-left: 4px solid var(--info);
     font-size: 0.9rem;
@@ -219,7 +220,7 @@
 }
 
 .next-available-notice.highlighted {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
     border-left-color: white;
     transform: scale(1.02);
@@ -239,14 +240,14 @@
 .update-booking-btn {
     margin-top: 1rem;
     width: 100%;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border: none;
     color: white;
     transition: all 0.3s ease;
 }
 
 .update-booking-btn:hover {
-    background: var(--gradient-button-hover);
+    background: var(--button-hover-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(193, 153, 49, 0.4);
     color: white;
@@ -258,7 +259,7 @@
     flex-wrap: wrap;
     margin-top: 1rem;
     font-size: 0.85rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1rem;
     border-radius: 6px;
     border: 1px solid var(--border-color);
@@ -281,20 +282,20 @@
 }
 
 .legend-color.available {
-    background: var(--gradient-success);
+    background: var(--success-color);
 }
 
 .legend-color.booked {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
 }
 
 .legend-color.current-booking {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 /* Current assignments section */
 .current-assignments {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 8px;
     padding: 1rem;
     border: 1px solid var(--border-color);
@@ -303,7 +304,7 @@
 .current-assignment-item {
     padding: 1rem;
     border-radius: 8px;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-left: 4px solid var(--color-500);
     margin-bottom: 1rem;
     border: 1px solid var(--border-color);
@@ -311,7 +312,7 @@
 }
 
 .current-assignment-item:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow);
 }
@@ -321,7 +322,7 @@
 }
 
 .primary-tag {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
@@ -331,7 +332,7 @@
 }
 
 .assistant-tag {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     color: var(--text-primary);
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
@@ -356,7 +357,7 @@
     position: relative;
     flex: 0 0 calc(50% - 0.5rem);
     margin-bottom: 1rem;
-    background: var(--gradient-card);
+    background: var(--card-color);
     cursor: pointer;
     box-shadow: var(--shadow);
 }
@@ -369,7 +370,7 @@
 
 .therapist-card.selected {
     border-color: var(--color-500);
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     box-shadow: 0 0 0 3px var(--color-500-25);
 }
 
@@ -438,33 +439,33 @@
 }
 
 .alert-info {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
     border-color: var(--info);
 }
 
 .alert-warning {
-    background: var(--gradient-warning);
+    background: var(--warning-color);
     color: white;
     border-color: var(--warning);
 }
 
 .alert-success {
-    background: var(--gradient-success);
+    background: var(--success-color);
     color: white;
     border-color: var(--success);
 }
 
 /* Button enhancements */
 .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border: none;
     color: white;
     transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background: var(--gradient-button-hover);
+    background: var(--button-hover-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(193, 153, 49, 0.4);
     color: white;
@@ -479,13 +480,13 @@
 }
 
 .btn-danger {
-    background: var(--gradient-danger);
+    background: var(--danger-color);
     border: none;
     color: white;
 }
 
 .btn-danger:hover {
-    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    background: var(--danger-dark);
     color: white;
 }
 
@@ -496,21 +497,21 @@
 }
 
 .btn-outline-secondary:hover {
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-color: var(--color-400);
     color: var(--text-primary);
 }
 
 /* Card enhancements */
 .card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
     border-radius: 8px;
 }
 
 .card-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
 }
@@ -569,31 +570,31 @@
 }
 
 [data-theme="dark"] .service-card {
-    background: linear-gradient(135deg, #2d2d2d, #353535);
+    background: #2d2d2d;
     border-color: #404040;
 }
 
 [data-theme="dark"] .service-card:hover {
-    background: linear-gradient(135deg, #353535, #404040);
+    background: #353535;
 }
 
 [data-theme="dark"] .booking-summary {
-    background: linear-gradient(135deg, #2d2d2d, #404040);
+    background: #2d2d2d;
     border-color: #555555;
 }
 
 [data-theme="dark"] .current-assignments {
-    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    background: #1a1a1a;
     border-color: #404040;
 }
 
 [data-theme="dark"] .current-assignment-item {
-    background: linear-gradient(135deg, #353535, #404040);
+    background: #353535;
     border-color: #555555;
 }
 
 [data-theme="dark"] .current-assignment-item:hover {
-    background: linear-gradient(135deg, #404040, #4a4a4a);
+    background: #404040;
 }
 
 [data-theme="dark"] .schedule-timeline {
@@ -628,29 +629,31 @@
 }
 
 [data-theme="dark"] .availability-indicator.available {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    background: var(--success-color);
+    color: white;
     border-color: var(--success);
 }
 
 [data-theme="dark"] .availability-indicator.unavailable {
-    background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.1));
+    background: var(--warning-color);
+    color: white;
     border-color: var(--warning);
 }
 
 [data-theme="dark"] .next-available-notice {
-    background: linear-gradient(135deg, #2d2d2d, #353535);
+    background: #2d2d2d;
     border-color: #404040;
     color: #e5e5e5;
 }
 
 [data-theme="dark"] .next-available-notice.highlighted {
-    background: var(--gradient-info);
+    background: var(--info-color);
     color: white;
     border-color: white;
 }
 
 [data-theme="dark"] .legend {
-    background: linear-gradient(135deg, #2d2d2d, #353535);
+    background: #2d2d2d;
     border-color: #404040;
     color: #e5e5e5;
 }
@@ -676,7 +679,7 @@
 }
 
 [data-theme="dark"] .assistant-tag {
-    background: linear-gradient(135deg, #404040, #555555);
+    background: #404040;
     color: #e5e5e5;
     border-color: #666666;
 }

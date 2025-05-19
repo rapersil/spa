@@ -23,7 +23,7 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -49,7 +49,7 @@
     transform: scaleX(1);
 }
 
-/* Enhanced discount table with improved readability */
+/* Enhanced discount table */
 .discount-table {
     background: var(--card-bg);
     border-radius: 0 0 0.5rem 0.5rem;
@@ -170,7 +170,7 @@
 .service-card {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -179,12 +179,12 @@
 .service-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     border-color: var(--color-400);
 }
 
 .service-card .card-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -211,7 +211,7 @@
     content: '';
     width: 4px;
     height: 20px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border-radius: 2px;
 }
 
@@ -230,7 +230,7 @@
 
 /* Enhanced discount detail styling */
 .discount-details-card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
@@ -277,7 +277,7 @@
 }
 
 .service-discount-section {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     padding: 1.5rem;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
@@ -298,7 +298,7 @@
     left: 0;
     width: 60px;
     height: 2px;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 .service-header h6 {
@@ -358,7 +358,7 @@
 
 /* Enhanced discount form styling */
 .discount-form {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
@@ -367,12 +367,12 @@
 
 .discount-preview .card {
     border: 1px solid var(--border-color);
-    background: var(--gradient-card);
+    background: var(--card-color);
     box-shadow: var(--shadow);
 }
 
 .discount-preview .card-header {
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -387,7 +387,7 @@
     border: 2px solid var(--border-color);
     border-radius: 0.5rem;
     padding: 1rem;
-    background: var(--gradient-subtle);
+    background: var(--subtle-color);
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -401,14 +401,14 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
 
 .strategy-card:hover {
     border-color: var(--color-400);
-    background: var(--gradient-secondary);
+    background: var(--secondary-color);
     transform: translateY(-3px);
     box-shadow: var(--shadow);
 }
@@ -419,7 +419,7 @@
 
 .strategy-card.selected {
     border-color: var(--color-600);
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -477,7 +477,7 @@
 
 /* Enhanced delete confirmation */
 .delete-confirmation-card {
-    background: var(--gradient-card);
+    background: var(--card-color);
     border: 1px solid rgba(244, 67, 54, 0.3);
     border-radius: 0.5rem;
     box-shadow: var(--shadow-lg);
@@ -487,7 +487,7 @@
 .delete-icon {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.2));
+    background: var(--danger-light);
     color: var(--danger);
     border-radius: 50%;
     display: flex;
@@ -515,7 +515,7 @@
 }
 
 .discount-summary {
-    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(244, 67, 54, 0.1));
+    background: var(--danger-light);
     border: 1px solid rgba(244, 67, 54, 0.2);
     border-radius: 0.5rem;
     padding: 1.5rem;
@@ -534,66 +534,6 @@
     font-weight: 600;
     padding-top: 1rem;
     border-top: 2px solid rgba(244, 67, 54, 0.3);
-}
-
-/* Enhanced flatpickr customization */
-.flatpickr-calendar.open {
-    z-index: 1050;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
-    background: var(--card-bg);
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.flatpickr-months {
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.flatpickr-month {
-    color: var(--text-primary);
-}
-
-.flatpickr-day {
-    color: var(--text-primary);
-    transition: all 0.3s ease;
-}
-
-.flatpickr-day:hover {
-    background: var(--bg-secondary);
-    transform: scale(1.05);
-}
-
-.flatpickr-day.selected,
-.flatpickr-day.startRange,
-.flatpickr-day.endRange,
-.flatpickr-day.selected.inRange,
-.flatpickr-day.startRange.inRange,
-.flatpickr-day.endRange.inRange,
-.flatpickr-day.selected:focus,
-.flatpickr-day.startRange:focus,
-.flatpickr-day.endRange:focus,
-.flatpickr-day.selected:hover,
-.flatpickr-day.startRange:hover,
-.flatpickr-day.endRange:hover,
-.flatpickr-day.selected.prevMonthDay,
-.flatpickr-day.startRange.prevMonthDay,
-.flatpickr-day.endRange.prevMonthDay,
-.flatpickr-day.selected.nextMonthDay,
-.flatpickr-day.startRange.nextMonthDay,
-.flatpickr-day.endRange.nextMonthDay {
-    background: var(--gradient-primary);
-    border-color: var(--color-600);
-    color: white;
-}
-
-.flatpickr-time .numInputWrapper span.arrowUp:after {
-    border-bottom-color: var(--color-600);
-}
-
-.flatpickr-time .numInputWrapper span.arrowDown:after {
-    border-top-color: var(--color-600);
 }
 
 /* Enhanced responsive design */
@@ -646,8 +586,7 @@
 /* Loading states */
 .discount-loading {
     animation: shimmer 1.5s infinite;
-    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
-    background-size: 200% 100%;
+    background: var(--bg-secondary);
     border-radius: 0.5rem;
     height: 100px;
 }
