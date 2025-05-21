@@ -190,22 +190,17 @@ class ServiceSelectionForm(forms.Form):
         cleaned_data = super().clean()
         date = cleaned_data.get('date')
         time = cleaned_data.get('time')
-        
         if date and time:
-            # Combine date and time into a datetime object
             from datetime import datetime
             date_time = datetime.combine(date, time)
-            
-            # Convert to timezone-aware datetime
             from django.utils import timezone
             date_time = timezone.make_aware(date_time)
-            
-            # Check if the date_time is in the past
+            from django.utils.timezone import is_aware, make_aware
+            if not is_aware(date_time):
+                date_time = make_aware(date_time)
             if date_time < timezone.now():
                 raise ValidationError("Booking time cannot be in the past.")
-            
             cleaned_data['date_time'] = date_time
-            
         return cleaned_data
 # class ServiceSelectionForm(forms.Form):
 #     service = forms.ModelChoiceField(

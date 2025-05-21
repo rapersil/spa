@@ -163,65 +163,117 @@ class ServiceForm(forms.ModelForm):
 # Discount Forms
 # ============================
 
-class DiscountForm(forms.ModelForm):
-    """Form for creating and updating time-based service discounts."""
-    
-    class Meta:
-        model = Discount
-        fields = ('service', 'percentage', 'start_date', 'end_date')
-        widgets = {
-            'start_date': forms.DateTimeInput(
-                attrs={
-                    'type': 'datetime-local',
-                    'class': 'form-control'
-                }
-            ),
-            'end_date': forms.DateTimeInput(
-                attrs={
-                    'type': 'datetime-local',
-                    'class': 'form-control'
-                }
-            ),
-        }
-        help_texts = {
-            'start_date': "Enter the current time or a future datetime when this discount should start.",
-            'end_date': "Enter a future datetime after the start time when this discount should end."
-        }
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add Bootstrap classes
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+from django import forms
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.db.models import Q
+from .models import Discount, Service
 
+class DiscountForm(forms.Form):
+    """Form for creating and updating time-based service discounts with multi-select."""
     
+    DISCOUNT_TYPE_CHOICES = (
+        ('single', 'Single Service'),
+        ('multiple', 'Selected Services'),
+        ('all', 'All Active Services'),
+    )
+    
+    discount_type = forms.ChoiceField(
+        choices=DISCOUNT_TYPE_CHOICES,
+        initial='single',
+        widget=forms.RadioSelect,
+        help_text="Choose whether to apply discount to one, multiple, or all services"
+    )
+    
+    single_service = forms.ModelChoiceField(
+        queryset=Service.objects.filter(active=True),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text="Select a service for the discount"
+    )
+    
+    multiple_services = forms.ModelMultipleChoiceField(
+        queryset=Service.objects.filter(active=True),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Select multiple services for the discount"
+    )
+    
+    percentage = forms.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '100', 'step': '0.01'}),
+        help_text="Discount percentage (0-100%)"
+    )
+    
+    start_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        help_text="Enter the current time or a future datetime when this discount should start."
+    )
+    
+    end_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        help_text="Enter a future datetime after the start time when this discount should end."
+    )
+    
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
         
+        # If editing an existing discount
+        if self.instance:
+            self.fields['discount_type'].initial = 'single'
+            self.fields['single_service'].initial = self.instance.service
+            self.fields['percentage'].initial = self.instance.percentage
+            self.fields['start_date'].initial = self.instance.start_date
+            self.fields['end_date'].initial = self.instance.end_date
+            
+            # Disable discount type selection when editing
+            self.fields['discount_type'].widget.attrs['disabled'] = True
+            self.fields['discount_type'].help_text = "Discount type cannot be changed when editing"
+    
     def clean(self):
         cleaned_data = super().clean()
-        service = cleaned_data.get('service')
+        discount_type = cleaned_data.get('discount_type')
+        single_service = cleaned_data.get('single_service')
+        multiple_services = cleaned_data.get('multiple_services')
         start_datetime = cleaned_data.get('start_date')
         end_datetime = cleaned_data.get('end_date')
         
-        # Get current datetime with a small buffer to account for form submission time
+        # Get current datetime with a small buffer
         current_datetime = timezone.now() - timezone.timedelta(seconds=30)
         
-        # Validate full datetime (including time component)
+        # Validate service selection based on discount type
+        if discount_type == 'single' and not single_service:
+            raise ValidationError("Please select a service for single service discount.")
+        elif discount_type == 'multiple' and not multiple_services:
+            raise ValidationError("Please select at least one service for multiple services discount.")
+        
+        # Validate datetime fields
         if start_datetime and end_datetime:
-            # Ensure end datetime is always after start datetime
             if start_datetime >= end_datetime:
                 raise ValidationError("End datetime must be after start datetime.")
             
-            # Always ensure start datetime is not in the past for both new and updated discounts
             if start_datetime < current_datetime:
                 raise ValidationError("Start datetime cannot be in the past. Please use the current time or a future datetime.")
         
-        # Check for conflicting discounts, but exclude the current discount when updating
-        if service:
+        # Get services to check based on discount type
+        services_to_check = []
+        if discount_type == 'single' and single_service:
+            services_to_check = [single_service]
+        elif discount_type == 'multiple':
+            services_to_check = multiple_services
+        elif discount_type == 'all':
+            services_to_check = Service.objects.filter(active=True)
+        
+        # Check for conflicting discounts for all services
+        services_with_conflicts = []
+        for service in services_to_check:
             now = timezone.now()
             query = Q(start_date__lte=now, end_date__gt=now) | Q(start_date__gt=now)
             
-            # If updating an existing discount, exclude the current instance from the check
-            if self.instance.pk:
+            # Exclude current instance when updating
+            if self.instance and self.instance.pk and self.instance.service == service:
                 existing_discount = Discount.objects.filter(
                     service=service
                 ).filter(query).exclude(pk=self.instance.pk).exists()
@@ -231,9 +283,31 @@ class DiscountForm(forms.ModelForm):
                 ).filter(query).exists()
             
             if existing_discount:
-                raise ValidationError("This service already has an active or upcoming discount.")
+                services_with_conflicts.append(service.name)
+        
+        if services_with_conflicts:
+            if len(services_with_conflicts) == 1:
+                raise ValidationError(f"The service '{services_with_conflicts[0]}' already has an active or upcoming discount.")
+            else:
+                raise ValidationError(f"The following services already have active or upcoming discounts: {', '.join(services_with_conflicts)}")
         
         return cleaned_data
+    
+    def get_selected_services(self):
+        """Helper method to get the list of services based on discount type selection"""
+        if not self.is_valid():
+            return []
+            
+        discount_type = self.cleaned_data.get('discount_type')
+        
+        if discount_type == 'single':
+            return [self.cleaned_data.get('single_service')]
+        elif discount_type == 'multiple':
+            return list(self.cleaned_data.get('multiple_services', []))
+        elif discount_type == 'all':
+            return list(Service.objects.filter(active=True))
+        
+        return []
 
 
 # Booking Forms

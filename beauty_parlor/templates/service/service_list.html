@@ -16,7 +16,7 @@
             <p class="text-muted">Manage beauty services offered by the salon</p>
         </div>
         <div class="col-md-4 text-md-end">
-            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+            {% if request.user.user_type in 'ADMIN,SUPERADMIN,STAFF' %}
             <a href="{% url 'service_create' %}" class="btn btn-primary">
                 <i class="material-icons me-2">add</i>Add New Service
             </a>

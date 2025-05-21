@@ -1,6 +1,6 @@
 # beauty_app/views/discount_views.py
 
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -78,8 +78,7 @@ class DiscountDetailView(LoginRequiredMixin, AdminRequiredMixin, DetailView):
 
 # discount_views.py - Update the DiscountCreateView
 
-class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
-    model = Discount
+class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
     form_class = DiscountForm
     template_name = 'discount/discount_form.html'
     success_url = reverse_lazy('discount_list')
@@ -89,49 +88,78 @@ class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         # Pre-select service if passed in URL
         service_id = self.request.GET.get('service_id')
         if service_id:
-            kwargs['initial'] = {'service': service_id}
+            kwargs['initial'] = {
+                'discount_type': 'single',
+                'single_service': service_id
+            }
         return kwargs
     
-    def get(self, request, *args, **kwargs):
-        # Check if service_id is in the request and validate it before showing the form
-        service_id = request.GET.get('service_id')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add extra context for the template
+        service_id = self.request.GET.get('service_id')
         if service_id:
-            service = Service.objects.filter(id=service_id).first()
-            if service:
-                # Check for existing active discount
-                now = timezone.now()
-                active_discount = Discount.objects.filter(
-                    service=service,
-                    start_date__lte=now,
-                    end_date__gt=now
-                ).first()
-                
-                if active_discount:
-                    messages.error(
-                        request, 
-                        f"This service already has an active discount of {active_discount.percentage}% that ends on {active_discount.end_date.strftime('%Y-%m-%d')}."
-                    )
-                    return redirect('service_detail', pk=service_id)
-                
-                # Check for upcoming discount
-                upcoming_discount = Discount.objects.filter(
-                    service=service,
-                    start_date__gt=now
-                ).order_by('start_date').first()
-                
-                if upcoming_discount:
-                    messages.error(
-                        request, 
-                        f"This service already has an upcoming discount of {upcoming_discount.percentage}% scheduled to start on {upcoming_discount.start_date.strftime('%Y-%m-%d')}."
-                    )
-                    return redirect('service_detail', pk=service_id)
+            context['selected_service'] = Service.objects.filter(id=service_id).first()
         
-        return super().get(request, *args, **kwargs)
+        context['is_update'] = False
+        context['active_services_count'] = Service.objects.filter(active=True).count()
+        return context
     
     def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        messages.success(self.request, "Discount created successfully.")
+        selected_services = form.get_selected_services()
+        
+        if not selected_services:
+            messages.error(self.request, "No services selected for discount.")
+            return self.form_invalid(form)
+        
+        # Create discount for each selected service
+        discounts_created = 0
+        for service in selected_services:
+            discount = Discount(
+                service=service,
+                percentage=form.cleaned_data['percentage'],
+                start_date=form.cleaned_data['start_date'],
+                end_date=form.cleaned_data['end_date'],
+                created_by=self.request.user
+            )
+            discount.save()
+            discounts_created += 1
+        
+        # Customize success message based on how many discounts were created
+        if discounts_created == 1:
+            messages.success(self.request, f"Discount created successfully for '{selected_services[0].name}'.")
+        else:
+            messages.success(self.request, f"Discounts created successfully for {discounts_created} services.")
+        
         return super().form_valid(form)
+
+class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = Discount
+    form_class = DiscountForm
+    template_name = 'discount/discount_form.html'
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_object()
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_update'] = True
+        context['discount'] = self.get_object()
+        return context
+    
+    def form_valid(self, form):
+        discount = self.get_object()
+        
+        # Update the existing discount record
+        discount.percentage = form.cleaned_data['percentage']
+        discount.start_date = form.cleaned_data['start_date']
+        discount.end_date = form.cleaned_data['end_date']
+        discount.save()
+        
+        messages.success(self.request, f"Discount for '{discount.service.name}' updated successfully.")
+        return redirect('discount_detail', pk=discount.pk)
 
 # discount_views.py - Update the DiscountUpdateView
 class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):

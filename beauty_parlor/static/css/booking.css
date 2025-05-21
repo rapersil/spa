@@ -20,13 +20,13 @@
 }
 
 .booking-table th {
-    background: var(--subtle-color);
+    /* background: var(--subtle-color); */
     color: var(--text-primary);
     border-bottom: 2px solid var(--border-color);
 }
 
 .booking-table {
-    background-color: var(--card-bg);
+    /* background-color: var(--card-bg); */
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -69,14 +69,14 @@
 /* Booking Detail Styling with solid colors */
 .booking-detail-card .card-header,
 .customer-info-card .card-header {
-    background: var(--subtle-color);
+    /* background: var(--subtle-color); */
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
 }
 
 .booking-detail-card,
 .customer-info-card {
-    background: var(--card-color);
+    /* background: var(--card-color); */
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
 }
@@ -96,14 +96,14 @@
     left: 0;
     width: 50px;
     height: 2px;
-    background: var(--primary-color);
+    /* background: var(--primary-color); */
 }
 
 .booking-details-table th {
     width: 40%;
     font-weight: 600;
     color: var(--text-primary);
-    background: var(--subtle-color);
+    /* background: var(--subtle-color); */
     padding: 12px;
 }
 
@@ -114,14 +114,14 @@
 }
 
 .booking-details-table {
-    background: var(--card-bg);
+    /* background: var(--card-bg); */
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow);
 }
 
 .booking-notes {
-    background: var(--subtle-color);
+    /* background: var(--subtle-color); */
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1rem;
