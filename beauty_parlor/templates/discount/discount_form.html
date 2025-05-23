@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block title %}
-{% if is_update %}Edit Discount - {{ discount.discount_id }}{% else %}Add New Discount{% endif %}
+{% if is_update %}Edit Discount - {{ discount.name }}{% else %}Add New Discount{% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -45,6 +45,13 @@
     #selectedServicesCount {
         font-weight: bold;
     }
+    .discount-name-section {
+        background-color: var(--color-50);
+        padding: 1.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid var(--color-200);
+        margin-bottom: 2rem;
+    }
 </style>
 {% endblock %}
 
@@ -68,7 +75,7 @@
                 <div class="card-header">
                     <h4 class="mb-0">
                         {% if is_update %}
-                        <i class="material-icons me-2">edit</i>Edit Discount
+                        <i class="material-icons me-2">edit</i>Edit Discount - {{ discount.name }}
                         {% else %}
                         <i class="material-icons me-2">percent</i>Create New Discount
                         {% endif %}
@@ -78,10 +85,25 @@
                     <form method="post" class="discount-form needs-validation" novalidate>
                         {% csrf_token %}
                         
+                        <!-- Discount Name Section -->
+                        <div class="discount-name-section">
+                            <h5 class="mb-3">
+                                <i class="material-icons me-2">label</i>
+                                {% if is_update %}Update Discount Name{% else %}1. Name Your Discount{% endif %}
+                            </h5>
+                            {{ form.name|as_crispy_field }}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="material-icons me-1" style="font-size: 16px;">lightbulb</i>
+                                    <strong>Examples:</strong> Christmas Special, Flash Sale, Summer Promo, New Year Bonus, Weekend Deal
+                                </small>
+                            </div>
+                        </div>
+                        
                         {% if not is_update %}
                         <!-- Service Selection Section -->
                         <div class="service-selection-container">
-                            <h5 class="mb-3">1. Select Service(s)</h5>
+                            <h5 class="mb-3">2. Select Service(s)</h5>
                             
                             <div class="service-type-selection">
                                 <div class="form-group">
@@ -118,6 +140,7 @@
                                 <div class="alert alert-info">
                                     <i class="material-icons me-2">info</i>
                                     This will create individual discounts for all <strong>{{ active_services_count }}</strong> active services in the system.
+                                    Each service will get its own discount with the name format: "<span id="discountNamePreview">[Discount Name]</span> - [Service Name]"
                                 </div>
                             </div>
                             
@@ -130,7 +153,7 @@
                         
                         <!-- Discount Details Section -->
                         <div class="discount-details-container">
-                            <h5 class="mb-3">{% if is_update %}Edit Discount Details{% else %}2. Set Discount Details{% endif %}</h5>
+                            <h5 class="mb-3">{% if is_update %}Edit Discount Details{% else %}3. Set Discount Details{% endif %}</h5>
                             
                             <div class="row mb-4">
                                 <div class="col-md-6">
@@ -198,6 +221,7 @@
                     <div class="alert alert-info">
                         <h6><i class="material-icons me-2">lightbulb</i>Tips for Creating Discounts</h6>
                         <ul class="mb-0">
+                            <li>Choose a clear, descriptive name for your discount</li>
                             <li>Only services with no active discount are allowed for new discounts</li>
                             <li>Only active services can be discounted</li>
                             <li>Start date must be in the future for new discounts</li>
@@ -208,22 +232,22 @@
                     </div>
                     
                     <div class="mt-4">
-                        <h6>Common Discount Strategies</h6>
+                        <h6>Popular Discount Names</h6>
                         <div class="strategy-card mb-2">
                             <div class="strategy-name">Flash Sale</div>
                             <div class="strategy-desc">Short duration (1-3 days) with higher discount (20-30%)</div>
                         </div>
                         <div class="strategy-card mb-2">
-                            <div class="strategy-name">Weekly Special</div>
-                            <div class="strategy-desc">7-day promotion with moderate discount (10-15%)</div>
+                            <div class="strategy-name">Weekend Special</div>
+                            <div class="strategy-desc">Weekend promotion with moderate discount (10-15%)</div>
                         </div>
                         <div class="strategy-card mb-2">
-                            <div class="strategy-name">Monthly Promotion</div>
-                            <div class="strategy-desc">Entire month with lower discount (5-10%)</div>
+                            <div class="strategy-name">Holiday Bonus</div>
+                            <div class="strategy-desc">Holiday period with varying discount</div>
                         </div>
                         <div class="strategy-card">
-                            <div class="strategy-name">Seasonal Offer</div>
-                            <div class="strategy-desc">Holiday or seasonal period with varying discount</div>
+                            <div class="strategy-name">New Customer Deal</div>
+                            <div class="strategy-desc">Special offers for new customers</div>
                         </div>
                     </div>
                 </div>
@@ -251,6 +275,17 @@
             minDate: "today",
             time_24hr: true
         });
+        
+        // Update discount name preview for "all services" option
+        const discountNameInput = document.getElementById('id_name');
+        const discountNamePreview = document.getElementById('discountNamePreview');
+        
+        if (discountNameInput && discountNamePreview) {
+            discountNameInput.addEventListener('input', function() {
+                const name = this.value || '[Discount Name]';
+                discountNamePreview.textContent = name;
+            });
+        }
         
         {% if not is_update %}
         // Service selection type handling

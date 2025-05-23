@@ -1,6 +1,6 @@
-# beauty_app/views/discount_views.py
+# beauty_app/views/discount_views.py - Updated views with name field
 
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView,FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -9,10 +9,6 @@ from django.utils import timezone
 from ..models import Discount, Service, Booking
 from ..forms import DiscountForm
 from ..permissions import AdminRequiredMixin
-
-# beauty_app/views/discount_views.py
-
-from django.utils import timezone
 
 class DiscountListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = Discount
@@ -25,8 +21,6 @@ class DiscountListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
             '-start_date', '-end_date'
         )
     
-    # discount_views.py - Update the DiscountListView get_context_data method
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['now'] = timezone.now()
@@ -60,13 +54,10 @@ class DiscountListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
         services_with_discounts = set(list(active_discounts.values_list('service_id', flat=True)) + 
                                     list(upcoming_discounts.values_list('service_id', flat=True)))
         
-        
-        
         # Find active services NOT in the above set
         context['services_without_discount'] = Service.objects.filter(
             active=True
         ).exclude(id__in=services_with_discounts)
-        print(context['services_without_discount'])
         
         return context
 
@@ -74,9 +65,6 @@ class DiscountDetailView(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Discount
     template_name = 'discount/discount_detail.html'
     context_object_name = 'discount'
-    
-
-# discount_views.py - Update the DiscountCreateView
 
 class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
     form_class = DiscountForm
@@ -107,6 +95,7 @@ class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
     
     def form_valid(self, form):
         selected_services = form.get_selected_services()
+        discount_name = form.cleaned_data['name']
         
         if not selected_services:
             messages.error(self.request, "No services selected for discount.")
@@ -115,7 +104,14 @@ class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
         # Create discount for each selected service
         discounts_created = 0
         for service in selected_services:
+            # For multiple services, append service name to make it unique
+            if len(selected_services) > 1:
+                service_specific_name = f"{discount_name} - {service.name}"
+            else:
+                service_specific_name = discount_name
+                
             discount = Discount(
+                name=service_specific_name,
                 service=service,
                 percentage=form.cleaned_data['percentage'],
                 start_date=form.cleaned_data['start_date'],
@@ -127,9 +123,9 @@ class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
         
         # Customize success message based on how many discounts were created
         if discounts_created == 1:
-            messages.success(self.request, f"Discount created successfully for '{selected_services[0].name}'.")
+            messages.success(self.request, f"Discount '{discount_name}' created successfully for '{selected_services[0].name}'.")
         else:
-            messages.success(self.request, f"Discounts created successfully for {discounts_created} services.")
+            messages.success(self.request, f"Discount '{discount_name}' created successfully for {discounts_created} services.")
         
         return super().form_valid(form)
 
@@ -153,42 +149,14 @@ class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
         discount = self.get_object()
         
         # Update the existing discount record
+        discount.name = form.cleaned_data['name']
         discount.percentage = form.cleaned_data['percentage']
         discount.start_date = form.cleaned_data['start_date']
         discount.end_date = form.cleaned_data['end_date']
         discount.save()
         
-        messages.success(self.request, f"Discount for '{discount.service.name}' updated successfully.")
+        messages.success(self.request, f"Discount '{discount.name}' for '{discount.service.name}' updated successfully.")
         return redirect('discount_detail', pk=discount.pk)
-
-# discount_views.py - Update the DiscountUpdateView
-class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
-    model = Discount
-    form_class = DiscountForm
-    template_name = 'discount/discount_form.html'
-    
-    def form_valid(self, form):
-        messages.success(self.request, "Discount updated successfully.")
-        
-        # If this is an active discount, update any associated bookings
-        discount = form.instance
-        if discount.is_active():
-            # Get future bookings that use this service
-            future_bookings = Booking.objects.filter(
-                service=discount.service,
-                date_time__gte=timezone.now(),
-                status__in=['PENDING', 'CONFIRMED']
-            )
-            
-            # Update the service_discount reference
-            for booking in future_bookings:
-                booking.service_discount = discount
-                booking.save()
-                
-            if future_bookings.exists():
-                messages.info(self.request, f"Updated discount information for {future_bookings.count()} upcoming bookings.")
-                
-        return super().form_valid(form)
     
     def get_success_url(self):
         return reverse_lazy('discount_detail', kwargs={'pk': self.object.pk})
@@ -199,10 +167,9 @@ class DiscountDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     success_url = reverse_lazy('discount_list')
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Discount deleted successfully.")
+        discount = self.get_object()
+        messages.success(request, f"Discount '{discount.name}' deleted successfully.")
         return super().delete(request, *args, **kwargs)
-    
-
 
 class ServiceDiscountHistoryView(LoginRequiredMixin, AdminRequiredMixin, DetailView):
     model = Service

@@ -43,17 +43,24 @@ class StaffDetailView(LoginRequiredMixin, AdminRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         staff_member = self.object
         
-        # Get recent bookings created by this staff member (existing functionality)
-        context['recent_bookings'] = staff_member.created_bookings.all().order_by('-created_at')[:5]
+        # Determine bookings to display based on user type
+        if staff_member.user_type == 'STAFFLEVEL2':
+            # Get bookings assigned to this staff member
+            context['recent_bookings'] = Booking.objects.filter(
+                therapist_assignments__therapist=staff_member
+            ).order_by('-date_time')[:5]
+        else:
+            # Get bookings created by this staff member (existing behavior)
+            context['recent_bookings'] = staff_member.created_bookings.all().order_by('-created_at')[:5]
         
         # Enhanced activity tracking - Bookings updated
         context['updated_bookings'] = Booking.objects.filter(
             updated_by=staff_member
         ).exclude(
-            created_by=staff_member  # Exclude bookings they created themselves
+            created_by=staff_member
         ).order_by('-updated_at')[:5]
         
-        # Booking status changes (to completed/cancelled)
+        # Booking status changes
         context['completed_bookings'] = Booking.objects.filter(
             updated_by=staff_member,
             status='COMPLETED'

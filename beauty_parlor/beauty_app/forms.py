@@ -162,12 +162,7 @@ class ServiceForm(forms.ModelForm):
 # ============================
 # Discount Forms
 # ============================
-
-from django import forms
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from django.db.models import Q
-from .models import Discount, Service
+# beauty_app/forms.py - Updated DiscountForm
 
 class DiscountForm(forms.Form):
     """Form for creating and updating time-based service discounts with multi-select."""
@@ -176,6 +171,12 @@ class DiscountForm(forms.Form):
         ('single', 'Single Service'),
         ('multiple', 'Selected Services'),
         ('all', 'All Active Services'),
+    )
+    
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter discount name (e.g., Christmas Bonus, Flash Sale)'}),
+        help_text="Give this discount campaign a memorable name"
     )
     
     discount_type = forms.ChoiceField(
@@ -222,6 +223,7 @@ class DiscountForm(forms.Form):
         
         # If editing an existing discount
         if self.instance:
+            self.fields['name'].initial = self.instance.name
             self.fields['discount_type'].initial = 'single'
             self.fields['single_service'].initial = self.instance.service
             self.fields['percentage'].initial = self.instance.percentage
@@ -232,6 +234,14 @@ class DiscountForm(forms.Form):
             self.fields['discount_type'].widget.attrs['disabled'] = True
             self.fields['discount_type'].help_text = "Discount type cannot be changed when editing"
     
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip()
+            if len(name) < 3:
+                raise ValidationError("Discount name must be at least 3 characters long.")
+        return name
+    
     def clean(self):
         cleaned_data = super().clean()
         discount_type = cleaned_data.get('discount_type')
@@ -239,6 +249,7 @@ class DiscountForm(forms.Form):
         multiple_services = cleaned_data.get('multiple_services')
         start_datetime = cleaned_data.get('start_date')
         end_datetime = cleaned_data.get('end_date')
+        name = cleaned_data.get('name')
         
         # Get current datetime with a small buffer
         current_datetime = timezone.now() - timezone.timedelta(seconds=30)

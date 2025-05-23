@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Delete Discount - {{ discount.discount_id }}{% endblock %}
+{% block title %}Delete Discount - {{ discount.name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/discount.css' %}">
@@ -14,7 +14,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{% url 'discount_list' %}">Discounts</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'discount_detail' discount.pk %}">{{ discount.discount_id }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'discount_detail' discount.pk %}">{{ discount.name }}</a></li>
             <li class="breadcrumb-item active">Delete</li>
         </ol>
     </nav>
@@ -36,6 +36,7 @@
                     <div class="discount-summary p-3 mb-4 rounded text-start">
                         <div class="row">
                             <div class="col-sm-6">
+                                <p><strong>Discount Name:</strong> {{ discount.name }}</p>
                                 <p><strong>Discount ID:</strong> {{ discount.discount_id }}</p>
                                 <p><strong>Service:</strong> {{ discount.service.name }}</p>
                                 <p><strong>Percentage:</strong> {{ discount.percentage }}% OFF</p>
@@ -63,7 +64,7 @@
                                 <i class="material-icons me-2">close</i>Cancel
                             </a>
                             <button type="submit" class="btn btn-danger">
-                                <i class="material-icons me-2">delete</i>Delete Discount
+                                <i class="material-icons me-2">delete</i>Delete "{{ discount.name }}"
                             </button>
                         </div>
                     </form>

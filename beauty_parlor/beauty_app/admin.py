@@ -78,15 +78,17 @@ class DiscountInline(admin.TabularInline):
     def has_delete_permission(self, request, obj=None):
         return True
 
+# beauty_app/admin.py - Updated DiscountAdmin with name field
+
 @admin.register(Discount)
 class DiscountAdmin(admin.ModelAdmin):
-    list_display = ('discount_id', 'service', 'percentage', 'start_date', 'end_date', 'discount_status', 'created_by')
+    list_display = ('discount_id', 'name', 'service', 'percentage', 'start_date', 'end_date', 'discount_status', 'created_by')
     list_filter = ('service', 'created_by', 'start_date', 'end_date')
-    search_fields = ('discount_id', 'service__name')
+    search_fields = ('discount_id', 'name', 'service__name')
     ordering = ('-start_date',)
     
     fieldsets = (
-        ('Discount Information', {'fields': ('discount_id', 'service', 'percentage')}),
+        ('Discount Information', {'fields': ('discount_id', 'name', 'service', 'percentage')}),
         ('Validity Period', {'fields': ('start_date', 'end_date')}),
         ('System Information', {'fields': ('created_by',)}),
     )

@@ -115,6 +115,8 @@ class Discount(AuditableMixin, models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=100, help_text="Discount campaign name (e.g., 'Christmas Bonus', 'Flash Sale')")
+
     
     def save(self, *args, **kwargs):
         if not self.discount_id:
@@ -152,7 +154,7 @@ class Discount(AuditableMixin, models.Model):
         return savings
     
     def __str__(self):
-        return f"{self.service.name} {self.percentage}% ({self.discount_id})"
+        return f"{self.name} - {self.service.name} {self.percentage}% ({self.discount_id})"
     
 
 

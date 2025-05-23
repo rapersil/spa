@@ -38,6 +38,7 @@ from .views.booking_request_views import (
 )
 from .views.therapist_views import (
     TherapistListView, TherapistAssignmentView, RemoveTherapistAssignmentView, booking_calendar_therapist_view, therapist_detail_api,
+    therapist_schedule_view
   )  # Import the missing views
 from .views.public_therapist_views import (
     PublicTherapistListView,
@@ -152,7 +153,7 @@ urlpatterns = [
     # Therapist URLs
     path('therapists/', TherapistListView.as_view(), name='therapist_list'),
     path('api/therapist/<int:therapist_id>/', therapist_detail_api, name='therapist_detail_api'),
-
+    path('therapist/<int:therapist_id>/schedule/', therapist_schedule_view, name='therapist_schedule'),
     path('therapists/public/', PublicTherapistListView.as_view(), name='public_therapist_list'),
     path('api/public/therapist/<int:therapist_id>/', public_therapist_detail_api, name='therapist_detail_api_public'),
     path('calendar/therapist/public/', public_booking_calendar_therapist_view, name='public_booking_calendar_therapist'),

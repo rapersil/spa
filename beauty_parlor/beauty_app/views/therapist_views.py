@@ -424,3 +424,141 @@ def booking_calendar_therapist_view(request):
     }
     
     return render(request, 'therapist/booking_calendar_therapist.html', context)
+
+
+
+
+def therapist_schedule_view(request, therapist_id):
+    """Individual therapist schedule view with calendar and booking management"""
+    
+    # Get the therapist
+    therapist = get_object_or_404(CustomUser, 
+                                id=therapist_id, 
+                                user_type='STAFFLEVEL2', 
+                                is_active=True)
+    
+    # Get the date from query params, default to today
+    date_param = request.GET.get('date')
+    weekday_param = request.GET.get('weekday')
+    today = timezone.now().date()
+    
+    # Handle weekday parameter for direct day selection from dashboard
+    if weekday_param is not None:
+        try:
+            weekday = int(weekday_param)
+            days_diff = weekday - today.weekday()
+            if days_diff < 0:
+                days_diff += 7
+            current_date = today + timedelta(days=days_diff)
+        except ValueError:
+            current_date = today
+    elif date_param:
+        try:
+            current_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+        except ValueError:
+            current_date = today
+    else:
+        current_date = today
+    
+    # Get view type (day or week)
+    view_type = request.GET.get('view', 'day')
+    
+    if view_type == 'day':
+        start_date = current_date
+        end_date = current_date
+        prev_date = current_date - timedelta(days=1)
+        next_date = current_date + timedelta(days=1)
+    else:
+        # Week view
+        start_date = current_date - timedelta(days=current_date.weekday())
+        end_date = start_date + timedelta(days=6)
+        prev_date = start_date - timedelta(days=7)
+        next_date = start_date + timedelta(days=7)
+    
+    # Get bookings for this therapist in the date range
+    bookings = Booking.objects.filter(
+        therapist_assignments__therapist=therapist,
+        date_time__date__range=[start_date, end_date],
+        status__in=['PENDING', 'CONFIRMED', 'COMPLETED']
+    ).select_related('customer', 'service').prefetch_related('therapist_assignments').order_by('date_time')
+    
+    # Hours for the schedule (7 AM to 10 PM)
+    hours = list(range(7, 23))
+    
+    # Calculate grid positions for bookings
+    for booking in bookings:
+        booking.end_time = booking.date_time + timedelta(minutes=booking.service.duration)
+        
+        # Calculate grid positions (each hour = 8 rows, each row = 7.5 minutes)
+        start_minutes = (booking.date_time.hour - 7) * 60 + booking.date_time.minute
+        booking.start_row = int(start_minutes / 7.5) + 1
+        
+        end_minutes = (booking.end_time.hour - 7) * 60 + booking.end_time.minute
+        booking.end_row = int(end_minutes / 7.5) + 1
+        
+        # Calculate expected start time
+        expected_start = booking.get_expected_start_time()
+        wait_minutes = booking.get_wait_time_minutes()
+        
+        if wait_minutes > 0:
+            expected_start_minutes = (expected_start.hour - 7) * 60 + expected_start.minute
+            booking.expected_start_row = int(expected_start_minutes / 7.5) + 1
+    
+    # Create date range for week view
+    date_range = []
+    for i in range(7):
+        date_range.append(start_date + timedelta(days=i))
+    
+    # Group bookings by day for week view
+    bookings_by_day = {}
+    for day in date_range:
+        bookings_by_day[day] = [b for b in bookings if b.date_time.date() == day]
+    
+    # Calculate statistics
+    today_bookings = [b for b in bookings if b.date_time.date() == today]
+    pending_bookings = [b for b in bookings if b.status == 'PENDING']
+    confirmed_bookings = [b for b in bookings if b.status == 'CONFIRMED']
+    completed_bookings = [b for b in bookings if b.status == 'COMPLETED']
+    
+    # Calculate utilization for the selected period
+    total_possible_hours = len(date_range) * 8  # 8 working hours per day
+    booked_hours = sum(b.service.duration for b in bookings) / 60  # Convert minutes to hours
+    utilization_percentage = (booked_hours / total_possible_hours) * 100 if total_possible_hours > 0 else 0
+    
+    # Get upcoming bookings (next 7 days)
+    upcoming_bookings = Booking.objects.filter(
+        therapist_assignments__therapist=therapist,
+        date_time__date__range=[today, today + timedelta(days=7)],
+        status__in=['PENDING', 'CONFIRMED']
+    ).select_related('customer', 'service').order_by('date_time')[:10]
+    
+    context = {
+        'therapist': therapist,
+        'current_date': current_date,
+        'start_date': start_date,
+        'end_date': end_date,
+        'prev_date': prev_date,
+        'next_date': next_date,
+        'view_type': view_type,
+        'date_range': date_range,
+        'bookings': bookings,
+        'bookings_by_day': bookings_by_day,
+        'hours': hours,
+        'is_today': current_date == today,
+        
+        # Statistics
+        'total_bookings': len(bookings),
+        'today_bookings_count': len(today_bookings),
+        'pending_count': len(pending_bookings),
+        'confirmed_count': len(confirmed_bookings),
+        'completed_count': len(completed_bookings),
+        'utilization_percentage': round(utilization_percentage, 1),
+        'upcoming_bookings': upcoming_bookings,
+        
+        # Additional context
+        'selected_weekday': int(weekday_param) if weekday_param and weekday_param.isdigit() else None,
+        'today': today,
+        'current_time': timezone.now(),
+    }
+    
+    return render(request, 'therapist/therapist_schedule.html', context)
