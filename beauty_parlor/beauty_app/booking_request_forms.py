@@ -4,49 +4,7 @@ from django.utils import timezone
 from django.db.models import Q
 from .models import BookingTherapistAssignment, Customer, Service, BookingRequest, CustomUser
 
-# class CustomerSelectionForm(forms.Form):
-#     customer_choice = forms.ChoiceField(
-#         choices=(
-#             ('existing', 'I am an existing customer'),
-#             ('new', 'I am a new customer')
-#         ),
-#         widget=forms.RadioSelect,
-#         initial='new'
-#     )
-    
-#     existing_customer = forms.ModelChoiceField(
-#         queryset=Customer.objects.all().order_by('first_name', 'last_name'),
-#         required=False,
-#         empty_label="Select your name",
-#         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
-#     )
-    
-#     # Fields for new customer
-#     first_name = forms.CharField(max_length=100, required=False)
-#     last_name = forms.CharField(max_length=100, required=False)
-#     phone = forms.CharField(max_length=15, required=False)
-#     address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
-    
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         customer_choice = cleaned_data.get('customer_choice')
-        
-#         if customer_choice == 'existing':
-#             if not cleaned_data.get('existing_customer'):
-#                 raise ValidationError("Please select your name from the list.")
-#         elif customer_choice == 'new':
-#             # Validate new customer fields
-#             if not cleaned_data.get('first_name'):
-#                 raise ValidationError("First name is required for new customers.")
-#             if not cleaned_data.get('last_name'):
-#                 raise ValidationError("Last name is required for new customers.")
-#             if not cleaned_data.get('phone'):
-#                 raise ValidationError("Phone number is required for new customers.")
-                
-#         return cleaned_data
 
-
-# forms.py
 class CustomerSelectionForm(forms.Form):
     customer_choice = forms.ChoiceField(
         choices=[('existing', 'I am an existing customer'), ('new', 'I am a new customer')],

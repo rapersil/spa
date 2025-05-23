@@ -126,7 +126,11 @@ class AdminPasswordResetView(LoginRequiredMixin, AdminRequiredMixin, SingleObjec
     model = CustomUser
     template_name = 'auth/admin_password_reset.html'
     form_class = SetPasswordForm
-    
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object = None
+
     def get_object(self, queryset=None):
         # Ensure the user can't reset their own password through this view
         obj = super().get_object(queryset)

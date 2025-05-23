@@ -23,6 +23,103 @@
         color: var(--color-700);
         background-color: var(--gray-100);
     }
+    
+    /* Enhanced service preferences styling */
+    .service-preferences {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .preference-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        background-color: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        transition: all 0.2s ease;
+    }
+    
+    .preference-item:hover {
+        background-color: var(--color-50);
+        border-color: var(--color-200);
+    }
+    
+    .preference-header {
+        display: flex;
+        justify-content-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .service-name {
+        font-weight: 600;
+        color: var(--gray-800);
+        flex: 1;
+        margin-right: 0.5rem;
+    }
+    
+    .service-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-right: 0.5rem;
+    }
+    
+    .service-type-main {
+        background-color: var(--color-100);
+        color: var(--color-800);
+        border: 1px solid var(--color-300);
+    }
+    
+    .service-type-additional {
+        background-color: var(--info-light);
+        color: var(--info-dark);
+        border: 1px solid var(--info);
+    }
+    
+    .service-count-badge {
+        background-color: var(--color-500);
+        color: white;
+        font-weight: 600;
+        min-width: 2rem;
+        text-align: center;
+    }
+    
+    .progress {
+        height: 6px;
+        background-color: var(--gray-200);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, var(--color-400), var(--color-500));
+        transition: width 0.3s ease;
+    }
+    
+    .service-stats-summary {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background-color: var(--color-50-50);
+        border: 1px solid var(--color-200);
+        border-radius: 0.375rem;
+    }
+    
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .stats-row:last-child {
+        margin-bottom: 0;
+        font-weight: 600;
+        color: var(--color-700);
+        border-top: 1px solid var(--color-200);
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -278,16 +375,58 @@
                             <div class="service-preferences">
                                 {% for service in service_counts %}
                                 <div class="preference-item">
-                                    <div class="d-flex justify-content-between">
-                                        <span>{{ service.service__name }}</span>
-                                        <span class="badge bg-primary">{{ service.count }}x</span>
+                                    <div class="preference-header">
+                                        <div class="service-name">{{ service.service__name }}</div>
+                                        <div class="d-flex align-items-center">
+                                            {% if service.is_additional %}
+                                            <span class="service-type-badge service-type-additional">Add-on</span>
+                                            {% else %}
+                                            <span class="service-type-badge service-type-main">Main</span>
+                                            {% endif %}
+                                            <span class="badge service-count-badge">{{ service.count }}x</span>
+                                        </div>
                                     </div>
-                                    <div class="progress mt-1" style="height: 5px;">
+                                    <div class="progress">
                                         <div class="progress-bar" role="progressbar" 
                                             style="width: {% if service_counts.0.count %}{{ service.count|multiply:100|divide:service_counts.0.count }}{% else %}0{% endif %}%"></div>
                                     </div>
                                 </div>
                                 {% endfor %}
+                                
+                                <!-- Service Statistics Summary -->
+                                {% if service_counts|length > 1 %}
+                                <div class="service-stats-summary">
+                                    {% with total_services=service_counts|length total_bookings=service_counts|slice:"0:100"|length %}
+                                    {% with main_services=0 additional_services=0 %}
+                                        {% for service in service_counts %}
+                                            {% if service.is_additional %}
+                                                {% with additional_services=additional_services|add:service.count %}{% endwith %}
+                                            {% else %}
+                                                {% with main_services=main_services|add:service.count %}{% endwith %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="stats-row">
+                                            <span>Unique Services:</span>
+                                            <span>{{ total_services }}</span>
+                                        </div>
+                                        <div class="stats-row">
+                                            <span>Main Services:</span>
+                                            <span>{{ booking_count }}</span>
+                                        </div>
+                                        {% comment %}
+                                        <div class="stats-row">
+                                            <span>Add-on Services:</span>
+                                            <span>{{ additional_services }}</span>
+                                        </div>
+                                        {% endcomment %}
+                                        <div class="stats-row">
+                                            <span>Most Popular:</span>
+                                            <span>{{ service_counts.0.service__name }}</span>
+                                        </div>
+                                    {% endwith %}
+                                    {% endwith %}
+                                </div>
+                                {% endif %}
                             </div>
                             {% else %}
                             <p class="text-muted text-center mb-0">No service data available yet.</p>
