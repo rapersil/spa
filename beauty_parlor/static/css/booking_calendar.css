@@ -1,22 +1,22 @@
-/* booking_calendar.css */
-
 .booking-calendar-container {
     display: flex;
-    min-height: 1600px; /* Increased height for extended hours */
-    border-top: 1px solid var(--gray-200);
+    min-height: 1600px;
+    border-top: 1px solid var(--border-color);
     overflow-y: auto;
+    background-color: var(--bg-secondary);
 }
 
 .time-column {
     width: 80px;
     flex-shrink: 0;
-    border-right: 1px solid var(--gray-200);
+    border-right: 1px solid var(--border-color);
     position: relative;
+    background: var(--subtle-color);
 }
 
 .time-slot {
     height: 100px;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
     position: relative;
 }
 
@@ -25,9 +25,10 @@
     top: -10px;
     left: 10px;
     font-weight: bold;
-    color: var(--gray-600);
-    background-color: white;
+    color: var(--text-secondary);
+    background-color: var(--card-bg);
     padding: 0 5px;
+    border-radius: 3px;
 }
 
 .booking-columns {
@@ -38,8 +39,9 @@
 .booking-column {
     flex: 1;
     min-width: 200px;
-    border-right: 1px solid var(--gray-200);
+    border-right: 1px solid var(--border-color);
     position: relative;
+    background-color: var(--card-bg);
 }
 
 .staff-header {
@@ -47,39 +49,41 @@
     padding: 10px;
     text-align: center;
     font-weight: bold;
-    background-color: var(--gray-100);
-    border-bottom: 1px solid var(--gray-200);
+    background: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 10;
+    color: var(--text-primary);
 }
 
 .booking-slots {
     position: relative;
     height: 100%;
     display: grid;
-    grid-template-rows: repeat(128, 12.5px); /* 5-minute intervals for 16 hours (7am-10pm) */
+    grid-template-rows: repeat(128, 12.5px);
 }
 
 .booking-block {
     padding: 8px;
     border-radius: 4px;
-    color: var(--black);
+    color: var(--text-primary);
     overflow: hidden;
     text-decoration: none;
     transition: transform 0.1s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     margin: 2px 5px;
     position: relative;
     z-index: 5;
+    border: 1px solid var(--border-color);
 }
 
 .booking-block:hover {
     transform: scale(1.02);
     z-index: 6;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
     text-decoration: none;
-    color: var(--black);
+    color: var(--text-primary);
 }
 
 .booking-service {
@@ -100,99 +104,72 @@
     opacity: 0.8;
 }
 
-/* Service type colors based on the project's color scheme */
-/* Service type colors based on the project's gold/brown color scheme */
+/* Enhanced service type colors with solid colors */
 .service-type-0 {
-    background-color: var(--color-100-80);
+    background: var(--color-100);
     border-left: 4px solid var(--color-300);
 }
 
 .service-type-1 {
-    background-color: var(--color-200-80);
+    background: var(--color-200);
     border-left: 4px solid var(--color-400);
 }
 
 .service-type-2 {
-    background-color: var(--color-300-80);
+    background: var(--color-300);
     border-left: 4px solid var(--color-500);
 }
 
 .service-type-3 {
-    background-color: var(--color-400-80);
+    background: var(--color-400);
     border-left: 4px solid var(--color-600);
 }
 
 .service-type-4 {
-    background-color: var(--color-500-80);
+    background: var(--color-500);
     border-left: 4px solid var(--color-700);
+    color: white;
 }
 
-/* Adding additional service types for variety */
 .service-type-5 {
-    background-color: var(--color-400-50);
+    background: var(--color-400);
     border-left: 4px solid var(--color-600);
 }
 
 .service-type-6 {
-    background-color: var(--color-500-50);
+    background: var(--color-500);
     border-left: 4px solid var(--color-700);
+    color: white;
 }
 
 .service-type-7 {
-    background-color: var(--color-300-50);
+    background: var(--color-300);
     border-left: 4px solid var(--color-500);
 }
 
-/* Status-specific styling that maintains the color scheme */
-/* Status-specific styling that maintains the color scheme */
+/* Status-specific styling with enhanced patterns */
 .booking-block.booking-pending {
     opacity: 0.8;
-    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, transparent 75%, transparent);
-    background-size: 15px 15px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0, 0, 0, 0.05) 10px, rgba(0, 0, 0, 0.05) 15px);
 }
 
 .booking-block.booking-confirmed {
-    opacity: 1; /* Full opacity for confirmed bookings */
-    border: 2px solid var(--color-600); /* Bold border */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
-    /* Subtle pattern to distinguish confirmed bookings */
-    background-image: linear-gradient(45deg, rgba(193, 153, 49, 0.1) 25%, transparent 25%, transparent 50%, rgba(193, 153, 49, 0.1) 50%, rgba(193, 153, 49, 0.1) 75%, transparent 75%, transparent);
-    background-size: 20px 20px;
+    opacity: 1;
+    border: 2px solid var(--color-600);
+    box-shadow: 0 3px 6px rgba(193, 153, 49, 0.2);
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(193, 153, 49, 0.1) 15px, rgba(193, 153, 49, 0.1) 20px);
 }
 
 .booking-block.booking-completed {
     opacity: 0.8;
-    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1) 75%, transparent 75%, transparent);
-    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0, 0, 0, 0.1) 8px, rgba(0, 0, 0, 0.1) 10px);
 }
 
 .booking-block.booking-cancelled {
-    opacity: 0.5; /* More faded than before */
+    opacity: 0.5;
     text-decoration: line-through;
-    /* Distinctive diagonal pattern */
     background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.1) 0, rgba(0, 0, 0, 0.1) 10px, transparent 10px, transparent 20px);
-    /* Add a border to ensure it's visible but obviously cancelled */
-    border: 1px dashed var(--gray-500);
-}
-
-/* Add color variants for different booking statuses */
-.booking-pending {
-    opacity: 0.7;
-}
-
-.booking-confirmed {
-    opacity: 1;
-}
-
-.booking-completed {
-    opacity: 0.8;
-    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent);
-    background-size: 10px 10px;
-}
-
-.booking-cancelled {
-    opacity: 0.6;
-    text-decoration: line-through;
+    border: 1px dashed var(--text-muted);
 }
 
 /* Expected start time styling */
@@ -201,21 +178,21 @@
     margin-top: 2px;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.9);
-    background-color: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 3px;
     padding: 1px 4px;
     max-width: fit-content;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 60px; /* Limited initial width */
+    max-width: 60px;
     transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 0.7;
 }
 
 .expected-start-badge:hover,
 .booking-block:hover .expected-start-badge {
-    max-width: 200px; /* Expand on hover */
+    max-width: 200px;
     opacity: 1;
 }
 
@@ -224,12 +201,10 @@
     margin-right: 2px;
 }
 
-/* Make booking blocks taller when they have expected start times */
 .booking-block:has(.expected-start-badge) {
     padding-bottom: 12px;
 }
 
-/* Add a visual indicator for delayed appointments */
 .booking-block:has(.expected-start-badge):before {
     content: "";
     position: absolute;
@@ -257,7 +232,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background-color: var(--warning);
+    background: var(--warning-color);
     border-left: 3px solid var(--warning-dark);
     z-index: 4;
 }
@@ -266,7 +241,7 @@
     position: absolute;
     left: 5px;
     top: -20px;
-    background-color: var(--warning);
+    background: var(--warning-color);
     color: white;
     font-size: 0.7rem;
     padding: 2px 6px;
@@ -275,6 +250,7 @@
     transition: opacity 0.2s ease-in-out;
     white-space: nowrap;
     pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .expected-start-marker:hover .marker-tooltip {
@@ -284,7 +260,7 @@
 /* Highlight specific hours for better visual organization */
 .time-slot:nth-child(5), /* Noon - 12 PM */
 .time-slot:nth-child(12) /* Evening - 7 PM */ {
-    background-color: var(--color-50-25);
+    background-color: var(--color-50);
 }
 
 .time-slot:nth-child(5)::after,
@@ -299,76 +275,36 @@
     z-index: 2;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .booking-calendar-container {
-        flex-direction: column;
-    }
-    
-    .time-column {
-        width: 100%;
-        height: 30px;
-        border-right: none;
-        border-bottom: 1px solid var(--gray-200);
-    }
-    
-    .booking-columns {
-        flex-direction: column;
-    }
-    
-    .booking-column {
-        border-right: none;
-        border-bottom: 1px solid var(--gray-200);
-    }
-    
-    /* Mobile responsiveness for expected start badges */
-    .expected-start-badge {
-        display: inline-block;
-        margin-left: 5px;
-    }
-    
-    .booking-block {
-        padding: 5px;
-    }
-    
-    .booking-service, .booking-client, .booking-time {
-        font-size: 0.8rem;
-    }
-    
-    /* Add scroll indicator for extended time range */
-    .booking-calendar-container::after {
-        content: "Scroll down to view more hours";
-        display: block;
-        text-align: center;
-        padding: 10px;
-        background-color: var(--color-50);
-        font-size: 0.8rem;
-        position: sticky;
-        bottom: 0;
-        width: 100%;
-    }
-}
-
-/* Week Calendar Styles */
+/* Week Calendar Styles with solid colors */
 .week-calendar-container {
     display: flex;
     flex-direction: column;
     width: 100%;
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .week-day-headers {
     display: flex;
     justify-content: space-between;
-    background-color: var(--gray-100);
-    border-bottom: 1px solid var(--gray-300);
+    background: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .day-header {
     flex: 1;
     padding: 10px;
     text-align: center;
-    border-right: 1px solid var(--gray-200);
+    border-right: 1px solid var(--border-color);
     cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.day-header:hover {
+    background: var(--subtle-color);
 }
 
 .day-header:last-child {
@@ -376,7 +312,8 @@
 }
 
 .current-day {
-    background-color: var(--color-200);
+    background: var(--primary-color);
+    color: white;
 }
 
 .day-link {
@@ -391,20 +328,22 @@
 
 .day-date {
     font-size: 0.8rem;
-    color: var(--gray-600);
+    color: currentColor;
+    opacity: 0.8;
 }
 
 .week-calendar-grid {
     display: flex;
     min-height: 600px;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-color);
 }
 
 .day-column {
     flex: 1;
-    border-right: 1px solid var(--gray-200);
+    border-right: 1px solid var(--border-color);
     padding: 10px;
     overflow-y: auto;
+    background: var(--card-bg);
 }
 
 .day-column:last-child {
@@ -412,7 +351,7 @@
 }
 
 .current-day-column {
-    background-color: var(--color-50);
+    background: var(--subtle-color);
 }
 
 .week-booking {
@@ -420,28 +359,37 @@
     margin-bottom: 10px;
     border-radius: 4px;
     border-left: 4px solid var(--color-500);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow);
+    background: var(--card-color);
+    transition: all 0.3s ease;
+}
+
+.week-booking:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .booking-pending {
-    background-color: var(--warning-light);
+    background: var(--warning-light);
     border-left-color: var(--warning);
 }
 
 .booking-confirmed {
-    background-color: var(--info-light);
+    background: var(--info-light);
     border-left-color: var(--info);
 }
 
 .booking-completed {
-    background-color: var(--success-light);
+    background: var(--success-light);
     border-left-color: var(--success);
 }
 
 .booking-cancelled {
-    background-color: var(--danger-light);
+    background: var(--danger-light);
     border-left-color: var(--danger);
     text-decoration: line-through;
+    opacity: 0.7;
 }
 
 .booking-link {
@@ -453,25 +401,89 @@
 .booking-time {
     font-weight: bold;
     margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
 .booking-service {
     margin-bottom: 3px;
+    color: var(--text-primary);
 }
 
 .booking-client {
     font-size: 0.9rem;
-    color: var(--gray-700);
+    color: var(--text-secondary);
 }
 
 .booking-wait {
     margin-top: 5px;
     font-size: 0.8rem;
+    color: var(--text-muted);
 }
 
 .no-bookings {
     text-align: center;
     padding: 20px;
-    color: var(--gray-500);
+    color: var(--text-muted);
     font-style: italic;
+    background: var(--subtle-color);
+    border-radius: 8px;
+    margin: 10px;
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .booking-calendar-container {
+        flex-direction: column;
+    }
+    
+    .time-column {
+        width: 100%;
+        height: 30px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .booking-columns {
+        flex-direction: column;
+    }
+    
+    .booking-column {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .expected-start-badge {
+        display: inline-block;
+        margin-left: 5px;
+    }
+    
+    .booking-block {
+        padding: 5px;
+    }
+    
+    .booking-service, .booking-client, .booking-time {
+        font-size: 0.8rem;
+    }
+    
+    .booking-calendar-container::after {
+        content: "Scroll down to view more hours";
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background: var(--subtle-color);
+        font-size: 0.8rem;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        color: var(--text-secondary);
+    }
+    
+    .week-calendar-grid {
+        flex-direction: column;
+    }
+    
+    .day-column {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
 }

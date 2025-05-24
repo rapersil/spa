@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ therapist.get_full_name }} Schedule - {{ current_date|date:"M d, Y" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/therapist_calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_calendar.css' %}">
+<style>
+    
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+    <!-- Therapist Header -->
+    <div class="therapist-header-card">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        {% if therapist.profile_picture %}
+                        <img src="{{ therapist.profile_picture.url }}" 
+                             alt="{{ therapist.get_full_name }}" 
+                             class="therapist-avatar-large">
+                        {% else %}
+                        <div class="therapist-initials-large">
+                            {{ therapist.first_name|first|upper }}{{ therapist.last_name|first|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2 class="mb-1">{{ therapist.get_full_name }}</h2>
+                        <p class="mb-0 text-muted">
+                            {% if therapist.primary_service %}
+                            {{ therapist.primary_service.name }} Specialist
+                            {% else %}
+                            Beauty Therapist
+                            {% endif %}
+                        </p>
+                        <small class="text-muted">Employee ID: {{ therapist.user_id }}</small>
+                    </div>
+                </div>
+                
+                <!-- Schedule Statistics -->
+                <div class="schedule-stats">
+                    <div class="schedule-stat-card">
+                        <div class="schedule-stat-value">{{ total_bookings }}</div>
+                        <div class="schedule-stat-label">Total Bookings</div>
+                    </div>
+                    <div class="schedule-stat-card">
+                        <div class="schedule-stat-value">{{ today_bookings_count }}</div>
+                        <div class="schedule-stat-label">Today</div>
+                    </div>
+                    <div class="schedule-stat-card">
+                        <div class="schedule-stat-value">{{ confirmed_count }}</div>
+                        <div class="schedule-stat-label">Confirmed</div>
+                    </div>
+                    <div class="schedule-stat-card">
+                        <div class="schedule-stat-value">{{ utilization_percentage }}%</div>
+                        <div class="schedule-stat-label">Utilization</div>
+                        <div class="utilization-bar">
+                            <div class="utilization-fill" style="width: {{ utilization_percentage }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'therapist_list' %}" class="btn btn-outline-secondary me-2">
+                    <span class="material-icons me-2">arrow_back</span>Back to Therapists
+                </a>
+                <a href="{% url 'booking_create' %}?therapist_id={{ therapist.id }}" class="btn btn-primary">
+                    <span class="material-icons me-2">add</span>New Booking
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Navigation -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                {% if view_type == 'day' %}
+                <a href="?date={{ prev_date|date:'Y-m-d' }}&view=day" class="btn btn-outline-primary">
+                    <span class="material-icons">chevron_left</span> Previous Day
+                </a>
+                <div class="text-center">
+                    <h5 class="mb-0">
+                        {{ current_date|date:"l, F d, Y" }}
+                        {% if is_today %}
+                        <span class="badge bg-primary ms-2">Today</span>
+                        {% endif %}
+                    </h5>
+                    <p class="text-muted mb-0">{{ therapist.get_full_name }}'s Schedule</p>
+                </div>
+                <div>
+                    <a href="?date={{ next_date|date:'Y-m-d' }}&view=day" class="btn btn-outline-primary">
+                        Next Day <span class="material-icons">chevron_right</span>
+                    </a>
+                    <a href="?date={{ current_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-secondary ms-2">
+                        <span class="material-icons">calendar_view_week</span> Week View
+                    </a>
+                </div>
+                {% else %}
+                <a href="?date={{ prev_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-primary">
+                    <span class="material-icons">chevron_left</span> Previous Week
+                </a>
+                <div class="text-center">
+                    <h5 class="mb-0">{{ start_date|date:"M d" }} - {{ end_date|date:"M d, Y" }}</h5>
+                    <p class="text-muted mb-0">{{ therapist.get_full_name }}'s Weekly Schedule</p>
+                </div>
+                <div>
+                    <a href="?date={{ next_date|date:'Y-m-d' }}&view=week" class="btn btn-outline-primary">
+                        Next Week <span class="material-icons">chevron_right</span>
+                    </a>
+                    <a href="?date={{ current_date|date:'Y-m-d' }}&view=day" class="btn btn-outline-secondary ms-2">
+                        <span class="material-icons">today</span> Day View
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-9">
+            <!-- Calendar Grid -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <span class="material-icons me-2">schedule</span>
+                            {% if view_type == 'day' %}Daily Schedule{% else %}Weekly Schedule{% endif %} for {{ therapist.get_full_name }}
+                        </h5>
+                        <div>
+                            <span class="badge bg-primary">{{ bookings|length }} Appointment{{ bookings|length|pluralize }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-1">
+                    {% if view_type == 'day' %}
+                        <!-- Day View -->
+                        <div class="individual-therapist-calendar-container">
+                            <!-- Time Column -->
+                            <div class="time-column">
+                                {% for hour in hours %}
+                                <div class="time-slot">
+                                    {% if hour == 12 %}
+                                        12 PM
+                                    {% elif hour > 12 %}
+                                        {{ hour|add:"-12" }} PM
+                                    {% else %}
+                                        {{ hour }} AM
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Booking Column -->
+                            <div class="booking-column-single">
+                                <!-- Hour Slots -->
+                                {% for hour in hours %}
+                                <div class="calendar-hour-slot">
+                                    <div class="half-hour-line"></div>
+                                    <div class="quarter-hour-line"></div>
+                                    <div class="quarter-hour-line"></div>
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- Bookings -->
+                                {% for booking in bookings %}
+                                {% if booking.date_time.date == current_date %}
+                                <a href="{% url 'booking_detail' booking.pk %}" 
+                                   class="therapist-booking-single booking-{{ booking.status|lower }}"
+                                   style="top: {{ booking.start_row|multiply:7.5 }}px; height: {{ booking.end_row|subtract:booking.start_row|multiply:7.5 }}px;"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="right"
+                                   title="{{ booking.customer.first_name }} {{ booking.customer.last_name }} - {{ booking.service.name }} ({{ booking.date_time|date:'H:i' }} - {{ booking.end_time|date:'H:i' }})">
+                                    <div class="booking-service">{{ booking.service.name }}</div>
+                                    <div class="booking-client-small">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
+                                    <div class="booking-time-small">
+                                        {{ booking.date_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
+                                        {% with wait_minutes=booking.get_wait_time_minutes %}
+                                            {% if wait_minutes > 0 %}
+                                                <br><small class="expected-time">Est: {{ booking.get_expected_start_time|date:"H:i" }}</small>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </a>
+                                
+                                <!-- Expected start indicator if delayed -->
+                                {% with wait_minutes=booking.get_wait_time_minutes %}
+                                    {% if wait_minutes > 0 %}
+                                    <div class="expected-start-indicator" 
+                                         style="top: {{ booking.expected_start_row|multiply:7.5 }}px;"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="right"
+                                         title="Expected start time: {{ booking.get_expected_start_time|date:'H:i' }} ({{ wait_minutes }} min delay)"></div>
+                                    {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Week View -->
+                        <div class="week-calendar-container">
+                            <!-- Day Headers -->
+                            <div class="week-day-headers">
+                                {% for day in date_range %}
+                                <div class="day-header {% if day == current_date %}current-day{% endif %}">
+                                    <a href="?date={{ day|date:'Y-m-d' }}&view=day" class="day-link">
+                                        <div class="day-name">{{ day|date:"l" }}</div>
+                                        <div class="day-date">{{ day|date:"M d" }}</div>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Week Calendar Grid -->
+                            <div class="week-calendar-grid">
+                                {% for day in date_range %}
+                                <div class="day-column {% if day == current_date %}current-day-column{% endif %}">
+                                    <div class="day-bookings">
+                                        {% for booking in bookings_by_day|get_item:day %}
+                                        <div class="week-booking booking-{{ booking.status|lower }}">
+                                            <a href="{% url 'booking_detail' booking.pk %}" class="booking-link">
+                                                <div class="booking-time">{{ booking.date_time|date:"g:i A" }}</div>
+                                                <div class="booking-service">{{ booking.service.name }}</div>
+                                                <div class="booking-client">{{ booking.customer.first_name }} {{ booking.customer.last_name }}</div>
+                                                {% with wait_minutes=booking.get_wait_time_minutes %}
+                                                    {% if wait_minutes > 0 %}
+                                                    <div class="booking-wait text-muted">
+                                                        <small>Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}</small>
+                                                    </div>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </a>
+                                        </div>
+                                        {% empty %}
+                                        <div class="no-bookings">No appointments</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="card legend-card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <span class="material-icons me-2">info</span>
+                        Status Legend
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex flex-wrap gap-4">
+                                <div class="legend-item">
+                                    <div class="booking-status-legend booking-pending"></div>
+                                    <span class="legend-text">Pending</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="booking-status-legend booking-confirmed"></div>
+                                    <span class="legend-text">Confirmed</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="booking-status-legend booking-completed"></div>
+                                    <span class="legend-text">Completed</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="booking-status-legend booking-cancelled"></div>
+                                    <span class="legend-text">Cancelled</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="legend-item">
+                                <div class="expected-start-legend"></div>
+                                <span class="legend-text">Expected Start (when delayed)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <!-- Upcoming Bookings -->
+            <div class="card shadow-sm upcoming-bookings-card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="material-icons me-2">event</span>
+                        Upcoming Appointments
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if upcoming_bookings %}
+                        {% for booking in upcoming_bookings %}
+                        <div class="upcoming-booking-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'booking_detail' booking.pk %}" class="text-decoration-none">
+                                            {{ booking.customer.first_name }} {{ booking.customer.last_name }}
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1 text-muted small">{{ booking.service.name }}</p>
+                                    <p class="mb-0 small">
+                                        <span class="material-icons me-1" style="font-size: 1rem;">schedule</span>
+                                        {{ booking.date_time|date:"M d, g:i A" }}
+                                    </p>
+                                    {% with wait_minutes=booking.get_wait_time_minutes %}
+                                        {% if wait_minutes > 0 %}
+                                        <p class="mb-0 small text-warning">
+                                            <span class="material-icons me-1" style="font-size: 1rem;">hourglass_bottom</span>
+                                            Est. start: {{ booking.get_expected_start_time|date:"g:i A" }}
+                                        </p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                                <span class="badge bg-{% if booking.status == 'PENDING' %}warning{% elif booking.status == 'CONFIRMED' %}info{% elif booking.status == 'COMPLETED' %}success{% else %}danger{% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <span class="material-icons text-muted" style="font-size: 3rem;">event_available</span>
+                            <p class="text-muted mb-0">No upcoming appointments</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if upcoming_bookings %}
+                <div class="card-footer text-center">
+                    <a href="{% url 'booking_list' %}?therapist={{ therapist.id }}" class="btn btn-outline-primary btn-sm">
+                        View All Bookings
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="material-icons me-2">settings</span>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'booking_create' %}?therapist_id={{ therapist.id }}" class="btn btn-primary">
+                            <span class="material-icons me-2">add</span>New Booking
+                        </a>
+                        <a href="{% url 'booking_calendar_therapist' %}" class="btn btn-outline-primary">
+                            <span class="material-icons me-2">calendar_view_week</span>All Therapists
+                        </a>
+                        <a href="{% url 'staff_detail' therapist.id %}" class="btn btn-outline-secondary">
+                            <span class="material-icons me-2">person</span>Therapist Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                trigger: 'hover'
+            });
+        });
+
+        // Enhanced hover effects for bookings
+        const bookings = document.querySelectorAll('.therapist-booking-single');
+        bookings.forEach(booking => {
+            booking.addEventListener('mouseenter', function() {
+                this.style.zIndex = '20';
+            });
+            
+            booking.addEventListener('mouseleave', function() {
+                this.style.zIndex = '10';
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        {% if view_type == 'day' %}
+                        window.location.href = '?date={{ prev_date|date:"Y-m-d" }}&view=day';
+                        {% else %}
+                        window.location.href = '?date={{ prev_date|date:"Y-m-d" }}&view=week';
+                        {% endif %}
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        {% if view_type == 'day' %}
+                        window.location.href = '?date={{ next_date|date:"Y-m-d" }}&view=day';
+                        {% else %}
+                        window.location.href = '?date={{ next_date|date:"Y-m-d" }}&view=week';
+                        {% endif %}
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        window.location.href = '{% url "booking_create" %}?therapist_id={{ therapist.id }}';
+                        break;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

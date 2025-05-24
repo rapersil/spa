@@ -307,7 +307,7 @@
                                 <span class="material-icons me-2">edit</span>Edit Booking
                             </a>
                             {% endif %}
-                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' %}
+                            {% if request.user.user_type in 'ADMIN,SUPERADMIN' and booking.status != 'COMPLETED'%}
                             <a href="{% url 'booking_delete' booking.pk %}" class="btn btn-danger">
                                 <span class="material-icons me-2">delete</span>Delete
                             </a>
@@ -372,30 +372,31 @@
             <div class="card shadow-sm mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="material-icons me-2">person</i>Assigned Therapists</h5>
-                    {% if booking.status in "PENDING,CONFIRMED" %}
+                    {% if booking.status in "PENDING,CONFIRMED" and booking.date_time >= current_time %}
                     <a href="{% url 'assign_therapist' booking.pk %}" class="btn btn-sm btn-primary">
                         <i class="material-icons me-2">person_add</i>Manage Therapists
                     </a>
                     {%endif%}
                 </div>
+                
                 <div class="card-body p-0">
-                    {% if booking.service_assignments.exists %}
+                    {% if  service_assignments.exists %}
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th>Therapist</th>
                                     <th>Service</th>
-                                    <th>Role</th>
+                                    {% comment %} <th>Role</th> {% endcomment %}
                                     <th>Assigned By</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for assignment in booking.service_assignments.all %}
+                                 {% for assignment in service_assignments %}
                                 <tr>
                                     <td>{{ assignment.therapist.get_full_name }}</td>
-                                    <td>{{ assignment.service.name }}</td>
-                                    <td>{% if assignment.is_primary %}Primary{% else %}Assistant{% endif %}</td>
+                                    <td>{{ assignment.therapist.primary_service.name }}</td>
+                                    {% comment %} <td>{% if assignment.is_primary %}Primary{% else %}Assistant{% endif %}</td> {% endcomment %}
                                     <td>{{ assignment.assigned_by.get_full_name }}</td>
                                 </tr>
                                 {% endfor %}

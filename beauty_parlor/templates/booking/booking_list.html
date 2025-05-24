@@ -91,7 +91,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Date & Time</th>
+                            {% comment %} <th>Date & Time</th> {% endcomment %}
                             <th>Customer</th>
                             <th>Service</th>
                             <th>Price</th>
@@ -116,13 +116,13 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            <td>
+                            {% comment %} <td>
                                 <span class="booking-date">{{ booking.created_at|date:"M d, Y" }}</span>
                                 <span class="booking-time">{{ booking.created_at|date:"h:i A" }}</span>
-                                {% comment %} {% if booking.date_time.date == today %}
+                                {% if booking.date_time.date == today %}
                                 <span class="badge bg-info">Today</span>
-                                {% endif %} {% endcomment %}
-                            </td>
+                                {% endif %} 
+                            </td> {% endcomment %}
                             <td>
                                 <a href="{% url 'customer_detail' booking.customer.pk %}" class="customer-link">
                                     {{ booking.customer.first_name }} {{ booking.customer.last_name }}
@@ -204,7 +204,7 @@
                                             <span class="material-icons">assignment</span>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            {% if booking.status == 'CONFIRMED' %}
+                                            {% if booking.status == 'CONFIRMEDs' %}
                                             <li>
                                                 <form method="post" action="{% url 'booking_status_update' booking.pk %}">
                                                     {% csrf_token %}
@@ -230,29 +230,19 @@
                                             </li>
                                             {% endif %}
                                             
-                                            {% if booking.status in 'PENDING,CONFIRMED' %}
-                                                {% with wait_minutes=booking.get_wait_time_minutes %}
-                                                    {% if wait_minutes > 0 %}
-                                                        <div class="expected-start-info">
-                                                            <small class="text-muted">
-                                                                <span class="material-icons me-1">hourglass_bottom</span>Est. start: {{ booking.get_expected_start_time|date:"h:i A" }}
-                                                            </small>
-                                                        </div>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            {% endif %}
+                                           
                                             
-                                            {% if booking.status == 'CONFIRMED' %}
-                                            <li>
-                                                <form method="post" action="{% url 'booking_status_update' booking.pk %}">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="status" value="COMPLETED">
-                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                    <button type="submit" class="dropdown-item">
-                                                        <span class="material-icons text-success me-2">done_all</span>Mark as Completed
-                                                    </button>
-                                                </form>
-                                            </li>
+                                            {% if booking.status in 'CONFIRMED' %}
+                                                <li>
+                                                    <form method="post" action="{% url 'booking_status_update' booking.pk %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="status" value="COMPLETED">
+                                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <span class="material-icons text-success me-2">done_all</span>Mark as Completed
+                                                        </button>
+                                                    </form>
+                                                </li>
                                             {% endif %}
                                             
                                             {% if booking.status not in 'COMPLETED,CANCELLED' %}

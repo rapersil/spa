@@ -1,0 +1,610 @@
+
+{% extends 'public_base.html' %}
+{% load static %}
+
+{% block title %}Our Therapists - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/therapist.css' %}">
+<style>
+    .public-therapist-hero {
+        background: linear-gradient(135deg, var(--color-50), var(--color-100));
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 1px solid var(--color-200);
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--color-700);
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: var(--color-600);
+        margin-bottom: 2rem;
+    }
+    
+    .public-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .public-stat-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--color-200);
+    }
+    
+    .public-stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--color-600);
+    }
+    
+    .public-stat-label {
+        font-size: 0.9rem;
+        color: var(--gray-600);
+    }
+    
+    /* Keep all the existing therapist card styles */
+    .therapist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        justify-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .therapist-item {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        background: white;
+        border: 2px solid var(--color-200);
+        width: 100%;
+        max-width: 220px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .therapist-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: var(--color-400);
+    }
+    
+    .therapist-avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--color-200);
+        margin: 0 auto 1rem auto;
+        display: block;
+        transition: border-color 0.3s ease;
+    }
+    
+    .therapist-initials-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-400), var(--color-600));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 auto 1rem auto;
+        border: 4px solid var(--color-200);
+        transition: border-color 0.3s ease;
+    }
+    
+    .therapist-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--color-700);
+        margin-bottom: 0.5rem;
+    }
+    
+    .therapist-specialty {
+        color: var(--color-500);
+        font-weight: 500;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .therapist-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--success);
+    }
+    
+    .status-indicator.busy {
+        background-color: var(--warning);
+    }
+    
+    .status-text {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .therapist-cta {
+        background: var(--color-500);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .therapist-cta:hover {
+        background: var(--color-600);
+    }
+    
+    .public-search-container {
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+    
+    .public-search-input {
+        border: 2px solid var(--color-300);
+        border-radius: 25px;
+        padding: 12px 50px 12px 20px;
+        font-size: 1rem;
+        width: 100%;
+        outline: none;
+    }
+    
+    .public-search-input:focus {
+        border-color: var(--color-500);
+        box-shadow: 0 0 0 3px var(--color-100);
+    }
+    
+    .public-filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .public-filter-tab {
+        padding: 8px 20px;
+        border: 2px solid var(--color-200);
+        border-radius: 20px;
+        background: white;
+        color: var(--color-600);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .public-filter-tab.active {
+        background: var(--color-500);
+        border-color: var(--color-500);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Hero Section -->
+    <div class="public-therapist-hero">
+        <h1 class="hero-title">Meet Our Expert Therapists</h1>
+        <p class="hero-subtitle">Professional spa specialists dedicated to your wellness and spa goals</p>
+        
+        <div class="public-stats">
+            <div class="public-stat-item">
+                <div class="public-stat-value">{{ total_therapists }}</div>
+                <div class="public-stat-label">Expert Therapists</div>
+            </div>
+            <div class="public-stat-item">
+                <div class="public-stat-value">{{ available_now }}</div>
+                <div class="public-stat-label">Available Today</div>
+            </div>
+            <div class="public-stat-item">
+                <div class="public-stat-value">{{ currently_busy }}</div>
+                <div class="public-stat-label">Currently Serving</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="public-search-container">
+        <input type="text" id="publicTherapistSearch" class="public-search-input" 
+               placeholder="Search for therapists by name or specialty...">
+    </div>
+    
+    <div class="public-filter-tabs">
+        <div class="public-filter-tab active" data-filter="all">All Therapists</div>
+        <div class="public-filter-tab" data-filter="available">Available Now</div>
+        {% for service in services %}
+        <div class="public-filter-tab" data-filter="service-{{ service.id }}">{{ service.name }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Therapists Grid -->
+    <div class="therapist-grid" id="publicTherapistsGrid">
+        {% for therapist in therapists %}
+        <div class="therapist-item" 
+             data-therapist-id="{{ therapist.id }}"
+             data-name="{{ therapist.get_full_name|lower }}"
+             data-specialty="{% if therapist.primary_service %}{{ therapist.primary_service.name|lower }}{% else %}beauty therapist{% endif %}"
+             data-service-id="{% if therapist.primary_service %}{{ therapist.primary_service.id }}{% endif %}"
+             data-status="{% if therapist.is_currently_busy %}busy{% else %}available{% endif %}"
+             onclick="showPublicTherapistDetails({{ therapist.id }})">
+            
+            <!-- Profile Picture or Initials -->
+            {% if therapist.profile_picture %}
+            <img src="{{ therapist.profile_picture.url }}" alt="{{ therapist.get_full_name }}" class="therapist-avatar-large">
+            {% else %}
+            <div class="therapist-initials-large">
+                {{ therapist.first_name|first }}{{ therapist.last_name|first }}
+            </div>
+            {% endif %}
+            
+            <!-- Therapist Info -->
+            <h3 class="therapist-name">{{ therapist.get_full_name }}</h3>
+            
+            <p class="therapist-specialty">
+                {% if therapist.primary_service %}
+                {{ therapist.primary_service.name }} Specialist
+                {% else %}
+                Beauty Therapist
+                {% endif %}
+            </p>
+            
+            <!-- Status Indicator -->
+            <div class="therapist-status">
+                {% if therapist.is_currently_busy %}
+                <span class="status-indicator busy"></span>
+                <span class="status-text">Currently Busy</span>
+                {% else %}
+                <span class="status-indicator"></span>
+                <span class="status-text">Available</span>
+                {% endif %}
+            </div>
+            
+            <!-- Call to Action -->
+            <button class="therapist-cta">View Schedule & Book</button>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <span class="material-icons" style="font-size: 4rem; color: var(--gray-400);">groups</span>
+                <h4 class="mt-3">No therapists available</h4>
+                <p class="text-muted">Please check back later or contact us directly.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Call to Action Section -->
+    <div class="text-center mt-5 mb-4">
+        <h3 class="mb-3">Ready to book your appointment?</h3>
+        <p class="text-muted mb-4">Contact us directly or view our calendar to find the perfect time</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'public_booking_calendar_therapist' %}" class="btn btn-primary btn-lg">
+                <span class="material-icons me-2">calendar_today</span>View Calendar
+            </a>
+            <a href="{% url 'public_booking_request_create' %}" class="btn btn-outline-primary btn-lg">
+                <span class="material-icons me-2">add</span>Request Booking
+            </a>
+            <a href="tel:{{ settings.BEAUTY_PARLOR_PHONE }}" class="btn btn-success btn-lg">
+                <span class="material-icons me-2">phone</span>Call Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Public Therapist Details Modal -->
+<div class="modal fade" id="publicTherapistModal" tabindex="-1" aria-labelledby="publicTherapistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <div id="publicModalAvatar" class="me-3">
+                        <!-- Avatar will be inserted here -->
+                    </div>
+                    <div>
+                        <h5 class="modal-title" id="publicTherapistModalLabel">Therapist Details</h5>
+                        <p class="mb-0" id="publicModalSpecialty"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="publicModalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'public_booking_request_create' %}" class="btn btn-primary">
+                    <span class="material-icons me-2">add</span>Book Appointment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let publicTherapistModal = null;
+let allPublicTherapists = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    publicTherapistModal = new bootstrap.Modal(document.getElementById('publicTherapistModal'));
+    allPublicTherapists = Array.from(document.querySelectorAll('.therapist-item'));
+    
+    initializePublicSearch();
+    initializePublicFilters();
+});
+
+function initializePublicSearch() {
+    const searchInput = document.getElementById('publicTherapistSearch');
+    
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = this.value.toLowerCase().trim();
+            const activeFilter = document.querySelector('.public-filter-tab.active').dataset.filter;
+            filterPublicTherapists(activeFilter, query);
+        }, 300);
+    });
+}
+
+function initializePublicFilters() {
+    const filterTabs = document.querySelectorAll('.public-filter-tab');
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            const searchQuery = document.getElementById('publicTherapistSearch').value.toLowerCase().trim();
+            filterPublicTherapists(filter, searchQuery);
+        });
+    });
+}
+
+function filterPublicTherapists(filter, searchQuery = '') {
+    const grid = document.getElementById('publicTherapistsGrid');
+    let visibleCount = 0;
+    
+    allPublicTherapists.forEach(therapist => {
+        let shouldShow = true;
+        
+        // Apply filter
+        if (filter === 'available') {
+            shouldShow = therapist.dataset.status === 'available';
+        } else if (filter.startsWith('service-')) {
+            const serviceId = filter.replace('service-', '');
+            shouldShow = therapist.dataset.serviceId === serviceId;
+        }
+        
+        // Apply search query
+        if (shouldShow && searchQuery) {
+            const name = therapist.dataset.name;
+            const specialty = therapist.dataset.specialty;
+            shouldShow = name.includes(searchQuery) || specialty.includes(searchQuery);
+        }
+        
+        // Show/hide therapist
+        if (shouldShow) {
+            therapist.style.display = 'block';
+            visibleCount++;
+        } else {
+            therapist.style.display = 'none';
+        }
+    });
+    
+    // Show no results message if needed
+    if (visibleCount === 0) {
+        if (!document.getElementById('noResultsMessage')) {
+            const noResults = document.createElement('div');
+            noResults.id = 'noResultsMessage';
+            noResults.className = 'col-12 text-center py-5';
+            noResults.innerHTML = `
+                <span class="material-icons" style="font-size: 4rem; color: var(--gray-400);">search_off</span>
+                <h4 class="mt-3">No therapists found</h4>
+                <p class="text-muted">Try adjusting your search or filter criteria.</p>
+            `;
+            grid.appendChild(noResults);
+        }
+    } else {
+        const noResults = document.getElementById('noResultsMessage');
+        if (noResults) {
+            noResults.remove();
+        }
+    }
+}
+
+function showPublicTherapistDetails(therapistId) {
+    // Show loading state
+    document.getElementById('publicModalContent').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading therapist details...</p>
+        </div>
+    `;
+    
+    publicTherapistModal.show();
+    
+    // Fetch therapist details
+    fetch(`/api/public/therapist/${therapistId}/`)
+        .then(response => response.json())
+        .then(data => {
+            displayPublicTherapistDetails(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('publicModalContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="material-icons me-2">error</i>
+                    Error loading therapist details. Please try again.
+                </div>
+            `;
+        });
+}
+
+function displayPublicTherapistDetails(data) {
+    const therapist = data.therapist;
+    
+    // Update modal header
+    document.getElementById('publicTherapistModalLabel').textContent = therapist.name;
+    document.getElementById('publicModalSpecialty').textContent = therapist.primary_service;
+    
+    // Update avatar
+    const modalAvatar = document.getElementById('publicModalAvatar');
+    if (therapist.profile_picture) {
+        modalAvatar.innerHTML = `<img src="${therapist.profile_picture}" alt="${therapist.name}" class="therapist-modal-avatar">`;
+    } else {
+        const initials = therapist.name.split(' ').map(n => n[0]).join('');
+        modalAvatar.innerHTML = `<div class="therapist-modal-initials">${initials}</div>`;
+    }
+    
+    // Build public modal content
+    const content = `
+        <!-- About the Therapist -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">person</span>
+                About ${therapist.name}
+            </h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Specialization</div>
+                        <div class="info-value">${therapist.primary_service}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Experience Since</div>
+                        <div class="info-value">${therapist.experience_since}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Offered -->
+        ${data.services.length > 0 ? `
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">spa</span>
+                Services & Pricing
+            </h6>
+            <div class="row">
+                ${data.services.map(service => `
+                    <div class="col-md-6 mb-3">
+                        <div class="service-card p-3 border rounded">
+                            <h6 class="mb-2">${service.name}</h6>
+                            <p class="small text-muted mb-2">${service.description}</p>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">${service.duration} minutes</span>
+                                <strong class="text-primary">GHS${service.price}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+
+        <!-- Availability Summary -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">event_available</span>
+                Availability Overview
+            </h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Next Available</div>
+                        <div class="info-value">${data.availability_summary.next_available}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Average Availability</div>
+                        <div class="info-value">${data.availability_summary.avg_daily_availability}% daily</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Schedule Overview -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">schedule</span>
+                This Week's Availability
+            </h6>
+            <div class="schedule-container">
+                <div class="row">
+                    ${data.upcoming_schedule.map(day => `
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="schedule-day-card p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong>${day.day_name}</strong>
+                                    <small class="text-muted">${new Date(day.date).toLocaleDateString()}</small>
+                                </div>
+                                <div class="availability-indicator">
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: ${(day.available_slots / 8) * 100}%"></div>
+                                    </div>
+                                    <small class="text-muted">${day.available_slots} of 8 hours available</small>
+                                </div>
+                                ${day.time_slots.length > 0 ? `
+                                    <div class="booked-slots mt-2">
+                                        <small class="text-muted">Busy times:</small>
+                                        ${day.time_slots.map(slot => `
+                                            <div class="small text-danger">
+                                                ${slot.start_time} - ${slot.end_time} (${slot.service_name})
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<small class="text-success">Fully available</small>'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('publicModalContent').innerHTML = content;
+}
+</script>
+{% endblock %}

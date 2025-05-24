@@ -1,142 +1,753 @@
-.receipt-container {
-    max-width: 190mm;        /* Wider for standard paper */
+.receipt-container,
+.print-container {
+    max-width: 210mm;
     margin: 0 auto;
-    border: 1px dashed var(--gray-300);
-    padding: 10px;
-    background-color: var(--white);
+    border: 1px dashed var(--border-color);
+    padding: 15mm;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    position: relative;
 }
 
+.receipt-container::before,
+.print-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 8px 8px 0 0;
+}
+
+/* Enhanced receipt styling */
 .receipt {
-    padding: 1rem;
-    font-family: Arial, sans-serif;  /* Better for standard printing */
-    max-width: none;                 /* Remove width restriction */
+    padding: 2rem;
+    font-family: 'Montserrat', Arial, sans-serif;
     width: 100%;
     margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Receipt header with enhanced styling */
+.receipt-header {
+    text-align: center;
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    position: relative;
+}
+
+.receipt-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: var(--color-600);
 }
 
 .receipt-header h4 {
-    color: var(--color-800);
-    margin-bottom: 5px;
-    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 24px;
     font-weight: bold;
+    letter-spacing: 0.5px;
 }
 
 .receipt-header p {
-    margin-bottom: 5px;
-    font-size: 12px;
-    color: var(--gray-700);
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 
 .receipt-header h5 {
-    margin-top: 10px;
-    font-size: 16px;
-    border-top: 1px solid var(--gray-300);
-    border-bottom: 1px solid var(--gray-300);
-    padding: 5px 0;
+    margin-top: 15px;
+    font-size: 18px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 0;
     color: var(--color-700);
+    background: var(--subtle-color);
+    border-radius: 4px;
 }
 
-/* Section headers */
+/* Receipt body sections */
+.receipt-body {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.receipt-info,
+.receipt-customer,
+.receipt-items,
+.booking-reference {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--subtle-color);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    page-break-inside: avoid;
+}
+
+.receipt-info:last-child,
+.receipt-customer:last-child,
+.receipt-items:last-child,
+.booking-reference:last-child {
+    margin-bottom: 0;
+}
+
+/* Enhanced section headers */
 .customer-header,
 .service-header,
-.reference-header {
-    font-weight: 600;
-    color: var(--color-700);
-    font-size: 14px;
-    border-bottom: 1px dashed var(--gray-300);
-    padding-bottom: 3px;
+.reference-header,
+.instruction-header {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 16px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Discount styling */
+.customer-header::before,
+.service-header::before,
+.reference-header::before,
+.instruction-header::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: var(--color-600);
+    border-radius: 2px;
+}
+
+/* Customer information styling */
+.receipt-customer-info {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 3px solid var(--color-500);
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.customer-details {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Receipt items table */
+.receipt-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.receipt-items-table th {
+    background: var(--subtle-color);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+.receipt-items-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.receipt-items-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.receipt-items-table .item-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.receipt-items-table .item-details {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 3px;
+}
+
+.receipt-items-table .item-price {
+    font-weight: 600;
+    color: var(--color-700);
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Discount and pricing styling */
 .receipt-item-discount {
     color: var(--danger);
     font-size: 0.9em;
+    font-weight: 500;
 }
 
-/* Total amount highlight */
-.receipt-total {
+.discount-row {
+    background: rgba(244, 67, 54, 0.05);
+}
+
+.additional-services {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--subtle-color);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.additional-services-header {
     font-weight: 600;
-    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
 }
 
-/* Thank you message styling */
+.receipt-subtotal {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Enhanced total section */
+.receipt-total-section {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 6px;
+    border: 2px solid var(--color-300);
+    margin-top: 1rem;
+    page-break-inside: avoid;
+}
+
+.receipt-total {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--color-700);
+    text-align: right;
+    padding: 12px 0;
+    border-top: 2px solid var(--color-500);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.receipt-total::before {
+    content: '';
+    width: 6px;
+    height: 20px;
+    background: var(--color-600);
+    border-radius: 3px;
+}
+
+/* Thank you message */
 .thank-you {
     font-weight: 600;
     color: var(--color-700);
-    font-size: 16px;
+    font-size: 18px;
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--subtle-color);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
 }
 
 /* Notes section */
 .notes {
-    background-color: var(--color-50);
-    padding: 8px;
+    background: var(--subtle-color);
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    border-left: 3px solid var(--color-500);
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-top: 1rem;
+}
+
+/* Payment information */
+.payment-instruction {
+    border-top: 1px dashed var(--border-color);
+    padding-top: 12px;
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.paid-status {
+    background: var(--success);
+    color: white;
+    padding: 8px 16px;
     border-radius: 4px;
-    font-size: 12px;
-    border-left: 2px solid var(--color-400);
-}
-
-/* Print-specific styling */
-@media print {
-    body {
-        padding: 0;
-        margin: 0;
-    }
-    
-    .receipt-container {
-        border: none;
-        width: 90%;
-        max-width: 190mm; /* Much wider than before */
-        padding: 0;
-        margin: 0 auto;
-    }
-    
-    .no-print {
-        display: none;
-    }
-    
-    @page {
-        size: auto; /* Use standard paper size */
-        margin: 10mm; /* Standard margins */
-    }
-    
-    /* Make content fit on one page */
-    .receipt {
-        font-size: 12pt;
-        font-family: Arial, sans-serif; /* Better for standard printing */
-        max-width: none;
-        width: 100%;
-    }
-    
-    /* Create a two-column layout for wider format */
-    .receipt-body {
-        display: flex;
-        flex-wrap: wrap;
-    }
-    
-    .receipt-info, .customer-header, .service-header {
-        width: 100%;
-    }
-    
-    .receipt-customer, .receipt-items {
-        width: 48%;
-        margin-right: 2%;
-    }
-    
-    .booking-reference {
-        width: 48%;
-    }
-}
-
-.additional-services {
+    text-align: center;
+    font-weight: 600;
     margin-top: 10px;
-    margin-bottom: 10px;
 }
 
-.receipt-subtotal {
-    margin-top: 5px;
+.unpaid-status {
+    background: var(--danger);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* QR code section */
+.qr-section {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.qr-code {
+    display: inline-block;
+    padding: 10px;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.qr-code img {
+    max-width: 100px;
+    height: auto;
+    display: block;
+}
+
+.qr-label {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
-.receipt-item-discount {
-    font-size: 0.9em;
+/* Booking reference section */
+.booking-reference-details {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.reference-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.reference-item {
+    padding: 8px;
+    background: var(--subtle-color);
+    border-radius: 4px;
+    border-left: 2px solid var(--color-500);
+}
+
+.reference-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.reference-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Footer information */
+.receipt-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.receipt-footer p {
+    margin-bottom: 6px;
+}
+
+.receipt-footer .footer-note {
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+/* Print-specific adjustments */
+@media print {
+    /* Reset all styles for printing */
+    body {
+        padding: 0;
+        margin: 0;
+        background: white !important;
+        color: black !important;
+        font-family: Arial, sans-serif;
+    }
+    
+    /* Hide non-printable elements */
+    .no-print,
+    .btn,
+    .navbar,
+    .sidebar,
+    .modal,
+    .toast,
+    .alert,
+    .dropdown,
+    nav,
+    header,
+    footer:not(.receipt-footer) {
+        display: none !important;
+    }
+    
+    /* Container adjustments */
+    .receipt-container,
+    .print-container {
+        border: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    
+    .receipt-container::before,
+    .print-container::before {
+        display: none !important;
+    }
+    
+    /* Receipt adjustments */
+    .receipt {
+        width: 100% !important;
+        max-width: none !important;
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        border-radius: 0 !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 12pt !important;
+        line-height: 1.4 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Content adjustments */
+    .receipt-body,
+    .receipt-info,
+    .receipt-customer,
+    .receipt-items,
+    .booking-reference,
+    .receipt-section {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 0 !important;
+        color: black !important;
+        page-break-inside: avoid;
+        margin-bottom: 10pt !important;
+        padding: 8pt !important;
+    }
+    
+    /* Header adjustments */
+    .receipt-header {
+        border-bottom: 2px solid #333 !important;
+        margin-bottom: 15pt !important;
+        padding-bottom: 10pt !important;
+    }
+    
+    .receipt-header::after {
+        background: #333 !important;
+    }
+    
+    .receipt-header h4 {
+        color: black !important;
+        font-size: 18pt !important;
+        margin-bottom: 6pt !important;
+    }
+    
+    .receipt-header h5 {
+        color: black !important;
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+        font-size: 14pt !important;
+        padding: 6pt !important;
+    }
+    
+    .receipt-header p {
+        color: #333 !important;
+        font-size: 10pt !important;
+        margin-bottom: 4pt !important;
+    }
+    
+    /* Section headers */
+    .customer-header,
+    .service-header,
+    .reference-header,
+    .instruction-header {
+        color: black !important;
+        border-bottom: 1px solid #333 !important;
+        font-size: 12pt !important;
+        padding-bottom: 4pt !important;
+        margin-bottom: 8pt !important;
+    }
+    
+    .customer-header::before,
+    .service-header::before,
+    .reference-header::before,
+    .instruction-header::before {
+        background: #333 !important;
+    }
+    
+    /* Table adjustments */
+    .receipt-items-table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        border: 1px solid #333 !important;
+        background: white !important;
+    }
+    
+    .receipt-items-table th {
+        background: #f5f5f5 !important;
+        color: black !important;
+        border: 1px solid #333 !important;
+        padding: 6pt !important;
+        font-size: 10pt !important;
+        font-weight: bold !important;
+    }
+    
+    .receipt-items-table td {
+        border: 1px solid #333 !important;
+        padding: 4pt 6pt !important;
+        color: black !important;
+        font-size: 9pt !important;
+    }
+    
+    /* Pricing adjustments */
+    .receipt-total-section {
+        background: #f9f9f9 !important;
+        border: 2px solid #333 !important;
+        border-radius: 0 !important;
+        page-break-inside: avoid;
+    }
+    
+    .receipt-total {
+        color: black !important;
+        font-size: 14pt !important;
+        border-top: 2px solid #333 !important;
+        font-weight: bold !important;
+    }
+    
+    .receipt-total::before {
+        background: #333 !important;
+    }
+    
+    .receipt-subtotal {
+        color: #666 !important;
+        border-top: 1px dashed #333 !important;
+        font-size: 9pt !important;
+    }
+    
+    /* Discount styling */
+    .receipt-item-discount {
+        color: #d32f2f !important;
+        font-weight: bold !important;
+    }
+    
+    .discount-row {
+        background: #ffe0e0 !important;
+    }
+    
+    /* Additional elements */
+    .thank-you {
+        background: #f5f5f5 !important;
+        color: black !important;
+        border: 1px solid #ddd !important;
+        font-size: 14pt !important;
+        text-align: center !important;
+        padding: 8pt !important;
+        margin: 10pt 0 !important;
+    }
+    
+    .notes {
+        background: #f9f9f9 !important;
+        color: black !important;
+        border-left: 3px solid #333 !important;
+        font-size: 9pt !important;
+        padding: 6pt !important;
+    }
+    
+    .payment-instruction {
+        color: #666 !important;
+        border-top: 1px dashed #333 !important;
+        font-size: 9pt !important;
+    }
+    
+    .paid-status,
+    .unpaid-status {
+        background: white !important;
+        color: black !important;
+        border: 2px solid #333 !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+    }
+    
+    .paid-status::before {
+        content: "✓ ";
+    }
+    
+    .unpaid-status::before {
+        content: "⚠ ";
+    }
+    
+    /* QR code adjustments */
+    .qr-section {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+    }
+    
+    .qr-code {
+        background: white !important;
+        border: 1px solid #333 !important;
+    }
+    
+    .qr-label {
+        color: #666 !important;
+        font-size: 8pt !important;
+    }
+    
+    /* Reference grid adjustments */
+    .reference-grid {
+        display: block !important;
+    }
+    
+    .reference-item {
+        background: #f5f5f5 !important;
+        border-left: 2px solid #333 !important;
+        margin-bottom: 4pt !important;
+        display: block !important;
+        padding: 4pt !important;
+    }
+    
+    .reference-label {
+        color: #666 !important;
+        font-size: 8pt !important;
+    }
+    
+    .reference-value {
+        color: black !important;
+        font-size: 10pt !important;
+        font-weight: bold !important;
+    }
+    
+    /* Footer adjustments */
+    .receipt-footer {
+        border-top: 1px solid #333 !important;
+        color: #666 !important;
+        font-size: 8pt !important;
+        text-align: center !important;
+        margin-top: 15pt !important;
+        padding-top: 8pt !important;
+    }
+    
+    .receipt-footer p {
+        margin-bottom: 4pt !important;
+    }
+    
+    .footer-note {
+        color: #999 !important;
+        font-size: 7pt !important;
+    }
+    
+    /* Page settings */
+    @page {
+        size: A4;
+        margin: 15mm;
+        margin-bottom: 20mm;
+    }
+    
+    /* Force page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .no-page-break {
+        page-break-inside: avoid;
+    }
+    
+    /* Dark mode print override */
+    [data-theme="dark"] .receipt,
+    [data-theme="dark"] .receipt-container,
+    [data-theme="dark"] .receipt-header,
+    [data-theme="dark"] .receipt-body,
+    [data-theme="dark"] .receipt-info,
+    [data-theme="dark"] .receipt-customer,
+    [data-theme="dark"] .receipt-items,
+    [data-theme="dark"] .booking-reference,
+    [data-theme="dark"] .receipt-section,
+    [data-theme="dark"] .receipt-total-section,
+    [data-theme="dark"] .thank-you,
+    [data-theme="dark"] .notes,
+    [data-theme="dark"] .qr-section {
+        background: white !important;
+        color: black !important;
+        border-color: #333 !important;
+    }
+    
+    [data-theme="dark"] .receipt-items-table th,
+    [data-theme="dark"] .receipt-items-table td {
+        background: white !important;
+        color: black !important;
+        border-color: #333 !important;
+    }
+    
+    [data-theme="dark"] .receipt-header h4,
+    [data-theme="dark"] .receipt-header h5,
+    [data-theme="dark"] .receipt-header p,
+    [data-theme="dark"] .customer-header,
+    [data-theme="dark"] .service-header,
+    [data-theme="dark"] .reference-header,
+    [data-theme="dark"] .instruction-header,
+    [data-theme="dark"] .receipt-total {
+        color: black !important;
+    }
 }

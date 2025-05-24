@@ -1,16 +1,12 @@
-/* Define local font faces */
 @font-face {
   font-family: 'Playfair Display';
   src: url('fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
-  /* Add additional formats like woff2 if available: url('fonts/playfair-display-regular.woff2') format('woff2'); */
 }
 
 @font-face {
   font-family: 'Montserrat';
   src: url('fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
-  /* Add additional formats like woff2 if available: url('fonts/montserrat-regular.woff2') format('woff2'); */
 }
-
 
 @font-face {
   font-family: 'Material Icons';
@@ -20,7 +16,6 @@
   font-style: normal;
   font-display: block;
 }
-
 
 /* Material Icons base styles */
 .material-icons {
@@ -40,10 +35,8 @@
   text-rendering: optimizeLegibility;
 }
 
-
-/* Rest of your original CSS */
 :root {
-  /* Primary Brand Colors - Pink/Purple Gradient */
+  /* Primary Brand Colors - Gold/Brown */
   --color-50: #faf8ec;
   --color-100: #e9dd9f;
   --color-200: #e9dd9f;
@@ -115,75 +108,165 @@
   
   --white: #ffffff;
   --black: #000000;
+
+  /* Solid Color Definitions - No Gradients */
+  --primary-color: var(--color-500);
+  --secondary-color: var(--color-200);
+  --warm-color: var(--color-600);
+  --gold-color: var(--color-500);
+  --subtle-color: var(--color-100);
+  --card-color: var(--white);
+  --header-color: var(--color-700);
+  --overlay-color: var(--color-50);
+
+  /* Button colors */
+  --button-color: var(--color-500);
+  --button-hover-color: var(--color-600);
+
+  /* Solid color variants for different states */
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --info-color: #03a9f4;
+
+  /* Light Mode Variables */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --navbar-bg: var(--color-700);
+  --sidebar-bg: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
 }
 
-/* Applying fonts globally */
+/* Dark Mode Variables */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #404040;
+  --text-primary: #e5e5e5;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888888;
+  --border-color: #404040;
+  --card-bg: #2d2d2d;
+  --navbar-bg: #1a1a1a;
+  --sidebar-bg: #2d2d2d;
+  --input-bg: #404040;
+  --input-border: #555555;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.7);
+  
+  /* Adjust existing color variables for dark mode */
+  --gray-50: #404040;
+  --gray-100: #555555;
+  --gray-200: #666666;
+  --gray-300: #777777;
+  --gray-400: #888888;
+  --gray-500: #999999;
+  --gray-600: #aaaaaa;
+  --gray-700: #bbbbbb;
+  --gray-800: #cccccc;
+  --gray-900: #dddddd;
+
+  /* Override solid color definitions for dark mode */
+  --primary-color: var(--color-500);
+  --secondary-color: var(--color-300);
+  --warm-color: var(--color-600);
+  --gold-color: var(--color-500);
+  --subtle-color: var(--color-200);
+  --card-color: #2d2d2d;
+  --header-color: #1a1a1a;
+  --overlay-color: #404040;
+
+  /* Button colors for dark mode */
+  --button-color: var(--color-500);
+  --button-hover-color: var(--color-600);
+}
+
+/* Global styles */
 body {
   font-family: 'Montserrat', sans-serif;
   padding-bottom: 120px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', serif;
+  color: var(--text-primary);
 }
 
-/* Primary Button */
+/* Enhanced button styles with solid colors */
 .btn-primary {
-  background-color: var(--color-600);
-  border-color: var(--color-700);
+  background: var(--primary-color);
+  border: none;
+  box-shadow: 0 4px 15px rgba(193, 153, 49, 0.3);
+  transition: all 0.3s ease;
   font-family: 'Montserrat', sans-serif;
+  color: white;
 }
 
 .btn-primary:hover {
-  background-color: var(--color-700);
-  border-color: var(--color-800);
+  background: var(--button-hover-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(154, 112, 37, 0.4);
+  color: white;
 }
 
-/* Secondary Button */
 .btn-secondary {
-  background-color: var(--color-300);
-  border-color: var(--color-400);
+  background: var(--secondary-color);
+  border: none;
   color: var(--color-950);
   font-family: 'Montserrat', sans-serif;
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-400);
-  border-color: var(--color-500);
+  background: var(--warm-color);
+  color: white;
 }
 
-/* Button Variants */
 .btn-danger {
-  background-color: var(--danger);
-  border-color: var(--danger-dark);
+  background: var(--danger-color);
+  border: none;
   font-family: 'Montserrat', sans-serif;
+  color: white;
 }
 
 .btn-danger:hover {
-  background-color: var(--danger-dark);
-  border-color: var(--danger-dark);
+  background: var(--danger-dark);
+  color: white;
 }
 
 .btn-outline-primary {
   color: var(--color-700);
   border-color: var(--color-600);
   font-family: 'Montserrat', sans-serif;
+  background: transparent;
 }
 
 .btn-outline-primary:hover {
-  background-color: var(--color-600);
+  background: var(--primary-color);
   border-color: var(--color-700);
-  color: var(--white);
+  color: white;
 }
 
 .btn-outline-secondary {
-  color: var(--color-800);
-  border-color: var(--color-300);
+  color: var(--text-primary);
+  border-color: var(--border-color);
   font-family: 'Montserrat', sans-serif;
+  background: transparent;
 }
 
 .btn-outline-secondary:hover {
-  background-color: var(--color-300);
+  background: var(--secondary-color);
   color: var(--color-900);
   border-color: var(--color-400);
 }
@@ -192,89 +275,147 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--warning);
   border-color: var(--warning);
   font-family: 'Montserrat', sans-serif;
+  background: transparent;
 }
 
 .btn-outline-warning:hover {
-  background-color: var(--warning);
-  color: var(--white);
+  background: var(--warning-color);
+  color: white;
   border-color: var(--warning-dark);
 }
 
-/* Badges */
+/* Enhanced card styles */
+.card {
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  background: var(--card-color);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  /* background: var(--subtle-color); */
+  border-bottom: 1px solid var(--border-color);
+  font-family: 'Playfair Display', serif;
+  color: var(--text-primary);
+}
+
+/* Navbar with solid color */
+.navbar {
+  background: var(--navbar-bg) !important;
+  font-family: 'Montserrat', sans-serif;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+  color: var(--color-50) !important;
+}
+
+/* Enhanced dashboard panel */
+.dashboard-panel {
+  border-left: 4px solid var(--color-500);
+  background: var(--subtle-color);
+  font-family: 'Montserrat', sans-serif;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.dashboard-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Enhanced form controls */
+.form-control:focus {
+  border-color: var(--color-400);
+  box-shadow: 0 0 0 0.25rem var(--color-500-25);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.form-control, .form-select {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+/* Enhanced badges */
 .badge.bg-primary {
-  background-color: var(--color-600) !important;
+  background: var(--primary-color) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
 .badge.bg-secondary {
-  background-color: var(--secondary) !important;
+  background: var(--secondary-color) !important;
+  color: var(--color-900) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
 .badge.bg-success {
-  background-color: var(--success) !important;
+  background: var(--success-color) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
 .badge.bg-danger {
-  background-color: var(--danger) !important;
+  background: var(--danger-color) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
 .badge.bg-warning {
-  background-color: var(--warning) !important;
+  background: var(--warning-color) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
 .badge.bg-info {
-  background-color: var(--info) !important;
+  background: var(--info-color) !important;
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Card Styling */
-.card {
+/* Enhanced progress bars */
+.progress {
+  background-color: var(--bg-tertiary);
   border-radius: 0.5rem;
-  border: none;
-  transition: all 0.2s;
-  font-family: 'Montserrat', sans-serif;
+  overflow: hidden;
 }
 
-.card-header {
-  background-color: var(--color-50);
-  border-bottom: 1px solid var(--color-100);
-  font-family: 'Playfair Display', serif;
+.progress-bar {
+  background: var(--primary-color);
+  transition: all 0.3s ease;
 }
 
-/* Navbar */
-.navbar {
-  background-color: var(--color-800);
-  font-family: 'Montserrat', sans-serif;
+.progress-bar.bg-success {
+  background: var(--success-color) !important;
 }
 
-.navbar-brand, .navbar-nav .nav-link {
-  color: var(--color-50);
+.progress-bar.bg-warning {
+  background: var(--warning-color) !important;
 }
 
-/* Dashboard Panels */
-.dashboard-panel {
-  border-left: 4px solid var(--color-500);
-  background-color: var(--color-50);
-  font-family: 'Montserrat', sans-serif;
+.progress-bar.bg-danger {
+  background: var(--danger-color) !important;
 }
 
-/* Forms */
-.form-control:focus {
-  border-color: var(--color-400);
-  box-shadow: 0 0 0 0.25rem var(--color-600-25);
+.progress-bar.bg-info {
+  background: var(--info-color) !important;
 }
 
-/* Footer */
+/* Enhanced footer */
 .footer {
-  background-color: var(--color-800);
+  background: var(--header-color);
   color: var(--white);
   padding: 2rem 0;
   margin-top: 3rem;
   font-family: 'Montserrat', sans-serif;
+  border-top: 1px solid var(--border-color);
 }
 
 .footer h5 {
@@ -289,23 +430,19 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5rem;
 }
 
-.footer .mt-2 {
-  margin-top: 1.5rem !important;
-  color: var(--color-200);
-}
-
-/* Links */
+/* Enhanced links */
 a {
   color: var(--color-600);
+  transition: color 0.3s ease;
 }
 
 a:hover {
   color: var(--color-700);
 }
 
-/* Text colors */
+/* Text colors with theme support */
 .text-muted {
-  color: var(--gray-600) !important;
+  color: var(--text-muted) !important;
 }
 
 .text-success {
@@ -328,39 +465,43 @@ a:hover {
   color: var(--color-600) !important;
 }
 
-/* Pagination */
+/* Enhanced pagination */
 .page-link {
-  color: var(--color-700);
+  color: var(--text-primary);
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
   font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s ease;
 }
 
 .page-link:hover {
-  color: var(--color-900);
+  color: white;
+  background: var(--primary-color);
+  border-color: var(--color-600);
 }
 
 .page-item.active .page-link {
-  background-color: var(--color-600);
+  background: var(--primary-color);
   border-color: var(--color-700);
+  color: white;
 }
 
-/* Progress bars */
-.progress {
-  background-color: var(--color-100);
+/* Enhanced breadcrumbs */
+.breadcrumb {
+  background-color: var(--bg-secondary);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
 }
 
-.progress-bar {
-  background-color: var(--color-500);
-}
-
-/* Breadcrumbs */
 .breadcrumb-item.active {
-  color: var(--color-700);
+  color: var(--text-muted);
   font-family: 'Montserrat', sans-serif;
 }
 
 .breadcrumb-item a {
   color: var(--color-600);
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .breadcrumb-item a:hover {
@@ -368,21 +509,160 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Footer positioning */
-.footer {
-  background-color: var(--color-900);
-  border-top: 1px solid #dee2e6;
-  z-index: 1030;
-  width: 100%;
-  left: 0;
+/* Dark Mode Toggle Styles */
+.theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
 }
 
-/* Add padding to the body to prevent content from being hidden behind the footer */
-body {
-  padding-bottom: 120px;
+.theme-toggle:hover {
+  background: var(--subtle-color);
+  border-color: var(--color-400);
+  transform: scale(1.05);
 }
 
+.theme-toggle-icon {
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+/* Tables with dark mode support */
+.table {
+  --bs-table-bg: var(--card-bg);
+  --bs-table-border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.table-hover tbody tr:hover {
+  --bs-table-hover-bg: var(--bg-tertiary);
+}
+
+.table th {
+  /* background: var(--subtle-color); */
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Modal enhancements */
+.modal-content {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  border-radius: 0.5rem;
+}
+
+.modal-header {
+  background: var(--warm-color);
+  color: white;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--subtle-color);
+  color: var(--text-primary);
+}
+
+/* Alert enhancements */
+.alert {
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.alert-info {
+  background: var(--info-light);
+  border-color: var(--info);
+  color: white;
+}
+
+.alert-warning {
+  background: var(--warning-light);
+  border-color: var(--warning);
+  color: white;
+}
+
+.alert-success {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: white;
+}
+
+.alert-danger {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: white;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--button-hover-color);
+}
+
+/* Global transition for theme switching */
+* {
+  transition: background-color 0.3s ease, 
+              border-color 0.3s ease, 
+              color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Preserve special transitions */
+.btn-primary,
+.card,
+.dashboard-panel,
+.theme-toggle {
+  transition: all 0.3s ease;
+}
+
+/* Special logo styling */
 .text-colored-logo {
   filter: brightness(0);
   mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .text-colored-logo {
+  filter: brightness(0.8) contrast(1.2);
 }

@@ -1,0 +1,515 @@
+{% extends 'public_base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Therapist Schedule - {{ current_date|date:"M d, Y" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_calendar.css' %}">
+<style>
+    .public-calendar-hero {
+        background: linear-gradient(135deg, var(--color-50), var(--color-100));
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 1px solid var(--color-200);
+    }
+
+    .public-therapist-calendar-container {
+        display: grid;
+        grid-template-columns: 80px repeat({{ therapists|length }}, 1fr);
+        gap: 1px;
+        background-color: var(--gray-200);
+        border-radius: 8px;
+        overflow: hidden;
+        min-height: 500px;
+    }
+
+    /* Enhanced Therapist Header with Avatar */
+    .public-therapist-header {
+        background: linear-gradient(135deg, var(--color-100), var(--color-200));
+        padding: 1rem 0.5rem;
+        text-align: center;
+        border-bottom: 2px solid var(--color-300);
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .public-therapist-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-bottom: 0.5rem;
+        object-fit: cover;
+        border: 2px solid var(--color-400);
+    }
+
+    .public-therapist-initials {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--color-500);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        border: 2px solid var(--color-400);
+    }
+
+    .public-therapist-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--color-700);
+        margin-bottom: 0.2rem;
+        line-height: 1.2;
+    }
+
+    .public-therapist-specialty {
+        font-size: 0.75rem;
+        color: var(--color-600);
+        line-height: 1.1;
+    }
+
+    /* Enhanced booking blocks */
+    .public-booking-block {
+        position: absolute;
+        background: var(--color-300);
+        color: var(--color-700);
+        border-radius: 4px;
+        padding: 4px 6px;
+        font-size: 0.7rem;
+        text-align: center;
+        cursor: default;
+        border: 1px solid var(--color-400);
+        min-height: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+
+    .public-booking-block:hover {
+        background: var(--color-400);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .booking-anonymous {
+        color: var(--color-700);
+        font-weight: 600;
+    }
+
+    /* Calendar grid improvements */
+    .therapist-column {
+        position: relative;
+        background: white;
+        min-height: 480px;
+    }
+
+    .calendar-hour-slot {
+        height: 60px;
+        border-bottom: 1px solid var(--gray-100);
+        position: relative;
+    }
+
+    .half-hour-line {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--gray-150);
+    }
+
+    .quarter-hour-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--gray-100);
+    }
+
+    .quarter-hour-line:first-of-type {
+        top: 25%;
+    }
+
+    .quarter-hour-line:last-of-type {
+        top: 75%;
+    }
+
+    /* Time column styling */
+    .time-column {
+        background: var(--gray-50);
+        border-right: 2px solid var(--gray-200);
+    }
+
+    .time-column-header {
+        height: 122px;
+        background: linear-gradient(135deg, var(--color-200), var(--color-300));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-700);
+        font-weight: 600;
+        border-bottom: 2px solid var(--color-300);
+    }
+
+    .time-slot {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    /* Legend and CTA improvements */
+    .public-calendar-legend {
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .legend-item-public {
+        display: flex;
+        align-items: center;
+        margin-right: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .legend-color-public {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        margin-right: 10px;
+        border: 1px solid var(--gray-300);
+    }
+
+    .legend-color-public.booked {
+        background: var(--color-300);
+        border-color: var(--color-400);
+    }
+
+    .legend-color-public.available {
+        background: var(--gray-100);
+        border-color: var(--gray-200);
+    }
+
+    .public-cta-section {
+        background: linear-gradient(135deg, var(--color-50), var(--color-100));
+        border: 1px solid var(--color-200);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .public-therapist-calendar-container {
+            grid-template-columns: 60px repeat({{ therapists|length }}, 1fr);
+        }
+        
+        .public-therapist-header {
+            min-height: 100px;
+            padding: 0.75rem 0.25rem;
+        }
+        
+        .public-therapist-avatar,
+        .public-therapist-initials {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .public-therapist-name {
+            font-size: 0.8rem;
+        }
+        
+        .public-therapist-specialty {
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Tooltip styling */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    .tooltip-inner {
+        background-color: var(--color-700);
+        color: white;
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+
+    /* Additional visual enhancements */
+    .calendar-container-wrapper {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .booking-stats-badge {
+        display: inline-flex;
+        align-items: center;
+        background: var(--color-100);
+        color: var(--color-700);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid var(--color-200);
+    }
+
+    .booking-stats-badge .material-icons {
+        font-size: 1rem;
+        margin-right: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+    <!-- Public Hero Section -->
+    <div class="public-calendar-hero">
+        <h2><span class="material-icons me-2">groups</span>Our Therapists' Availability</h2>
+        <p class="text-muted mb-3">View real-time availability and book your preferred appointment time</p>
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+            <span class="booking-stats-badge">
+                <span class="material-icons">people</span>
+                {{ therapists|length }} Therapist{{ therapists|length|pluralize }}
+            </span>
+            <span class="booking-stats-badge">
+                <span class="material-icons">event</span>
+                {{ total_bookings }} Appointment{{ total_bookings|pluralize }} Today
+            </span>
+        </div>
+    </div>
+
+    <!-- Date Navigation -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="?date={{ prev_date|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                    <span class="material-icons">chevron_left</span> Previous Day
+                </a>
+                <div class="text-center">
+                    <h4 class="mb-0">
+                        {{ current_date|date:"l, F d, Y" }}
+                        {% if is_today %}
+                        <span class="badge bg-primary ms-2">Today</span>
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-0">Real-time availability schedule</p>
+                </div>
+                <a href="?date={{ next_date|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                    Next Day <span class="material-icons">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Public Calendar Grid -->
+    <div class="card shadow-sm">
+        <div class="card-body p-1">
+            <div class="calendar-container-wrapper">
+                <div class="public-therapist-calendar-container">
+                    <!-- Time Column -->
+                    <div class="time-column">
+                        <div class="time-column-header">
+                            <span class="material-icons">schedule</span>
+                        </div>
+                        {% for hour in hours %}
+                        <div class="time-slot">
+                            {% if hour == 12 %}
+                                12 PM
+                            {% elif hour > 12 %}
+                                {{ hour|add:"-12" }} PM
+                            {% else %}
+                                {{ hour }} AM
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Therapist Columns -->
+                    {% for therapist in therapists %}
+                    <div class="therapist-column">
+                        <!-- Enhanced Therapist Header with Avatar -->
+                        <div class="public-therapist-header">
+                            {% if therapist.profile_picture %}
+                                <img src="{{ therapist.profile_picture.url }}" alt="{{ therapist.get_full_name }}" class="public-therapist-avatar">
+                            {% else %}
+                                <div class="public-therapist-initials">
+                                    {{ therapist.first_name.0|default:therapist.username.0 }}{{ therapist.last_name.0|default:'' }}
+                                </div>
+                            {% endif %}
+                            <div class="public-therapist-name">{{ therapist.get_full_name }}</div>
+                            <div class="public-therapist-specialty">
+                                {% if therapist.primary_service %}
+                                    {{ therapist.primary_service.name }}
+                                {% else %}
+                                    Beauty Therapist
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Hour Slots with Grid Lines -->
+                        {% for hour in hours %}
+                        <div class="calendar-hour-slot">
+                            <div class="half-hour-line"></div>
+                            <div class="quarter-hour-line"></div>
+                            <div class="quarter-hour-line"></div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Bookings for this therapist (anonymized) -->
+                        {% for booking in bookings_by_therapist|get_item:therapist.id %}
+                        <div class="public-booking-block"
+                             style="top: {{ booking.start_row|multiply:7.5|add:122 }}px; height: {{ booking.end_row|subtract:booking.start_row|multiply:7.5 }}px; left: 4px; right: 4px;"
+                             data-bs-toggle="tooltip"
+                             data-bs-placement="top"
+                             title="Reserved: {{ booking.service.name }} ({{ booking.date_time|date:'H:i' }} - {{ booking.end_time|date:'H:i' }})">
+                            <div class="booking-anonymous">Reserved</div>
+                            <div style="font-size: 0.65rem; opacity: 0.8;">{{ booking.service.name }}</div>
+                            <div style="font-size: 0.6rem; opacity: 0.7;">{{ booking.date_time|date:"H:i" }}-{{ booking.end_time|date:"H:i" }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Legend -->
+    <div class="public-calendar-legend">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h6 class="mb-3"><span class="material-icons me-2">info</span>Calendar Legend</h6>
+                <div class="d-flex flex-wrap">
+                    <div class="legend-item-public">
+                        <div class="legend-color-public available"></div>
+                        <span>Available Time</span>
+                    </div>
+                    <div class="legend-item-public">
+                        <div class="legend-color-public booked"></div>
+                        <span>Reserved Appointment</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-md-end">
+                    <p class="mb-0"><small class="text-muted">
+                        <span class="material-icons me-1" style="font-size: 1rem; vertical-align: text-bottom;">schedule</span>
+                        Operating Hours: 9:00 AM - 8:00 PM
+                    </small></p>
+                    <p class="mb-0"><small class="text-muted">
+                        <span class="material-icons me-1" style="font-size: 1rem; vertical-align: text-bottom;">refresh</span>
+                        Schedule updates in real-time
+                    </small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Call to Action Section -->
+    <div class="public-cta-section">
+        <h4 class="mb-3"><span class="material-icons me-2">event_available</span>Ready to Schedule Your Appointment?</h4>
+        <p class="text-muted mb-4">See an available time that works for you? Choose your preferred way to book below.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'public_booking_request_create' %}" class="btn btn-primary btn-lg">
+                <span class="material-icons me-2">add</span>Request Booking Online
+            </a>
+            <a href="tel:{{ settings.BEAUTY_PARLOR_PHONE }}" class="btn btn-success btn-lg">
+                <span class="material-icons me-2">phone</span>Call {{ settings.BEAUTY_PARLOR_PHONE }}
+            </a>
+            <a href="{% url 'public_service_list' %}" class="btn btn-outline-primary">
+                <span class="material-icons me-2">spa</span>Browse Services
+            </a>
+        </div>
+        <div class="mt-3">
+            <small class="text-muted">
+                <span class="material-icons me-1" style="font-size: 1rem; vertical-align: text-bottom;">info</span>
+                Online requests are typically confirmed within 2 hours during business hours
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips for booking blocks
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: 'custom-tooltip'
+            });
+        });
+
+        // Add smooth scrolling to time slots when clicking on calendar
+        const calendarContainer = document.querySelector('.public-therapist-calendar-container');
+        if (calendarContainer) {
+            calendarContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('time-slot')) {
+                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+
+        // Add loading state for booking blocks (optional enhancement)
+        const bookingBlocks = document.querySelectorAll('.public-booking-block');
+        bookingBlocks.forEach(block => {
+            block.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.02)';
+            });
+            
+            block.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Auto-refresh calendar every 5 minutes to show real-time updates
+        setInterval(function() {
+            // Only refresh if the page is visible
+            if (!document.hidden) {
+                const currentUrl = new URL(window.location);
+                const refreshIndicator = document.createElement('div');
+                refreshIndicator.className = 'position-fixed top-0 end-0 m-3 alert alert-info alert-dismissible fade show';
+                refreshIndicator.innerHTML = `
+                    <span class="material-icons me-2">refresh</span>
+                    Updating schedule...
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(refreshIndicator);
+
+                // Auto-dismiss after 2 seconds
+                setTimeout(() => {
+                    if (refreshIndicator && refreshIndicator.parentNode) {
+                        refreshIndicator.remove();
+                    }
+                    // Uncomment the line below to enable auto-refresh
+                    // window.location.reload();
+                }, 2000);
+            }
+        }, 300000); // 5 minutes
+    });
+</script>
+{% endblock %}

@@ -1,51 +1,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Customer, Service, BookingRequest, CustomUser
-
-# class CustomerSelectionForm(forms.Form):
-#     customer_choice = forms.ChoiceField(
-#         choices=(
-#             ('existing', 'I am an existing customer'),
-#             ('new', 'I am a new customer')
-#         ),
-#         widget=forms.RadioSelect,
-#         initial='new'
-#     )
-    
-#     existing_customer = forms.ModelChoiceField(
-#         queryset=Customer.objects.all().order_by('first_name', 'last_name'),
-#         required=False,
-#         empty_label="Select your name",
-#         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
-#     )
-    
-#     # Fields for new customer
-#     first_name = forms.CharField(max_length=100, required=False)
-#     last_name = forms.CharField(max_length=100, required=False)
-#     phone = forms.CharField(max_length=15, required=False)
-#     address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
-    
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         customer_choice = cleaned_data.get('customer_choice')
-        
-#         if customer_choice == 'existing':
-#             if not cleaned_data.get('existing_customer'):
-#                 raise ValidationError("Please select your name from the list.")
-#         elif customer_choice == 'new':
-#             # Validate new customer fields
-#             if not cleaned_data.get('first_name'):
-#                 raise ValidationError("First name is required for new customers.")
-#             if not cleaned_data.get('last_name'):
-#                 raise ValidationError("Last name is required for new customers.")
-#             if not cleaned_data.get('phone'):
-#                 raise ValidationError("Phone number is required for new customers.")
-                
-#         return cleaned_data
+from django.db.models import Q
+from .models import BookingTherapistAssignment, Customer, Service, BookingRequest, CustomUser
 
 
-# forms.py
 class CustomerSelectionForm(forms.Form):
     customer_choice = forms.ChoiceField(
         choices=[('existing', 'I am an existing customer'), ('new', 'I am a new customer')],
@@ -131,51 +90,121 @@ class CustomerSelectionForm(forms.Form):
                 
         return cleaned_data
 
+
 class ServiceSelectionForm(forms.Form):
     service = forms.ModelChoiceField(
         queryset=Service.objects.filter(active=True),
-        empty_label="Select a service",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        label="Select Service",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
     )
-    
     date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        initial=timezone.now().date
+        label="Select Date",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=True
+    )
+    time = forms.TimeField(
+        label="Select Time",
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        required=True
+    )
+    preferred_therapist = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(user_type='STAFFLEVEL2', is_active=True),
+        label="Preferred Therapist (Optional)",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
     )
     
-    time = forms.TimeField(
-        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-        initial=timezone.now().time
-    )
-     # Add therapist field
-    therapist = forms.ModelChoiceField(
-        queryset=CustomUser.objects.none(),  # Will be populated via JS
-        required=False,
-        empty_label="Select a therapist (optional)",
-        widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
-    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'initial' in kwargs and 'time' in kwargs['initial']:
+            # Check if we have a time value passed from AJAX update
+            self.fields['time'].initial = kwargs['initial']['time']
+    
+    # Update the therapist filtering method
+    def update_therapists(self, service_id, date_time=None):
+        """Dynamically update the therapist field based on the selected service and time"""
+        if not service_id:
+            self.fields['preferred_therapist'].queryset = CustomUser.objects.filter(
+                user_type='STAFFLEVEL2', is_active=True
+            )
+            return
+            
+        # Filter therapists who can provide this service
+        therapists = CustomUser.objects.filter(
+            user_type='STAFFLEVEL2', 
+            is_active=True
+        ).filter(Q(primary_service_id=service_id) | Q(assigned_services__service_id=service_id))
+        
+        # If we have date_time, we can filter available therapists but still show all
+        if date_time:
+            # We'll just update the queryset without filtering out unavailable therapists
+            # The UI will handle showing availability status
+            pass
+            
+        self.fields['preferred_therapist'].queryset = therapists
     
     def clean(self):
         cleaned_data = super().clean()
         date = cleaned_data.get('date')
         time = cleaned_data.get('time')
-        
         if date and time:
-            # Combine date and time into a datetime object
             from datetime import datetime
             date_time = datetime.combine(date, time)
-            
-            # Convert to timezone-aware datetime
             from django.utils import timezone
             date_time = timezone.make_aware(date_time)
-            
-            # Check if the date_time is in the past
+            from django.utils.timezone import is_aware, make_aware
+            if not is_aware(date_time):
+                date_time = make_aware(date_time)
             if date_time < timezone.now():
                 raise ValidationError("Booking time cannot be in the past.")
-            
             cleaned_data['date_time'] = date_time
-            
         return cleaned_data
+# class ServiceSelectionForm(forms.Form):
+#     service = forms.ModelChoiceField(
+#         queryset=Service.objects.filter(active=True),
+#         empty_label="Select a service",
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+    
+#     date = forms.DateField(
+#         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+#         initial=timezone.now().date
+#     )
+    
+#     time = forms.TimeField(
+#         widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+#         initial=timezone.now().time
+#     )
+#      # Add therapist field
+#     therapist = forms.ModelChoiceField(
+#         queryset=CustomUser.objects.none(),  # Will be populated via JS
+#         required=False,
+#         empty_label="Select a therapist (optional)",
+#         widget=forms.Select(attrs={'class': 'form-control', 'disabled': 'disabled'})
+#     )
+    
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         date = cleaned_data.get('date')
+#         time = cleaned_data.get('time')
+        
+#         if date and time:
+#             # Combine date and time into a datetime object
+#             from datetime import datetime
+#             date_time = datetime.combine(date, time)
+            
+#             # Convert to timezone-aware datetime
+#             from django.utils import timezone
+#             date_time = timezone.make_aware(date_time)
+            
+#             # Check if the date_time is in the past
+#             if date_time < timezone.now():
+#                 raise ValidationError("Booking time cannot be in the past.")
+            
+#             cleaned_data['date_time'] = date_time
+            
+#         return cleaned_data
 
 class AdditionalServicesForm(forms.Form):
     """Form for selecting additional services"""

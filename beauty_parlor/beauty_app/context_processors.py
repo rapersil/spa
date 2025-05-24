@@ -2,6 +2,7 @@
 from .models import BookingRequest
 from django.conf import settings
 
+
 def beauty_settings(request):
     """
     Adds beauty parlor settings to the template context
@@ -18,20 +19,20 @@ def beauty_settings(request):
     }
 
 
-
-
 def notification_counts(request):
     """
     Add notification counts to all template contexts
     """
     context = {}
-    
+
     # Only add the counts if the user is logged in and is staff
-    if request.user.is_authenticated and hasattr(request.user, 'user_type') and request.user.user_type in ['STAFF', 'ADMIN', 'SUPERADMIN']:
+    if request.user.is_authenticated and hasattr(request.user, 'user_type') and request.user.user_type in ['STAFF',
+                                                                                                           'ADMIN',
+                                                                                                           'SUPERADMIN']:
         # Count pending booking requests
         pending_count = BookingRequest.objects.filter(status='PENDING').count()
         context['pending_booking_requests_count'] = pending_count
     else:
         context['pending_booking_requests_count'] = 0
-        
+
     return context

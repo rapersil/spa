@@ -43,23 +43,28 @@
                             <span class="material-icons">spa</span>Services
                         </a>
                     </li>
-                    <!-- Add this inside the navbar-nav list -->
                     <li class="nav-item">
                         <a class="nav-link {% if 'request-booking' in request.path %}active{% endif %}" href="{% url 'public_booking_request_create' %}">
                             <span class="material-icons">event_add</span>Book Appointment
                         </a>
                     </li>
-                    
-                </ul>
-                <!-- Add this inside the navbar-nav list, after the Services link -->
-               
-                {% comment %} <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">
-                            <span class="material-icons">login</span>Staff Login
+                        <a class="nav-link {% if request.resolver_match.url_name == 'therapist_list' %}active{% endif %}" 
+                        href="{% url 'public_therapist_list' %}">
+                            <span class="material-icons me-2">groups</span>
+                            Therapists
                         </a>
                     </li>
-                </ul> {% endcomment %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Theme Toggle Button -->
+                    <li class="nav-item">
+                        <button class="theme-toggle" title="Toggle Theme">
+                            <span class="material-icons theme-toggle-icon">dark_mode</span>
+                        </button>
+                    </li>
+                </ul>
                 
             </div>
         </div>
@@ -106,6 +111,9 @@
     
     <!-- jQuery -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script src="{% static 'js/theme.js' %}"></script>
     
     <!-- Custom JavaScript -->
     <script src="{% static 'js/main.js' %}"></script>

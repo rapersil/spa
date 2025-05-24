@@ -59,11 +59,11 @@
                         </div>
                         
                         <div class="row">
-                            {%comment%}
+                            
                             <div class="col-md-6 mb-3">
                                 {{ form.email|as_crispy_field }}
                             </div>
-                            {%endcomment%}
+                            
                             <div class="col-md-6 mb-3">
                                 {{ form.phone_number|as_crispy_field }}
                             </div>
@@ -128,27 +128,28 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get the user type select element
-    const userTypeSelect = document.getElementById('id_user_type');
+    const userTypeField = document.getElementById('id_user_type');
     const primaryServiceContainer = document.getElementById('primaryServiceContainer');
+    const primaryServiceField = document.getElementById('id_primary_service');
     
-    // Function to check and toggle fields based on user type
-    function toggleServiceField() {
-        const selectedUserType = userTypeSelect.value;
+    function togglePrimaryServiceField() {
+        const selectedUserType = userTypeField.value;
         
-        // Show/hide service field based on user type
-        if (selectedUserType === 'COMMONSTAFF') {
+        if (selectedUserType === 'STAFFLEVEL2') {
             primaryServiceContainer.style.display = 'block';
+            primaryServiceField.required = false; // Make it optional
         } else {
             primaryServiceContainer.style.display = 'none';
+            primaryServiceField.value = ''; // Clear the field
+            primaryServiceField.required = false;
         }
     }
     
-    // Add event listener for user type changes
-    userTypeSelect.addEventListener('change', toggleServiceField);
+    // Initial check
+    togglePrimaryServiceField();
     
-    // Run once on page load
-    toggleServiceField();
+    // Listen for changes
+    userTypeField.addEventListener('change', togglePrimaryServiceField);
 });
 </script>
 {% endblock %}

@@ -1,15 +1,58 @@
-
 {% extends 'base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}
-{% if form.instance.pk %}Edit Discount - {{ form.instance.discount_id }}{% else %}Add New Discount{% endif %}
+{% if is_update %}Edit Discount - {{ discount.name }}{% else %}Add New Discount{% endif %}
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/discount.css' %}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .service-selection-container {
+        margin-bottom: 2rem;
+    }
+    .service-type-selection {
+        margin-bottom: 1.5rem;
+    }
+    .service-type-options {
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.25rem;
+        margin-top: 1rem;
+    }
+    .multiple-services-container {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 0.5rem;
+    }
+    .service-checkbox {
+        margin-bottom: 0.75rem;
+    }
+    .service-item-info {
+        display: block;
+        font-size: 0.8rem;
+        color: #666;
+        margin-left: 1.75rem;
+    }
+    .discount-preview-container {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        margin-top: 1rem;
+    }
+    #selectedServicesCount {
+        font-weight: bold;
+    }
+    .discount-name-section {
+        background-color: var(--color-50);
+        padding: 1.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid var(--color-200);
+        margin-bottom: 2rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +63,7 @@
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{% url 'discount_list' %}">Discounts</a></li>
             <li class="breadcrumb-item active">
-                {% if form.instance.pk %}Edit Discount{% else %}Add New Discount{% endif %}
+                {% if is_update %}Edit Discount{% else %}Add New Discount{% endif %}
             </li>
         </ol>
     </nav>
@@ -31,8 +74,8 @@
             <div class="card shadow-sm">
                 <div class="card-header">
                     <h4 class="mb-0">
-                        {% if form.instance.pk %}
-                        <i class="material-icons me-2">edit</i>Edit Discount
+                        {% if is_update %}
+                        <i class="material-icons me-2">edit</i>Edit Discount - {{ discount.name }}
                         {% else %}
                         <i class="material-icons me-2">percent</i>Create New Discount
                         {% endif %}
@@ -41,95 +84,133 @@
                 <div class="card-body">
                     <form method="post" class="discount-form needs-validation" novalidate>
                         {% csrf_token %}
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <div class="service-field">
-                                    {% if selected_service %}
-                                    <input type="hidden" name="service" value="{{ selected_service.id }}">
-                                    <div class="selected-service mb-3">
-                                        <label for="id_service" class="form-label">Service</label>
+
+                        <!-- Discount Name Section -->
+                        <div class="discount-name-section">
+                            <h5 class="mb-3">
+                                <i class="material-icons me-2">label</i>
+                                {% if is_update %}Update Discount Name{% else %}1. Name Your Discount{% endif %}
+                            </h5>
+                            {{ form.name|as_crispy_field }}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="material-icons me-1" style="font-size: 16px;">lightbulb</i>
+                                    <strong>Examples:</strong> Christmas Special, Flash Sale, Summer Promo, New Year Bonus, Weekend Deal
+                                </small>
+                            </div>
+                        </div>
+
+                        {% if not is_update %}
+                        <!-- Service Selection Section -->
+                        <div class="service-selection-container">
+                            <h5 class="mb-3">2. Select Service(s)</h5>
+
+                            <div class="service-type-selection">
+                                <div class="form-group">
+                                    <label>Discount Scope:</label>
+                                    {{ form.discount_type }}
+                                    <small class="form-text text-muted">{{ form.discount_type.help_text }}</small>
+                                </div>
+                            </div>
+
+                            <div id="singleServiceContainer" class="service-type-options">
+                                {{ form.single_service|as_crispy_field }}
+                            </div>
+
+                            <div id="multipleServicesContainer" class="service-type-options d-none">
+                                <label for="id_multiple_services">Select Services:</label>
+                                <div class="multiple-services-container">
+                                    {% for service in form.multiple_services.field.queryset %}
+                                    <div class="service-checkbox">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="multiple_services" value="{{ service.id }}" id="service_{{ service.id }}" class="form-check-input">
+                                            <label for="service_{{ service.id }}" class="form-check-label">{{ service.name }}</label>
+                                        </div>
+                                        <span class="service-item-info">GHS{{ service.price }} - {{ service.duration }} min</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="form-text text-muted">{{ form.multiple_services.help_text }}</small>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="selectAllBtn">Select All</button>
+                                </div>
+                            </div>
+
+                            <div id="allServicesContainer" class="service-type-options d-none">
+                                <div class="alert alert-info">
+                                    <i class="material-icons me-2">info</i>
+                                    This will create individual discounts for all <strong>{{ active_services_count }}</strong> active services in the system.
+                                    Each service will get its own discount with the name format: "<span id="discountNamePreview">[Discount Name]</span> - [Service Name]"
+                                </div>
+                            </div>
+
+                            <div id="selectionSummary" class="discount-preview-container d-none">
+                                <h6>Selection Summary:</h6>
+                                <p>You're creating discount(s) for <span id="selectedServicesCount">0</span> service(s).</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Discount Details Section -->
+                        <div class="discount-details-container">
+                            <h5 class="mb-3">{% if is_update %}Edit Discount Details{% else %}3. Set Discount Details{% endif %}</h5>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    {{ form.percentage|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="discountPreview" class="discount-preview d-none">
+                                        <label class="form-label">Price Preview</label>
                                         <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <h5 class="mb-1">{{ selected_service.name }}</h5>
-                                                        <p class="mb-1"><small>GHS{{ selected_service.price }} - {{ selected_service.duration }} min</small></p>
-                                                    </div>
-                                                    <a href="#" id="changeServiceBtn" class="btn btn-sm btn-outline-primary">
-                                                        <i class="material-icons me-1">swap_horiz</i>Change Service
-                                                    </a>
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Regular Price:</span>
+                                                    <span id="regularPrice">GHS0.00</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between text-danger">
+                                                    <span>Discount:</span>
+                                                    <span id="discountAmount">-GHS0.00</span>
+                                                </div>
+                                                <hr class="my-2">
+                                                <div class="d-flex justify-content-between fw-bold">
+                                                    <span>Final Price:</span>
+                                                    <span id="finalPrice">GHS0.00</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="service-select-field d-none">
-                                        {{ form.service|as_crispy_field }}
-                                    </div>
-                                    {% else %}
-                                    <div class="service-select-field">
-                                        {{ form.service|as_crispy_field }}
-                                    </div>
-                                    {% endif %}
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                {{ form.percentage|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                <div id="discountPreview" class="discount-preview d-none">
-                                    <label class="form-label">Price Preview</label>
-                                    <div class="card">
-                                        <div class="card-body p-3">
-                                            <div class="d-flex justify-content-between">
-                                                <span>Regular Price:</span>
-                                                <span id="regularPrice">GHS0.00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between text-danger">
-                                                <span>Discount:</span>
-                                                <span id="discountAmount">-GHS0.00</span>
-                                            </div>
-                                            <hr class="my-2">
-                                            <div class="d-flex justify-content-between fw-bold">
-                                                <span>Final Price:</span>
-                                                <span id="finalPrice">GHS0.00</span>
-                                            </div>
-                                        </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="datetime-field">
+                                        {{ form.start_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="datetime-field">
+                                        {{ form.end_date|as_crispy_field }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="datetime-field">
-                                    {{ form.start_date|as_crispy_field }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="datetime-field">
-                                    {{ form.end_date|as_crispy_field }}
-                                </div>
-                            </div>
-                        </div>
-                        
+
                         <div class="d-flex justify-content-between">
-                            <a href="{% if form.instance.pk %}{% url 'discount_detail' form.instance.pk %}{% else %}{% url 'discount_list' %}{% endif %}" class="btn btn-outline-secondary">
+                            <a href="{% if is_update %}{% url 'discount_detail' discount.pk %}{% else %}{% url 'discount_list' %}{% endif %}" class="btn btn-outline-secondary">
                                 <i class="material-icons me-2">close</i>Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="material-icons me-2">save</i>
-                                {% if form.instance.pk %}Save Changes{% else %}Create Discount{% endif %}
+                                {% if is_update %}Save Changes{% else %}Create Discount{% endif %}
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        
+
         <!-- Help & Information Column -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
@@ -140,6 +221,7 @@
                     <div class="alert alert-info">
                         <h6><i class="material-icons me-2">lightbulb</i>Tips for Creating Discounts</h6>
                         <ul class="mb-0">
+                            <li>Choose a clear, descriptive name for your discount</li>
                             <li>Only services with no active discount are allowed for new discounts</li>
                             <li>Only active services can be discounted</li>
                             <li>Start date must be in the future for new discounts</li>
@@ -148,24 +230,24 @@
                             <li>Only one active discount per service is allowed</li>
                         </ul>
                     </div>
-                    
+
                     <div class="mt-4">
-                        <h6>Common Discount Strategies</h6>
+                        <h6>Popular Discount Names</h6>
                         <div class="strategy-card mb-2">
                             <div class="strategy-name">Flash Sale</div>
                             <div class="strategy-desc">Short duration (1-3 days) with higher discount (20-30%)</div>
                         </div>
                         <div class="strategy-card mb-2">
-                            <div class="strategy-name">Weekly Special</div>
-                            <div class="strategy-desc">7-day promotion with moderate discount (10-15%)</div>
+                            <div class="strategy-name">Weekend Special</div>
+                            <div class="strategy-desc">Weekend promotion with moderate discount (10-15%)</div>
                         </div>
                         <div class="strategy-card mb-2">
-                            <div class="strategy-name">Monthly Promotion</div>
-                            <div class="strategy-desc">Entire month with lower discount (5-10%)</div>
+                            <div class="strategy-name">Holiday Bonus</div>
+                            <div class="strategy-desc">Holiday period with varying discount</div>
                         </div>
                         <div class="strategy-card">
-                            <div class="strategy-name">Seasonal Offer</div>
-                            <div class="strategy-desc">Holiday or seasonal period with varying discount</div>
+                            <div class="strategy-name">New Customer Deal</div>
+                            <div class="strategy-desc">Special offers for new customers</div>
                         </div>
                     </div>
                 </div>
@@ -186,43 +268,115 @@
             minDate: "today",
             time_24hr: true
         });
-        
+
         flatpickr("#id_end_date", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today",
             time_24hr: true
         });
-        
-        // Handle service selection toggle
-        const changeServiceBtn = document.getElementById('changeServiceBtn');
-        if (changeServiceBtn) {
-            changeServiceBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelector('.selected-service').classList.add('d-none');
-                document.querySelector('.service-select-field').classList.remove('d-none');
+
+        // Update discount name preview for "all services" option
+        const discountNameInput = document.getElementById('id_name');
+        const discountNamePreview = document.getElementById('discountNamePreview');
+
+        if (discountNameInput && discountNamePreview) {
+            discountNameInput.addEventListener('input', function() {
+                const name = this.value || '[Discount Name]';
+                discountNamePreview.textContent = name;
             });
         }
-        
+
+        {% if not is_update %}
+        // Service selection type handling
+        const discountTypeInputs = document.querySelectorAll('input[name="discount_type"]');
+        const singleServiceContainer = document.getElementById('singleServiceContainer');
+        const multipleServicesContainer = document.getElementById('multipleServicesContainer');
+        const allServicesContainer = document.getElementById('allServicesContainer');
+        const selectionSummary = document.getElementById('selectionSummary');
+        const selectedServicesCount = document.getElementById('selectedServicesCount');
+
+        function updateServiceContainers() {
+            const selectedType = document.querySelector('input[name="discount_type"]:checked').value;
+
+            singleServiceContainer.classList.add('d-none');
+            multipleServicesContainer.classList.add('d-none');
+            allServicesContainer.classList.add('d-none');
+
+            if (selectedType === 'single') {
+                singleServiceContainer.classList.remove('d-none');
+                updateSelectionSummary(1);
+            } else if (selectedType === 'multiple') {
+                multipleServicesContainer.classList.remove('d-none');
+                updateMultipleSelectionSummary();
+            } else if (selectedType === 'all') {
+                allServicesContainer.classList.remove('d-none');
+                updateSelectionSummary({{ active_services_count }});
+            }
+        }
+
+        function updateSelectionSummary(count) {
+            if (count > 0) {
+                selectedServicesCount.textContent = count;
+                selectionSummary.classList.remove('d-none');
+            } else {
+                selectionSummary.classList.add('d-none');
+            }
+        }
+
+        function updateMultipleSelectionSummary() {
+            const checkedCount = document.querySelectorAll('input[name="multiple_services"]:checked').length;
+            updateSelectionSummary(checkedCount);
+        }
+
+        // Add event listeners for discount type selection
+        discountTypeInputs.forEach(input => {
+            input.addEventListener('change', updateServiceContainers);
+        });
+
+        // Add event listeners for multiple service checkboxes
+        const multipleServiceCheckboxes = document.querySelectorAll('input[name="multiple_services"]');
+        multipleServiceCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateMultipleSelectionSummary);
+        });
+
+        // Select All button functionality
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        selectAllBtn.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="multiple_services"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+
+            selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
+            updateMultipleSelectionSummary();
+        });
+
+        // Initial setup
+        updateServiceContainers();
+        {% endif %}
+
         // Price Calculator
-        const serviceSelect = document.getElementById('id_service');
+        const serviceSelect = document.getElementById('id_single_service');
         const percentageInput = document.getElementById('id_percentage');
         const discountPreview = document.getElementById('discountPreview');
         const regularPrice = document.getElementById('regularPrice');
         const discountAmount = document.getElementById('discountAmount');
         const finalPrice = document.getElementById('finalPrice');
-        
+
         function updatePricePreview() {
             let price = 0;
             let serviceName = '';
-            
+
             // Get price from selected service
             if (serviceSelect && serviceSelect.selectedOptions.length > 0) {
                 const selectedOption = serviceSelect.selectedOptions[0];
                 price = parseFloat(selectedOption.getAttribute('data-price') || 0);
                 serviceName = selectedOption.innerText;
             }
-            
+
             // Or from pre-selected service hidden input
             const selectedServiceInput = document.querySelector('input[name="service"][type="hidden"]');
             if (selectedServiceInput) {
@@ -231,16 +385,16 @@
                 price = parseFloat('{{ selected_service.price }}');
                 serviceName = '{{ selected_service.name }}';
             }
-            
+
             // If we have a price and percentage, show the preview
             const percentage = parseFloat(percentageInput.value || 0);
             if (price > 0 && percentage > 0) {
                 discountPreview.classList.remove('d-none');
-                
+
                 // Calculate values
                 const discount = price * (percentage / 100);
                 const final = price - discount;
-                
+
                 // Update display
                 regularPrice.textContent = 'GHS' + price.toFixed(2);
                 discountAmount.textContent = '-GHS' + discount.toFixed(2);
@@ -249,27 +403,18 @@
                 discountPreview.classList.add('d-none');
             }
         }
-        
+
         // Attach event listeners
         if (serviceSelect) {
             serviceSelect.addEventListener('change', updatePricePreview);
         }
-        
+
         if (percentageInput) {
             percentageInput.addEventListener('input', updatePricePreview);
         }
-        
+
         // Initial calculation
         updatePricePreview();
-
-        // Add this to your document.ready function
-// Prevent auto-dismissal of info alerts
-document.querySelectorAll('.alert.alert-info').forEach(alert => {
-    // Remove any auto-dismiss functionality
-    if (alert._dismissElement) {
-        alert._dismissElement.removeEventListener('click', alert._dismissHandler);
-    }
-});
     });
 </script>
 {% endblock %}

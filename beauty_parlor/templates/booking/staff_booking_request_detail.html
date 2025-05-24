@@ -78,48 +78,54 @@
                                 <p><strong>Date:</strong> {{ booking_request.date_time|date:"l, F d, Y" }}</p>
                                 <p><strong>Time:</strong> {{ booking_request.date_time|date:"h:i A" }}</p>
                             </div>
+
+                             {% if booking_request.preferred_therapist %}
+                                <div class="col-md-12 mt-2">
+                                    <p><strong>Preferred Therapist:</strong> <span class="badge bg-success">{{ booking_request.preferred_therapist.get_full_name }}</span> </p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     
                     <!-- Additional Services -->
                     <!-- Additional services section -->
-<div class="card mb-3">
-    <div class="card-header">
-        <h5>Additional Services</h5>
-    </div>
-    <div class="card-body">
-        {% if additional_services %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Duration</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for service in additional_services %}
-                <tr>
-                    <td>{{ service.name }}</td>
-                    <td>{{ service.duration }} minutes</td>
-                    <td>GHS{{ service.price }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr class="table-secondary">
-                    <th>Total (including main service)</th>
-                    <th>{{ total_duration }} minutes</th>
-                    <th>GHS{{ total_price }}</th>
-                </tr>
-            </tfoot>
-        </table>
-        {% else %}
-        <p class="text-muted">No additional services selected</p>
-        {% endif %}
-    </div>
-</div>
-                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5>Additional Services</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if additional_services %}
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Duration</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service in additional_services %}
+                                    <tr>
+                                        <td>{{ service.name }}</td>
+                                        <td>{{ service.duration }} minutes</td>
+                                        <td>GHS{{ service.price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <th>Total (including main service)</th>
+                                        <th>{{ total_duration }} minutes</th>
+                                        <th>GHS{{ total_price }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <p class="text-muted">No additional services selected</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                                        
                     <!-- Notes -->
                     {% if booking_request.notes %}
                     <div class="request-detail-section">

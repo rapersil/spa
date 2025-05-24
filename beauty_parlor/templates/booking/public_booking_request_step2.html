@@ -1,4 +1,7 @@
 {% extends 'public_base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_filters %}
 {% load static %}
 {% load crispy_forms_tags %}
 
@@ -8,6 +11,7 @@
 <link rel="stylesheet" href="{% static 'css/booking.css' %}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
+    /* Step indicator styles */
     .step-indicator {
         display: flex;
         justify-content: space-between;
@@ -68,20 +72,218 @@
         background-color: var(--color-300);
     }
     
-    .service-card {
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-bottom: 1rem;
+    /* Updated compact therapist selection styles */
+    .therapist-selection-container {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
     }
     
-    .service-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    .therapist-card {
+        border: 1px solid var(--gray-200);
+        border-radius: 6px;
+        padding: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        flex: 0 0 calc(50% - 8px);
+        margin-bottom: 15px;
     }
     
-    .service-card.selected {
-        border: 2px solid var(--color-500);
+    @media (max-width: 768px) {
+        .therapist-card {
+            flex: 0 0 100%;
+        }
+    }
+    
+    .therapist-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .therapist-card.selected {
+        border-color: var(--color-500);
         background-color: var(--color-50);
+    }
+    
+    .therapist-card.unavailable {
+        opacity: 0.8;
+        background-color: var(--gray-100);
+    }
+    
+    .therapist-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .therapist-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--color-600);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+    
+    .therapist-info {
+        flex-grow: 1;
+    }
+    
+    .therapist-name {
+        font-weight: bold;
+        margin-bottom: 2px;
+        font-size: 1rem;
+    }
+    
+    .therapist-specialty {
+        color: var(--gray-600);
+        font-size: 0.8rem;
+    }
+    
+    .therapist-selection {
+        margin-left: 10px;
+    }
+    
+    .availability-indicator {
+        display: flex;
+        align-items: center;
+        margin-top: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .availability-indicator .material-icons {
+        margin-right: 6px;
+        font-size: 16px;
+    }
+    
+    /* Smaller timeline visualization */
+    .schedule-timeline {
+        margin-top: 10px;
+        position: relative;
+        height: 40px;
+        background-color: var(--gray-100);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .schedule-hours {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .hour-marker {
+        position: absolute;
+        height: 100%;
+        border-left: 1px solid var(--gray-300);
+        font-size: 9px;
+        color: var(--gray-600);
+    }
+    
+    .hour-marker span {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+    }
+    
+    .schedule-slot {
+        position: absolute;
+        height: 100%;
+        top: 0;
+        background-color: var(--success-light);
+        opacity: 0.8;
+        transition: all 0.2s ease;
+    }
+    
+    .schedule-slot.booked {
+        background-color: var(--danger-light);
+    }
+    
+    .schedule-slot.requested {
+        background-color: var(--color-500);
+        opacity: 1;
+        border: 2px solid var(--color-700);
+    }
+    
+    .slot-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--gray-800);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        display: none;
+        z-index: 10;
+    }
+    
+    .schedule-slot:hover .slot-tooltip {
+        display: block;
+    }
+    
+    /* Enhanced next available notice */
+    .next-available-notice {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background-color: var(--info-light);
+        border-radius: 4px;
+        border-left: 4px solid var(--info);
+        font-size: 0.9rem;
+    }
+    
+    .next-available-notice.highlighted {
+        background-color: var(--info-light);
+        border-left: 4px solid var(--info);
+        font-weight: bold;
+    }
+    
+    /* Update time button */
+    .update-time-btn {
+        margin-top: 8px;
+        width: 100%;
+    }
+    
+    .legend {
+        display: flex;
+        margin-top: 6px;
+        font-size: 0.8rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 16px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 4px;
+    }
+    
+    .legend-color.available {
+        background-color: var(--success-light);
+    }
+    
+    .legend-color.booked {
+        background-color: var(--danger-light);
+    }
+    
+    .legend-color.requested {
+        background-color: var(--color-500);
     }
 </style>
 {% endblock %}
@@ -123,10 +325,10 @@
     </div>
     
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h4 class="mb-0"><i class="material-icons me-2">spa</i>Step 2: Select Service & Time</h4>
+                    <h4 class="mb-0"><i class="material-icons me-2">spa</i>Step 2: Select Service, Time & Therapist</h4>
                 </div>
                 <div class="card-body">
                     <form method="post" id="serviceForm">
@@ -142,6 +344,55 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 {{ form.time|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden field for storing selected therapist ID -->
+                        <input type="hidden" name="preferred_therapist" id="selected_therapist_id" value="">
+                        
+                        <!-- Service Duration Info -->
+                        <div id="service-duration-info" class="alert alert-light border mb-4" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons me-2">schedule</i>
+                                <div>
+                                    <strong>Service Duration:</strong> <span id="duration-text">0</span> minutes
+                                    <div class="small text-muted">The therapist will be occupied for this duration.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Therapist Selection Section -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Your Preferred Therapist (Optional)</label>
+                            <div id="therapist-loading" class="text-center py-4" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading available therapists...</p>
+                            </div>
+                            
+                            <div id="therapist-selection-container" class="therapist-selection-container" style="display: none;">
+                                <!-- Therapist cards will be inserted here by JavaScript -->
+                            </div>
+                            
+                            <div id="no-therapists-message" class="alert alert-info" style="display: none;">
+                                <i class="material-icons me-2">info</i>
+                                No therapists are available for the selected service and time. Please try a different time or service.
+                            </div>
+                            
+                            <div id="schedule-legend" class="legend mt-3" style="display: none;">
+                                <div class="legend-item">
+                                    <div class="legend-color available"></div>
+                                    <span>Available</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color booked"></div>
+                                    <span>Booked</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color requested"></div>
+                                    <span>Your Requested Time</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -176,7 +427,6 @@
             disable: [
                 function(date) {
                     // Disable weekends or specific days if needed
-                    // return date.getDay() === 0 || date.getDay() === 6;
                     return false;
                 }
             ]
@@ -191,6 +441,318 @@
             maxTime: "17:00",
             time_24hr: true
         });
+        
+        // Get form elements
+        const serviceSelect = document.getElementById('id_service');
+        const dateInput = document.getElementById('id_date');
+        const timeInput = document.getElementById('id_time');
+        const selectedTherapistInput = document.getElementById('selected_therapist_id');
+        const therapistSelectionContainer = document.getElementById('therapist-selection-container');
+        const therapistLoading = document.getElementById('therapist-loading');
+        const noTherapistsMessage = document.getElementById('no-therapists-message');
+        const serviceDurationInfo = document.getElementById('service-duration-info');
+        const durationText = document.getElementById('duration-text');
+        const scheduleLegend = document.getElementById('schedule-legend');
+        
+        // Service duration in minutes
+        let serviceDuration = 0;
+        
+        // Function to update available therapists
+        function updateAvailableTherapists() {
+            const serviceId = serviceSelect.value;
+            if (!serviceId || !dateInput.value || !timeInput.value) {
+                therapistSelectionContainer.style.display = 'none';
+                therapistLoading.style.display = 'none';
+                noTherapistsMessage.style.display = 'none';
+                serviceDurationInfo.style.display = 'none';
+                scheduleLegend.style.display = 'none';
+                return;
+            }
+            
+            const dateTime = `${dateInput.value}T${timeInput.value}`;
+            
+            // Show loading indicator
+            therapistSelectionContainer.style.display = 'none';
+            therapistLoading.style.display = 'block';
+            noTherapistsMessage.style.display = 'none';
+            serviceDurationInfo.style.display = 'none';
+            scheduleLegend.style.display = 'none';
+            
+            // Make the API request
+            fetch(`/api/therapists-for-service/?service_id=${serviceId}&date_time=${encodeURIComponent(dateTime)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    therapistLoading.style.display = 'none';
+                    
+                    // Update service duration info
+                    serviceDuration = data.service_duration || 0;
+                    durationText.textContent = serviceDuration;
+                    serviceDurationInfo.style.display = 'block';
+                    
+                    if (data.therapists && data.therapists.length > 0) {
+                        // Clear existing therapist cards
+                        therapistSelectionContainer.innerHTML = '';
+                        
+                        // Generate therapist cards
+                        data.therapists.forEach(therapist => {
+                            const isAvailable = therapist.available;
+                            
+                            // Create the therapist card
+                            const card = document.createElement('div');
+                            card.className = `therapist-card ${isAvailable ? '' : 'unavailable'}`;
+                            card.dataset.therapistId = therapist.id;
+                            
+                            // Create the header section
+                            const header = document.createElement('div');
+                            header.className = 'therapist-header';
+                            header.innerHTML = `
+                                <div class="therapist-avatar">${therapist.name.charAt(0)}</div>
+                                <div class="therapist-info">
+                                    <h5 class="therapist-name">${therapist.name}</h5>
+                                    <p class="therapist-specialty">${therapist.primary_service || 'Beauty Therapist'}</p>
+                                </div>
+                                <div class="therapist-selection">
+                                    <div class="form-check">
+                                        <input class="form-check-input therapist-checkbox" type="checkbox" 
+                                            id="therapist-${therapist.id}" ${isAvailable ? '' : 'disabled'}>
+                                        <label class="form-check-label" for="therapist-${therapist.id}">
+                                            Select
+                                        </label>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Create availability indicator
+                            const availabilityIndicator = document.createElement('div');
+                            availabilityIndicator.className = 'availability-indicator';
+                            if (isAvailable) {
+                                availabilityIndicator.innerHTML = `
+                                    <i class="material-icons text-success">check_circle</i>
+                                    <span class="text-success">Available at your requested time</span>
+                                `;
+                            } else {
+                                availabilityIndicator.innerHTML = `
+                                    <i class="material-icons text-danger">schedule</i>
+                                    <span class="text-danger">Unavailable at your requested time</span>
+                                `;
+                            }
+                            
+                            // Create the timeline section
+                            const scheduleTimeline = document.createElement('div');
+                            scheduleTimeline.className = 'schedule-timeline';
+                            
+                            const scheduleHours = document.createElement('div');
+                            scheduleHours.className = 'schedule-hours';
+                            
+                            // Add hour markers (for the 8-hour work day from 9am to 5pm)
+                            for (let hour = 9; hour <= 17; hour++) {
+                                const displayHour = hour > 12 ? hour - 12 : hour;
+                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                
+                                const marker = document.createElement('div');
+                                marker.className = 'hour-marker';
+                                marker.style.left = `${((hour - 9) / 8) * 100}%`;
+                                marker.innerHTML = `<span>${displayHour}${ampm}</span>`;
+                                
+                                scheduleHours.appendChild(marker);
+                            }
+                            
+                            // Get the requested time
+                            const [reqHours, reqMinutes] = timeInput.value.split(':').map(Number);
+                            
+                            // Add schedule slots (booked times)
+                            if (therapist.conflicts && therapist.conflicts.length > 0) {
+                                therapist.conflicts.forEach(conflict => {
+                                    const startDate = new Date(conflict.start);
+                                    const endDate = new Date(conflict.end);
+                                    
+                                    // Calculate position and width as percentage of the 8-hour day
+                                    const startHour = startDate.getHours() + (startDate.getMinutes() / 60);
+                                    const endHour = endDate.getHours() + (endDate.getMinutes() / 60);
+                                    
+                                    const left = Math.max(0, ((startHour - 9) / 8) * 100);
+                                    const right = Math.min(100, ((endHour - 9) / 8) * 100);
+                                    const width = right - left;
+                                    
+                                    if (width > 0) {
+                                        const slot = document.createElement('div');
+                                        slot.className = 'schedule-slot booked';
+                                        slot.style.left = `${left}%`;
+                                        slot.style.width = `${width}%`;
+                                        
+                                        const tooltip = document.createElement('div');
+                                        tooltip.className = 'slot-tooltip';
+                                        tooltip.textContent = `${formatTime(startDate)} - ${formatTime(endDate)}: ${conflict.service}`;
+                                        
+                                        slot.appendChild(tooltip);
+                                        scheduleTimeline.appendChild(slot);
+                                    }
+                                });
+                            }
+                            
+                            // Add the requested time slot
+                            const requestedStartHour = reqHours + (reqMinutes / 60);
+                            const requestedEndHour = requestedStartHour + (serviceDuration / 60);
+                            
+                            const requestedLeft = ((requestedStartHour - 9) / 8) * 100;
+                            const requestedWidth = ((serviceDuration / 60) / 8) * 100;
+                            
+                            const requestedSlot = document.createElement('div');
+                            requestedSlot.className = 'schedule-slot requested';
+                            requestedSlot.style.left = `${requestedLeft}%`;
+                            requestedSlot.style.width = `${requestedWidth}%`;
+                            
+                            const requestedTooltip = document.createElement('div');
+                            requestedTooltip.className = 'slot-tooltip';
+                            requestedTooltip.textContent = `Your request: ${timeInput.value} (${serviceDuration} min)`;
+                            
+                            requestedSlot.appendChild(requestedTooltip);
+                            scheduleTimeline.appendChild(requestedSlot);
+                            
+                            // Add hour labels to the timeline
+                            scheduleTimeline.appendChild(scheduleHours);
+                            
+                            // Append everything to the card
+                            card.appendChild(header);
+                            card.appendChild(availabilityIndicator);
+                            
+                            // Add next available notice if not available
+                            if (!isAvailable && therapist.next_available) {
+                                const nextAvailableNotice = document.createElement('div');
+                                nextAvailableNotice.className = 'next-available-notice';
+                                nextAvailableNotice.innerHTML = `
+                                    <i class="material-icons me-1">event_available</i>
+                                    <span>Next available time: <strong>${therapist.next_available}</strong> on the selected date</span>
+                                `;
+                                
+                                 // Add update time button
+                                const updateBtn = document.createElement('button');
+                                updateBtn.type = 'button';
+                                updateBtn.className = 'btn btn-sm btn-primary update-time-btn mt-2';
+                                updateBtn.innerHTML = '<i class="material-icons me-1">update</i>Use This Time Instead';
+
+                                updateBtn.addEventListener('click', function() {
+                                    // Update the time input with the next available time properly
+                                    const timeInstance = timeInput._flatpickr;
+                                    const [hours, minutes] = therapist.next_available.split(':').map(Number);
+                                    
+                                    // Create a date object with the correct time
+                                    const newTime = new Date();
+                                    newTime.setHours(hours);
+                                    newTime.setMinutes(minutes);
+                                    
+                                    // Set the time in the Flatpickr instance
+                                    timeInstance.setDate(newTime);
+                                    
+                                    // Re-fetch therapists for this new time
+                                    setTimeout(() => {
+                                        updateAvailableTherapists();
+                                    }, 300);
+                                });
+
+                                nextAvailableNotice.appendChild(updateBtn);
+                                card.appendChild(nextAvailableNotice);
+                            }
+                            
+                            card.appendChild(scheduleTimeline);
+                            
+                            // Add the card to the container
+                            therapistSelectionContainer.appendChild(card);
+                            
+                            // Add click event to the card
+                            card.addEventListener('click', function(e) {
+                                // Don't handle clicks on unavailable therapists or if clicking on the checkbox directly
+                                if (!isAvailable || e.target.classList.contains('therapist-checkbox') || 
+                                    e.target.classList.contains('form-check-input') || 
+                                    e.target.classList.contains('form-check-label') ||
+                                    e.target.classList.contains('update-time-btn')) {
+                                    return;
+                                }
+                                
+                                // Toggle selection
+                                const checkbox = this.querySelector('.therapist-checkbox');
+                                checkbox.checked = !checkbox.checked;
+                                
+                                // Handle selection
+                                handleTherapistSelection(this, therapist.id);
+                            });
+                            
+                            // Add change event to the checkbox
+                            const checkbox = card.querySelector('.therapist-checkbox');
+                            checkbox.addEventListener('change', function() {
+                                if (isAvailable) {
+                                    handleTherapistSelection(card, therapist.id);
+                                }
+                            });
+                        });
+                        
+                        // Show the therapist cards and legend
+                        therapistSelectionContainer.style.display = 'flex';
+                        noTherapistsMessage.style.display = 'none';
+                        scheduleLegend.style.display = 'flex';
+                    } else {
+                        // No therapists available
+                        therapistSelectionContainer.style.display = 'none';
+                        noTherapistsMessage.style.display = 'block';
+                        scheduleLegend.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching therapists:', error);
+                    therapistLoading.style.display = 'none';
+                    therapistSelectionContainer.style.display = 'none';
+                    noTherapistsMessage.style.display = 'block';
+                    scheduleLegend.style.display = 'none';
+                    noTherapistsMessage.innerHTML = `
+                        <i class="material-icons me-2">error</i>
+                        Error fetching therapists. Please try again.
+                    `;
+                });
+        }
+        
+        // Helper function to format time
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        }
+        
+        // Function to handle therapist selection
+        function handleTherapistSelection(card, therapistId) {
+            // Check if this card is already selected
+            const checkbox = card.querySelector('.therapist-checkbox');
+            const isSelected = checkbox.checked;
+            
+            // Clear all previous selections
+            document.querySelectorAll('.therapist-card').forEach(c => {
+                c.classList.remove('selected');
+                const cb = c.querySelector('.therapist-checkbox');
+                if (cb !== checkbox) {
+                    cb.checked = false;
+                }
+            });
+            
+            // Update the selection
+            if (isSelected) {
+                card.classList.add('selected');
+                selectedTherapistInput.value = therapistId;
+            } else {
+                selectedTherapistInput.value = '';
+            }
+        }
+        
+        // Add event listeners to update therapists when service/date/time changes
+        serviceSelect.addEventListener('change', updateAvailableTherapists);
+        dateInput.addEventListener('change', updateAvailableTherapists);
+        timeInput.addEventListener('change', updateAvailableTherapists);
+        
+        // Initialize therapist display if service and time are already selected
+        if (serviceSelect.value && dateInput.value && timeInput.value) {
+            updateAvailableTherapists();
+        }
     });
 </script>
 {% endblock %}

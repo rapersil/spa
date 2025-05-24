@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
-{% block title %}Discount Details - {{ discount.discount_id }}{% endblock %}
+{% block title %}{{ discount.name }} - {{ discount.discount_id }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/discount.css' %}">
-
 {% endblock %}
 
 {% block content %}
@@ -15,7 +14,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{% url 'discount_list' %}">Discounts</a></li>
-            <li class="breadcrumb-item active">{{ discount.discount_id }}</li>
+            <li class="breadcrumb-item active">{{ discount.name }}</li>
         </ol>
     </nav>
 
@@ -27,7 +26,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <i class="material-icons me-2">check_circle</i>
-                        <strong>Active Discount:</strong> This discount is currently active and will expire on {{ discount.end_date|date:"F d, Y" }}.
+                        <strong>Active Discount:</strong> "{{ discount.name }}" is currently active and will expire on {{ discount.end_date|date:"F d, Y" }}.
                     </div>
                     <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-success">
                         <i class="material-icons me-2">edit</i>Edit Discount
@@ -39,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <i class="material-icons me-2">info</i>
-                        <strong>Upcoming Discount:</strong> This discount will become active on {{ discount.start_date|date:"F d, Y" }}.
+                        <strong>Upcoming Discount:</strong> "{{ discount.name }}" will become active on {{ discount.start_date|date:"F d, Y" }}.
                     </div>
                     <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-info">
                         <i class="material-icons me-2">edit</i>Edit Discount
@@ -51,7 +50,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <i class="material-icons me-2">schedule</i>
-                        <strong>Expired Discount:</strong> This discount expired on {{ discount.end_date|date:"F d, Y" }}.
+                        <strong>Expired Discount:</strong> "{{ discount.name }}" expired on {{ discount.end_date|date:"F d, Y" }}.
                     </div>
                     <div>
                         <a href="{% url 'discount_update' discount.pk %}" class="btn btn-sm btn-outline-secondary me-2">
@@ -77,13 +76,19 @@
                 <div class="card-body">
                     <table class="table table-sm discount-details-table">
                         <tr>
+                            <th>Discount Name:</th>
+                            <td>
+                                <span class="badge bg-primary fs-6">{{ discount.name }}</span>
+                            </td>
+                        </tr>
+                        <tr>
                             <th>Discount ID:</th>
                             <td>{{ discount.discount_id }}</td>
                         </tr>
                         <tr>
                             <th>Percentage:</th>
                             <td>
-                                <span class="badge bg-primary">{{ discount.percentage }}% OFF</span>
+                                <span class="badge bg-success">{{ discount.percentage }}% OFF</span>
                             </td>
                         </tr>
                         <tr>
@@ -98,7 +103,6 @@
                             <th>Duration:</th>
                             <td>{{ discount.end_date|timeuntil:discount.start_date }}</td>
                         </tr>
-                        <!-- discount_detail.html - Update the status display section -->
                         <tr>
                             <th>Status:</th>
                             <td>
@@ -152,7 +156,7 @@
                         </div>
                         
                         <div class="discount-calculation mt-4">
-                            <h6 class="mb-3">Price Calculation</h6>
+                            <h6 class="mb-3">Price Calculation with "{{ discount.name }}"</h6>
                             <div class="calculation-item">
                                 <div class="d-flex justify-content-between">
                                     <span>Regular Price:</span>
@@ -161,11 +165,10 @@
                             </div>
                             <div class="calculation-item">
                                 <div class="d-flex justify-content-between">
-                                    <span>Discount ({{ discount.percentage }}%):</span>
+                                    <span>{{ discount.name }} ({{ discount.percentage }}%):</span>
                                     <span class="text-danger">-GHS{{ discount.service.price|multiply:discount.percentage|divide:100|floatformat:2 }}</span>
                                 </div>
                             </div>
-                            <!-- discount_detail.html - Update the price calculation section -->
                             <div class="calculation-item result">
                                 <div class="d-flex justify-content-between">
                                     <span>Final Price:</span>
@@ -187,7 +190,7 @@
                 </div>
                 <div class="card-footer">
                     <a href="{% url 'booking_create' %}?service_id={{ discount.service.id }}" class="btn btn-primary w-100">
-                        <i class="material-icons me-2">add_event</i>Create Booking with this Service
+                        <i class="material-icons me-2">add_event</i>Create Booking with "{{ discount.name }}"
                     </a>
                 </div>
             </div>

@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Discount - {{ discount.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/discount.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .discount-update-container {
+        background-color: var(--color-50);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-200);
+        margin-bottom: 2rem;
+    }
+    
+    .service-info-card {
+        background: linear-gradient(135deg, var(--color-100), var(--color-200));
+        border: 1px solid var(--color-300);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .usage-stats {
+        background-color: var(--gray-50);
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: var(--color-700);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'discount_list' %}">Discounts</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'discount_detail' discount.pk %}">{{ discount.name }}</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Update Form -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="material-icons me-2">edit</i>Edit Discount
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Service Information Card -->
+                    <div class="service-info-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="material-icons me-2" style="color: var(--color-700);">spa</i>
+                            <h5 class="mb-0">Service: {{ service.name }}</h5>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Regular Price</small>
+                                <div class="fw-bold">GHS{{ service.price }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Duration</small>
+                                <div class="fw-bold">{{ service.duration }} minutes</div>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Current Status</small>
+                                <div class="fw-bold">
+                                    {% if discount.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elif discount.is_upcoming %}
+                                        <span class="badge bg-info">Upcoming</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Expired</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update Form -->
+                    <div class="discount-update-container">
+                        <h5 class="mb-3">
+                            <i class="material-icons me-2">settings</i>
+                            Update Discount Details
+                        </h5>
+                        
+                        <form method="post" class="discount-form needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    {{ form.name|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.percentage|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="discountPreview" class="discount-preview">
+                                        <label class="form-label">Price Preview</label>
+                                        <div class="card">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Regular Price:</span>
+                                                    <span id="regularPrice">GHS{{ service.price }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between text-danger">
+                                                    <span>Discount:</span>
+                                                    <span id="discountAmount">-GHS0.00</span>
+                                                </div>
+                                                <hr class="my-2">
+                                                <div class="d-flex justify-content-between fw-bold">
+                                                    <span>Final Price:</span>
+                                                    <span id="finalPrice">GHS{{ service.price }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    {{ form.start_date|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.end_date|as_crispy_field }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'discount_detail' discount.pk %}" class="btn btn-outline-secondary">
+                                    <i class="material-icons me-2">close</i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="material-icons me-2">save</i>Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Information & Statistics Column -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">analytics</i>Discount Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="usage-stats">
+                        <div class="stat-item">
+                            <span>Times Applied:</span>
+                            <span class="stat-value">{{ usage_count }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Total Savings:</span>
+                            <span class="stat-value">GHS{{ total_savings|floatformat:2 }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Created:</span>
+                            <span class="stat-value">{{ discount.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Duration:</span>
+                            <span class="stat-value">
+                                {% with days=discount.end_date|timeuntil:discount.start_date %}
+                                    {{ days }}
+                                {% endwith %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="material-icons me-2">info</i>Update Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="material-icons me-2">lightbulb</i>Important Notes</h6>
+                        <ul class="mb-0">
+                            <li>You can modify past start dates for existing discounts</li>
+                            <li>End date must be after the start date</li>
+                            <li>Discount percentage must be between 1-100%</li>
+                            <li>Changes will not affect completed bookings</li>
+                            <li>The service assignment cannot be changed</li>
+                            <li>Ensure dates don't overlap with other discounts</li>
+                        </ul>
+                    </div>
+                    
+                    {% if usage_count > 0 %}
+                    <div class="alert alert-warning mt-3">
+                        <h6><i class="material-icons me-2">warning</i>Usage Notice</h6>
+                        <p class="mb-0">This discount has been applied to {{ usage_count }} booking{{ usage_count|pluralize }}. Changes will only affect future bookings.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/flatpickr.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime pickers
+        flatpickr("#id_start_date", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true
+        });
+        
+        flatpickr("#id_end_date", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true
+        });
+        
+        // Price Calculator
+        const percentageInput = document.getElementById('id_percentage');
+        const discountAmount = document.getElementById('discountAmount');
+        const finalPrice = document.getElementById('finalPrice');
+        const regularPriceValue = {{ service.price }};
+        
+        function updatePricePreview() {
+            const percentage = parseFloat(percentageInput.value || 0);
+            
+            if (percentage > 0) {
+                const discount = regularPriceValue * (percentage / 100);
+                const final = regularPriceValue - discount;
+                
+                discountAmount.textContent = '-GHS' + discount.toFixed(2);
+                finalPrice.textContent = 'GHS' + final.toFixed(2);
+            } else {
+                discountAmount.textContent = '-GHS0.00';
+                finalPrice.textContent = 'GHS' + regularPriceValue.toFixed(2);
+            }
+        }
+        
+        // Attach event listener
+        if (percentageInput) {
+            percentageInput.addEventListener('input', updatePricePreview);
+            // Initial calculation
+            updatePricePreview();
+        }
+    });
+</script>
+{% endblock %}

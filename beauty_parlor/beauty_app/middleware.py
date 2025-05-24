@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from datetime import datetime, timedelta
+
+
 class UnauthorizedMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -9,8 +11,6 @@ class UnauthorizedMiddleware:
         if response.status_code == 401:
             return render(request, '401.html', status=401)
         return response
-    
-
 
 
 class SessionTimeoutMiddleware:
@@ -20,11 +20,10 @@ class SessionTimeoutMiddleware:
     def __call__(self, request):
         if request.user.is_authenticated:
             # Update the session expiry time
-            request.session.set_expiry(600)  # 10 minutes
-            
+            request.session.set_expiry(1200)
+
         response = self.get_response(request)
         return response
-    
 
 
 # Add to beauty_app/middleware.py
@@ -33,6 +32,7 @@ import threading
 
 _thread_local = threading.local()
 
+
 class AuditMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -40,13 +40,13 @@ class AuditMiddleware:
     def __call__(self, request):
         # Store request in thread local
         _thread_local.request = request
-        
+
         response = self.get_response(request)
-        
+
         # Clear thread local to prevent memory leaks
         if hasattr(_thread_local, 'request'):
             del _thread_local.request
-        
+
         return response
 
 

@@ -1,0 +1,530 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Therapists - {{ settings.BEAUTY_PARLOR_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/therapist.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2><span class="material-icons me-2">groups</span>Our Therapists</h2>
+            <p class="text-muted">Meet our professional beauty therapists</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'booking_calendar_therapist' %}" class="btn btn-outline-primary ms-2">
+                <span class="material-icons me-2">calendar_view_week</span>Therapist Calendar
+            </a>
+            <a href="{% url 'booking_create' %}" class="btn btn-primary">
+                <span class="material-icons me-2">add</span>New Booking
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="summary-stats">
+        <div class="summary-card">
+            <div class="summary-icon">
+                <span class="material-icons">groups</span>
+            </div>
+            <div class="summary-value">{{ total_therapists }}</div>
+            <div class="summary-label">Total Therapists</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">
+                <span class="material-icons">event_available</span>
+            </div>
+            <div class="summary-value">{{ active_therapists }}</div>
+            <div class="summary-label">Active Today</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">
+                <span class="material-icons">trending_up</span>
+            </div>
+            <div class="summary-value" id="available-count">{{ available_therapists|default:0 }}</div>
+            <div class="summary-label">Available Now</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">
+                <span class="material-icons">schedule</span>
+            </div>
+            <div class="summary-value" id="busy-count">{{ busy_therapists|default:0 }}</div>
+            <div class="summary-label">Currently Busy</div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="therapist-header-section">
+        <!-- Search Bar -->
+        <div class="therapist-search-bar">
+            <div class="search-input-group">
+                <input type="text" id="therapistSearch" class="search-input" placeholder="Search therapists by name or specialty...">
+                <button class="search-button" id="searchButton">
+                    <span class="material-icons">search</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-filter="all">
+                <span class="material-icons me-1">groups</span>All Therapists
+            </div>
+            <div class="filter-tab" data-filter="available">
+                <span class="material-icons me-1">check_circle</span>Available
+            </div>
+            <div class="filter-tab" data-filter="busy">
+                <span class="material-icons me-1">schedule</span>Busy
+            </div>
+            {% for service in services %}
+            <div class="filter-tab" data-filter="service-{{ service.id }}">
+                <span class="material-icons me-1">spa</span>{{ service.name }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Therapists Grid -->
+    <div class="therapists-container">
+        <div class="therapists-grid" id="therapistsGrid">
+            {% for therapist in therapists %}
+            <div class="therapist-item" 
+                 data-therapist-id="{{ therapist.id }}"
+                 data-name="{{ therapist.get_full_name|lower }}"
+                 data-specialty="{% if therapist.primary_service %}{{ therapist.primary_service.name|lower }}{% else %}beauty therapist{% endif %}"
+                 data-service-id="{% if therapist.primary_service %}{{ therapist.primary_service.id }}{% endif %}"
+                 data-status="{% if therapist.is_currently_busy %}busy{% else %}available{% endif %}"
+                 onclick="showTherapistDetails({{ therapist.id }})">
+                
+                <!-- Profile Picture or Initials -->
+                {% if therapist.profile_picture %}
+                <img src="{{ therapist.profile_picture.url }}" 
+                     alt="{{ therapist.get_full_name }}" 
+                     class="therapist-avatar-large">
+                {% else %}
+                <div class="therapist-initials-large">
+                    {{ therapist.first_name|first|upper }}{{ therapist.last_name|first|upper }}
+                </div>
+                {% endif %}
+                
+                <!-- Therapist Info -->
+                <div class="therapist-name">
+                    {{ therapist.get_full_name }}
+                    <span class="material-icons schedule-icon">schedule</span>
+                    <span class="material-icons expand-icon">keyboard_arrow_down</span>
+                </div>
+                
+                <div class="therapist-specialty">
+                    {% if therapist.primary_service %}
+                    {{ therapist.primary_service.name }} Specialist
+                    {% else %}
+                    Beauty Therapist
+                    {% endif %}
+                </div>
+                
+                <!-- Status Indicator -->
+                <div class="therapist-status">
+                    {% if therapist.is_currently_busy %}
+                    <span class="status-indicator busy"></span>
+                    <span class="status-text">Busy</span>
+                    {% if therapist.current_booking %}
+                    <div class="status-details">
+                        <small>{{ therapist.current_booking.service.name }}</small>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <span class="status-indicator"></span>
+                    <span class="status-text">Available</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="therapist-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ therapist.total_bookings|default:0 }}</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ therapist.upcoming_bookings|default:0 }}</span>
+                        <span class="stat-label">Upcoming</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-results">
+                    <span class="material-icons no-results-icon">groups</span>
+                    <h4>No therapists found</h4>
+                    <p>There are no active therapists in the system.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- No Search Results -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <span class="material-icons no-results-icon">search_off</span>
+            <h4>No therapists found</h4>
+            <p>Try adjusting your search criteria or filters.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Therapist Details Modal -->
+<div class="modal fade" id="therapistModal" tabindex="-1" aria-labelledby="therapistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <div id="modalAvatar" class="me-3">
+                        <!-- Avatar will be inserted here -->
+                    </div>
+                    <div>
+                        <h5 class="modal-title" id="therapistModalLabel">Therapist Details</h5>
+                        <p class="mb-0 text-white" id="modalSpecialty"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let therapistModal = null;
+let allTherapists = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    therapistModal = new bootstrap.Modal(document.getElementById('therapistModal'));
+    
+    // Store all therapist items for filtering
+    allTherapists = Array.from(document.querySelectorAll('.therapist-item'));
+    
+    // Initialize search functionality
+    initializeSearch();
+    
+    // Initialize filter functionality
+    initializeFilters();
+    
+    // Update counts
+    updateCounts();
+});
+
+function initializeSearch() {
+    const searchInput = document.getElementById('therapistSearch');
+    const searchButton = document.getElementById('searchButton');
+    
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
+        filterTherapists(activeFilter, query);
+    }
+    
+    // Search on input change (debounced)
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300);
+    });
+    
+    // Search on button click
+    searchButton.addEventListener('click', performSearch);
+    
+    // Search on Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
+    });
+}
+
+function initializeFilters() {
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            filterTabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter therapists
+            const filter = this.dataset.filter;
+            const searchQuery = document.getElementById('therapistSearch').value.toLowerCase().trim();
+            filterTherapists(filter, searchQuery);
+        });
+    });
+}
+
+function filterTherapists(filter, searchQuery = '') {
+    const therapistsGrid = document.getElementById('therapistsGrid');
+    const noResults = document.getElementById('noResults');
+    let visibleCount = 0;
+    
+    allTherapists.forEach(therapist => {
+        let shouldShow = true;
+        
+        // Apply filter
+        if (filter === 'available') {
+            shouldShow = therapist.dataset.status === 'available';
+        } else if (filter === 'busy') {
+            shouldShow = therapist.dataset.status === 'busy';
+        } else if (filter.startsWith('service-')) {
+            const serviceId = filter.replace('service-', '');
+            shouldShow = therapist.dataset.serviceId === serviceId;
+        }
+        // 'all' filter shows everything
+        
+        // Apply search query
+        if (shouldShow && searchQuery) {
+            const name = therapist.dataset.name;
+            const specialty = therapist.dataset.specialty;
+            shouldShow = name.includes(searchQuery) || specialty.includes(searchQuery);
+        }
+        
+        // Show/hide therapist
+        if (shouldShow) {
+            therapist.style.display = 'block';
+            visibleCount++;
+        } else {
+            therapist.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    if (visibleCount === 0) {
+        noResults.style.display = 'block';
+        therapistsGrid.style.display = 'none';
+    } else {
+        noResults.style.display = 'none';
+        therapistsGrid.style.display = 'grid';
+    }
+    
+    // Update counts
+    updateCounts();
+}
+
+function updateCounts() {
+    const availableTherapists = allTherapists.filter(t => 
+        t.dataset.status === 'available' && t.style.display !== 'none'
+    );
+    const busyTherapists = allTherapists.filter(t => 
+        t.dataset.status === 'busy' && t.style.display !== 'none'
+    );
+    
+    const availableCountElement = document.getElementById('available-count');
+    const busyCountElement = document.getElementById('busy-count');
+    
+    if (availableCountElement) {
+        availableCountElement.textContent = availableTherapists.length;
+    }
+    if (busyCountElement) {
+        busyCountElement.textContent = busyTherapists.length;
+    }
+}
+
+function showTherapistDetails(therapistId) {
+    // Show loading state
+    document.getElementById('modalContent').innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted">Loading therapist details...</p>
+        </div>
+    `;
+    
+    therapistModal.show();
+    
+    // Fetch therapist details
+    fetch(`/api/therapist/${therapistId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayTherapistDetails(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('modalContent').innerHTML = `
+                <div class="alert alert-danger d-flex align-items-center">
+                    <span class="material-icons me-2">error</span>
+                    <div>
+                        <strong>Error loading therapist details.</strong>
+                        <p class="mb-0">Please try again or contact support if the problem persists.</p>
+                    </div>
+                </div>
+            `;
+        });
+}
+
+function displayTherapistDetails(data) {
+    const therapist = data.therapist;
+    const stats = data.statistics;
+    
+    // Update modal header
+    document.getElementById('therapistModalLabel').textContent = therapist.name;
+    document.getElementById('modalSpecialty').textContent = therapist.primary_service || 'Beauty Therapist';
+    
+    // Update avatar
+    const modalAvatar = document.getElementById('modalAvatar');
+    if (therapist.profile_picture) {
+        modalAvatar.innerHTML = `<img src="${therapist.profile_picture}" alt="${therapist.name}" class="therapist-modal-avatar">`;
+    } else {
+        const initials = therapist.name.split(' ').map(n => n[0]).join('');
+        modalAvatar.innerHTML = `<div class="therapist-modal-initials">${initials}</div>`;
+    }
+    
+    // Build modal content
+    const content = `
+        <!-- Personal Information -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">person</span>
+                Personal Information
+            </h6>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">${therapist.name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Username</div>
+                    <div class="info-value">${therapist.username}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">${therapist.email}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value">${therapist.phone || 'Not provided'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Specialization</div>
+                    <div class="info-value">${therapist.primary_service || 'Beauty Therapist'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Joined Date</div>
+                    <div class="info-value">${new Date(therapist.date_joined).toLocaleDateString()}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">analytics</span>
+                Performance Statistics
+            </h6>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Bookings</div>
+                    <div class="info-value">${stats.total_bookings || 0}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Completed</div>
+                    <div class="info-value">${stats.completed_bookings || 0}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Upcoming</div>
+                    <div class="info-value">${stats.upcoming_bookings || 0}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Completion Rate</div>
+                    <div class="info-value">${stats.completion_rate || 0}%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Revenue</div>
+                    <div class="info-value">GHS${(stats.total_revenue || 0).toFixed(2)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Average Rating</div>
+                    <div class="info-value">${stats.average_rating || 'N/A'}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">history</span>
+                Recent Bookings
+            </h6>
+            <div class="booking-list">
+                ${data.recent_bookings && data.recent_bookings.length > 0 ? 
+                    data.recent_bookings.map(booking => `
+                        <div class="booking-item">
+                            <div class="booking-details">
+                                <div class="booking-id">#${booking.booking_id}</div>
+                                <div class="booking-customer">${booking.customer_name}</div>
+                                <div class="booking-service">${booking.service_name} • ${new Date(booking.date_time).toLocaleDateString()}</div>
+                            </div>
+                            <div class="booking-status">
+                                <span class="badge bg-${getStatusColor(booking.status_class)}">${booking.status}</span>
+                            </div>
+                        </div>
+                    `).join('') :
+                    '<div class="text-center text-muted py-4"><span class="material-icons mb-2" style="font-size: 3rem;">event_busy</span><p>No recent bookings found.</p></div>'
+                }
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="info-section">
+            <h6 class="section-title">
+                <span class="material-icons">settings</span>
+                Quick Actions
+            </h6>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/booking/create/?therapist=${therapist.id}" class="btn btn-primary">
+                    <span class="material-icons me-1">add</span>Book Appointment
+                </a>
+                <a href="/therapist/${therapist.id}/schedule/" class="btn btn-outline-primary">
+                    <span class="material-icons me-1">schedule</span>View Schedule
+                </a>
+                <a href="/staff/edit/${therapist.id}/" class="btn btn-outline-secondary">
+                    <span class="material-icons me-1">edit</span>Edit Profile
+                </a>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('modalContent').innerHTML = content;
+}
+
+function getStatusColor(status) {
+    switch(status) {
+        case 'pending': return 'warning';
+        case 'confirmed': return 'info';
+        case 'completed': return 'success';
+        case 'cancelled': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+// Auto-refresh therapist status every 30 seconds
+setInterval(function() {
+    // Only refresh if the modal is not open
+    if (!document.getElementById('therapistModal').classList.contains('show')) {
+        updateCounts();
+    }
+}, 30000);
+</script>
+{% endblock %}
