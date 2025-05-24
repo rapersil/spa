@@ -203,7 +203,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         total_bookings = Booking.objects.filter(query).count()
 
         if total_bookings == 0:
-            return 100  # Default to 100% if no bookings
+            return 0  # Fixed: Return 0% when no bookings exist
 
         # Apply the same current_only logic to completed bookings query
         completed_query = Q(date_time__date__gte=start_date, status='COMPLETED')
@@ -224,7 +224,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         total_bookings = Booking.objects.filter(query).count()
 
         if total_bookings == 0:
-            return 0  # Default to 0% if no bookings
+            return 0  # Correct: Return 0% when no bookings
 
         cancelled_query = Q(date_time__date__gte=start_date, status='CANCELLED')
         if current_only:
@@ -244,7 +244,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         total_bookings = Booking.objects.filter(query).count()
 
         if total_bookings == 0:
-            return 0
+            return 0  # Correct: Return 0% when no bookings
 
         pending_query = Q(date_time__date__gte=start_date, status='PENDING')
         if current_only:
@@ -264,7 +264,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         total_bookings = Booking.objects.filter(query).count()
 
         if total_bookings == 0:
-            return 0
+            return 0  # Correct: Return 0% when no bookings
 
         confirmed_query = Q(date_time__date__gte=start_date, status='CONFIRMED')
         if current_only:

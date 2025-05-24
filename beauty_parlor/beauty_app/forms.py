@@ -21,10 +21,14 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Make sure required fields are marked as such
-        self.fields['first_name'].required = True
-        self.fields['last_name'].required = True
-        # self.fields['email'].required = True
-        self.fields['phone_number'].required = True
+        if 'first_name' in self.fields:
+            self.fields['first_name'].required = True
+        if 'last_name' in self.fields:
+            self.fields['last_name'].required = True
+        if 'email' in self.fields:
+            self.fields['email'].required = False
+        if 'phone_number' in self.fields:
+            self.fields['phone_number'].required = True
 
         # Add Bootstrap classes
         for field in self.fields:
@@ -42,12 +46,13 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 
+
 class StaffCreationForm(CustomUserCreationForm):
     """Form specifically for admin to create staff users."""
 
     class Meta(CustomUserCreationForm.Meta):
         model = CustomUser
-        fields = ('first_name', 'last_name', 'phone_number', 'user_type', 'primary_service', 'profile_picture')
+        fields = ('first_name', 'last_name', 'email', 'phone_number', 'user_type', 'primary_service', 'profile_picture')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,6 +72,10 @@ class StaffCreationForm(CustomUserCreationForm):
             'class': 'form-control service-field',
             'data-requires-usertype': 'STAFFLEVEL2'
         })
+
+        # Make email optional for staff creation
+        if 'email' in self.fields:
+            self.fields['email'].required = False
 
 
 class CustomUserUpdateForm(forms.ModelForm):

@@ -25,6 +25,7 @@ class CustomUser(AuditableMixin, AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     password_change_required = models.BooleanField(default=False,
                                                    help_text="User must change password at next login")
+    email = models.EmailField(validators=[email_validator],null=True, blank=True)
     # New field for service assignment
     primary_service = models.ForeignKey(
         'Service',
