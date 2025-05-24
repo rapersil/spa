@@ -179,7 +179,8 @@ class ServiceForm(forms.ModelForm):
 # ============================
 # Discount Forms
 # ============================
-# beauty_app/forms.py - Updated DiscountForm
+
+
 
 class DiscountForm(forms.Form):
     """Form for creating and updating time-based service discounts with multi-select."""
@@ -237,10 +238,11 @@ class DiscountForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop('instance', None)
+        self.is_update = self.instance is not None
         super().__init__(*args, **kwargs)
 
         # If editing an existing discount
-        if self.instance:
+        if self.is_update:
             self.fields['name'].initial = self.instance.name
             self.fields['discount_type'].initial = 'single'
             self.fields['single_service'].initial = self.instance.service
@@ -248,9 +250,18 @@ class DiscountForm(forms.Form):
             self.fields['start_date'].initial = self.instance.start_date
             self.fields['end_date'].initial = self.instance.end_date
 
-            # Disable discount type selection when editing
-            self.fields['discount_type'].widget.attrs['disabled'] = True
-            self.fields['discount_type'].help_text = "Discount type cannot be changed when editing"
+            # For updates, hide the discount type selection and force single service mode
+            self.fields['discount_type'].widget = forms.HiddenInput()
+            self.fields['discount_type'].initial = 'single'
+
+            # Hide multiple service fields during update
+            self.fields['multiple_services'].widget = forms.HiddenInput()
+            self.fields['multiple_services'].required = False
+
+            # Update help texts for clarity
+            self.fields[
+                'start_date'].help_text = "You can modify the start time, including past dates for this existing discount."
+            self.fields['single_service'].help_text = f"Currently set to: {self.instance.service.name}"
 
     def clean_name(self):
         name = self.cleaned_data.get('name')
@@ -269,6 +280,11 @@ class DiscountForm(forms.Form):
         end_datetime = cleaned_data.get('end_date')
         name = cleaned_data.get('name')
 
+        # For updates, force discount_type to 'single' if not present (due to hidden field)
+        if self.is_update and not discount_type:
+            discount_type = 'single'
+            cleaned_data['discount_type'] = discount_type
+
         # Get current datetime with a small buffer
         current_datetime = timezone.now() - timezone.timedelta(seconds=30)
 
@@ -283,7 +299,8 @@ class DiscountForm(forms.Form):
             if start_datetime >= end_datetime:
                 raise ValidationError("End datetime must be after start datetime.")
 
-            if start_datetime < current_datetime:
+            # Only validate past dates for new discounts, not updates
+            if not self.is_update and start_datetime < current_datetime:
                 raise ValidationError(
                     "Start datetime cannot be in the past. Please use the current time or a future datetime.")
 
@@ -292,7 +309,7 @@ class DiscountForm(forms.Form):
         if discount_type == 'single' and single_service:
             services_to_check = [single_service]
         elif discount_type == 'multiple':
-            services_to_check = multiple_services
+            services_to_check = multiple_services or []
         elif discount_type == 'all':
             services_to_check = Service.objects.filter(active=True)
 
@@ -300,14 +317,18 @@ class DiscountForm(forms.Form):
         services_with_conflicts = []
         for service in services_to_check:
             now = timezone.now()
-            query = Q(start_date__lte=now, end_date__gt=now) | Q(start_date__gt=now)
 
-            # Exclude current instance when updating
-            if self.instance and self.instance.pk and self.instance.service == service:
+            # For updates, we need to check if the discount overlaps with other discounts
+            # but exclude the current instance being updated
+            if self.is_update:
+                # Check for conflicts with other discounts (excluding current instance)
+                query = Q(start_date__lte=end_datetime, end_date__gte=start_datetime)
                 existing_discount = Discount.objects.filter(
                     service=service
                 ).filter(query).exclude(pk=self.instance.pk).exists()
             else:
+                # For new discounts, check for any active or upcoming conflicts
+                query = Q(start_date__lte=now, end_date__gt=now) | Q(start_date__gt=now)
                 existing_discount = Discount.objects.filter(
                     service=service
                 ).filter(query).exists()
@@ -317,11 +338,13 @@ class DiscountForm(forms.Form):
 
         if services_with_conflicts:
             if len(services_with_conflicts) == 1:
+                conflict_type = "overlapping" if self.is_update else "active or upcoming"
                 raise ValidationError(
-                    f"The service '{services_with_conflicts[0]}' already has an active or upcoming discount.")
+                    f"The service '{services_with_conflicts[0]}' already has an {conflict_type} discount.")
             else:
+                conflict_type = "overlapping" if self.is_update else "active or upcoming"
                 raise ValidationError(
-                    f"The following services already have active or upcoming discounts: {', '.join(services_with_conflicts)}")
+                    f"The following services already have {conflict_type} discounts: {', '.join(services_with_conflicts)}")
 
         return cleaned_data
 
@@ -333,13 +356,67 @@ class DiscountForm(forms.Form):
         discount_type = self.cleaned_data.get('discount_type')
 
         if discount_type == 'single':
-            return [self.cleaned_data.get('single_service')]
+            service = self.cleaned_data.get('single_service')
+            return [service] if service else []
         elif discount_type == 'multiple':
             return list(self.cleaned_data.get('multiple_services', []))
         elif discount_type == 'all':
             return list(Service.objects.filter(active=True))
 
         return []
+
+
+# Create a separate ModelForm for simpler updates
+class DiscountUpdateForm(forms.ModelForm):
+    """Simplified form specifically for updating individual discounts."""
+
+    class Meta:
+        model = Discount
+        fields = ['name', 'percentage', 'start_date', 'end_date']
+        widgets = {
+            'start_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'end_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'percentage': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '100', 'step': '0.01'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add help texts
+        self.fields['name'].help_text = "Update the discount campaign name"
+        self.fields['percentage'].help_text = "Discount percentage (0-100%)"
+        self.fields['start_date'].help_text = "You can modify the start time, including past dates"
+        self.fields['end_date'].help_text = "End datetime must be after start datetime"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_datetime = cleaned_data.get('start_date')
+        end_datetime = cleaned_data.get('end_date')
+
+        # Validate datetime fields
+        if start_datetime and end_datetime:
+            if start_datetime >= end_datetime:
+                raise ValidationError("End datetime must be after start datetime.")
+
+        # Check for overlapping discounts with other discounts for the same service
+        if self.instance and self.instance.service:
+            service = self.instance.service
+
+            # Check for conflicts with other discounts (excluding current instance)
+            overlapping_discounts = Discount.objects.filter(
+                service=service,
+                start_date__lte=end_datetime,
+                end_date__gte=start_datetime
+            ).exclude(pk=self.instance.pk)
+
+            if overlapping_discounts.exists():
+                raise ValidationError(
+                    f"The dates overlap with another discount for {service.name}. "
+                    f"Please choose different dates or remove the conflicting discount first."
+                )
+
+        return cleaned_data
 
 
 # Booking Forms

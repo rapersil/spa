@@ -90,9 +90,9 @@ class ServiceCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     template_name = 'service/service_form.html'
     success_url = reverse_lazy('service_list')
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
+    # def __init__(self, **kwargs):
+    #     super().__init__(kwargs)
+    #     self.object = None
 
     def form_valid(self, form):
         response = super().form_valid(form)

@@ -84,7 +84,7 @@
                 <div class="card-body">
                     <form method="post" class="discount-form needs-validation" novalidate>
                         {% csrf_token %}
-                        
+
                         <!-- Discount Name Section -->
                         <div class="discount-name-section">
                             <h5 class="mb-3">
@@ -99,12 +99,12 @@
                                 </small>
                             </div>
                         </div>
-                        
+
                         {% if not is_update %}
                         <!-- Service Selection Section -->
                         <div class="service-selection-container">
                             <h5 class="mb-3">2. Select Service(s)</h5>
-                            
+
                             <div class="service-type-selection">
                                 <div class="form-group">
                                     <label>Discount Scope:</label>
@@ -112,11 +112,11 @@
                                     <small class="form-text text-muted">{{ form.discount_type.help_text }}</small>
                                 </div>
                             </div>
-                            
+
                             <div id="singleServiceContainer" class="service-type-options">
                                 {{ form.single_service|as_crispy_field }}
                             </div>
-                            
+
                             <div id="multipleServicesContainer" class="service-type-options d-none">
                                 <label for="id_multiple_services">Select Services:</label>
                                 <div class="multiple-services-container">
@@ -135,7 +135,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="selectAllBtn">Select All</button>
                                 </div>
                             </div>
-                            
+
                             <div id="allServicesContainer" class="service-type-options d-none">
                                 <div class="alert alert-info">
                                     <i class="material-icons me-2">info</i>
@@ -143,18 +143,18 @@
                                     Each service will get its own discount with the name format: "<span id="discountNamePreview">[Discount Name]</span> - [Service Name]"
                                 </div>
                             </div>
-                            
+
                             <div id="selectionSummary" class="discount-preview-container d-none">
                                 <h6>Selection Summary:</h6>
                                 <p>You're creating discount(s) for <span id="selectedServicesCount">0</span> service(s).</p>
                             </div>
                         </div>
                         {% endif %}
-                        
+
                         <!-- Discount Details Section -->
                         <div class="discount-details-container">
                             <h5 class="mb-3">{% if is_update %}Edit Discount Details{% else %}3. Set Discount Details{% endif %}</h5>
-                            
+
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     {{ form.percentage|as_crispy_field }}
@@ -182,7 +182,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="datetime-field">
@@ -196,7 +196,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between">
                             <a href="{% if is_update %}{% url 'discount_detail' discount.pk %}{% else %}{% url 'discount_list' %}{% endif %}" class="btn btn-outline-secondary">
                                 <i class="material-icons me-2">close</i>Cancel
@@ -210,7 +210,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Help & Information Column -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
@@ -230,7 +230,7 @@
                             <li>Only one active discount per service is allowed</li>
                         </ul>
                     </div>
-                    
+
                     <div class="mt-4">
                         <h6>Popular Discount Names</h6>
                         <div class="strategy-card mb-2">
@@ -268,25 +268,25 @@
             minDate: "today",
             time_24hr: true
         });
-        
+
         flatpickr("#id_end_date", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today",
             time_24hr: true
         });
-        
+
         // Update discount name preview for "all services" option
         const discountNameInput = document.getElementById('id_name');
         const discountNamePreview = document.getElementById('discountNamePreview');
-        
+
         if (discountNameInput && discountNamePreview) {
             discountNameInput.addEventListener('input', function() {
                 const name = this.value || '[Discount Name]';
                 discountNamePreview.textContent = name;
             });
         }
-        
+
         {% if not is_update %}
         // Service selection type handling
         const discountTypeInputs = document.querySelectorAll('input[name="discount_type"]');
@@ -295,14 +295,14 @@
         const allServicesContainer = document.getElementById('allServicesContainer');
         const selectionSummary = document.getElementById('selectionSummary');
         const selectedServicesCount = document.getElementById('selectedServicesCount');
-        
+
         function updateServiceContainers() {
             const selectedType = document.querySelector('input[name="discount_type"]:checked').value;
-            
+
             singleServiceContainer.classList.add('d-none');
             multipleServicesContainer.classList.add('d-none');
             allServicesContainer.classList.add('d-none');
-            
+
             if (selectedType === 'single') {
                 singleServiceContainer.classList.remove('d-none');
                 updateSelectionSummary(1);
@@ -314,7 +314,7 @@
                 updateSelectionSummary({{ active_services_count }});
             }
         }
-        
+
         function updateSelectionSummary(count) {
             if (count > 0) {
                 selectedServicesCount.textContent = count;
@@ -323,41 +323,41 @@
                 selectionSummary.classList.add('d-none');
             }
         }
-        
+
         function updateMultipleSelectionSummary() {
             const checkedCount = document.querySelectorAll('input[name="multiple_services"]:checked').length;
             updateSelectionSummary(checkedCount);
         }
-        
+
         // Add event listeners for discount type selection
         discountTypeInputs.forEach(input => {
             input.addEventListener('change', updateServiceContainers);
         });
-        
+
         // Add event listeners for multiple service checkboxes
         const multipleServiceCheckboxes = document.querySelectorAll('input[name="multiple_services"]');
         multipleServiceCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', updateMultipleSelectionSummary);
         });
-        
+
         // Select All button functionality
         const selectAllBtn = document.getElementById('selectAllBtn');
         selectAllBtn.addEventListener('click', function() {
             const checkboxes = document.querySelectorAll('input[name="multiple_services"]');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            
+
             checkboxes.forEach(checkbox => {
                 checkbox.checked = !allChecked;
             });
-            
+
             selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
             updateMultipleSelectionSummary();
         });
-        
+
         // Initial setup
         updateServiceContainers();
         {% endif %}
-        
+
         // Price Calculator
         const serviceSelect = document.getElementById('id_single_service');
         const percentageInput = document.getElementById('id_percentage');
@@ -365,18 +365,18 @@
         const regularPrice = document.getElementById('regularPrice');
         const discountAmount = document.getElementById('discountAmount');
         const finalPrice = document.getElementById('finalPrice');
-        
+
         function updatePricePreview() {
             let price = 0;
             let serviceName = '';
-            
+
             // Get price from selected service
             if (serviceSelect && serviceSelect.selectedOptions.length > 0) {
                 const selectedOption = serviceSelect.selectedOptions[0];
                 price = parseFloat(selectedOption.getAttribute('data-price') || 0);
                 serviceName = selectedOption.innerText;
             }
-            
+
             // Or from pre-selected service hidden input
             const selectedServiceInput = document.querySelector('input[name="service"][type="hidden"]');
             if (selectedServiceInput) {
@@ -385,16 +385,16 @@
                 price = parseFloat('{{ selected_service.price }}');
                 serviceName = '{{ selected_service.name }}';
             }
-            
+
             // If we have a price and percentage, show the preview
             const percentage = parseFloat(percentageInput.value || 0);
             if (price > 0 && percentage > 0) {
                 discountPreview.classList.remove('d-none');
-                
+
                 // Calculate values
                 const discount = price * (percentage / 100);
                 const final = price - discount;
-                
+
                 // Update display
                 regularPrice.textContent = 'GHS' + price.toFixed(2);
                 discountAmount.textContent = '-GHS' + discount.toFixed(2);
@@ -403,16 +403,16 @@
                 discountPreview.classList.add('d-none');
             }
         }
-        
+
         // Attach event listeners
         if (serviceSelect) {
             serviceSelect.addEventListener('change', updatePricePreview);
         }
-        
+
         if (percentageInput) {
             percentageInput.addEventListener('input', updatePricePreview);
         }
-        
+
         // Initial calculation
         updatePricePreview();
     });

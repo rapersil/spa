@@ -1,4 +1,3 @@
-# beauty_app/views/discount_views.py - Updated views with name field
 from django.db.models import Q
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils import timezone
 from ..models import Discount, Service
-from ..forms import DiscountForm
+from ..forms import DiscountForm, DiscountUpdateForm
 from ..permissions import AdminRequiredMixin
 
 
@@ -139,8 +138,51 @@ class DiscountCreateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
 
 class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Discount
+    form_class = DiscountUpdateForm  # Use the simplified form for updates
+    template_name = 'discount/discount_update_form.html'  # Use a separate template
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_update'] = True
+        context['discount'] = self.get_object()
+
+        # Add service information for context
+        context['service'] = self.get_object().service
+
+        # Add usage statistics
+        discount = self.get_object()
+        context['usage_count'] = discount.applied_bookings.count()
+        context['total_savings'] = sum(
+            (booking.service.price * discount.percentage / 100)
+            for booking in discount.applied_bookings.all()
+        )
+
+        return context
+
+    def form_valid(self, form):
+        discount = form.save(commit=False)
+        # Ensure the service relationship remains intact
+        discount.service = self.get_object().service
+        discount.save()
+
+        messages.success(
+            self.request,
+            f"Discount '{discount.name}' for '{discount.service.name}' updated successfully."
+        )
+        return redirect('discount_detail', pk=discount.pk)
+
+    def get_success_url(self):
+        return reverse_lazy('discount_detail', kwargs={'pk': self.object.pk})
+
+
+# Alternative update view using the original form with proper handling
+class DiscountUpdateViewAlternative(LoginRequiredMixin, AdminRequiredMixin, FormView):
+    """Alternative update view using the original DiscountForm with proper instance handling."""
     form_class = DiscountForm
     template_name = 'discount/discount_form.html'
+
+    def get_object(self):
+        return Discount.objects.get(pk=self.kwargs['pk'])
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -151,6 +193,7 @@ class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['is_update'] = True
         context['discount'] = self.get_object()
+        context['service'] = self.get_object().service
         return context
 
     def form_valid(self, form):
@@ -163,12 +206,14 @@ class DiscountUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
         discount.end_date = form.cleaned_data['end_date']
         discount.save()
 
-        messages.success(self.request,
-                         f"Discount '{discount.name}' for '{discount.service.name}' updated successfully.")
+        messages.success(
+            self.request,
+            f"Discount '{discount.name}' for '{discount.service.name}' updated successfully."
+        )
         return redirect('discount_detail', pk=discount.pk)
 
     def get_success_url(self):
-        return reverse_lazy('discount_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy('discount_detail', kwargs={'pk': self.kwargs['pk']})
 
 
 class DiscountDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):

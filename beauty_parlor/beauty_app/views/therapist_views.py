@@ -18,9 +18,9 @@ class TherapistAssignmentView(LoginRequiredMixin, StaffRequiredMixin, FormView):
     template_name = 'booking/therapist_assignment.html'
     form_class = TherapistAssignmentForm
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.booking = None
+    # def __init__(self, **kwargs):
+    #     super().__init__(kwargs)
+    #     self.booking = None
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

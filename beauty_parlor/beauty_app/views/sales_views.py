@@ -160,9 +160,9 @@ class SaleCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     template_name = 'sales/sale_form.html'
     success_url = reverse_lazy('sales_list')
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
+    # def __init__(self, **kwargs):
+    #     super().__init__(kwargs)
+    #     self.object = None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
