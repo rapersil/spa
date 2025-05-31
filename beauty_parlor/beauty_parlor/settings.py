@@ -154,6 +154,27 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = os.environ.get('MEDIA_URL', 'media/')
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# File Upload Settings (NEW SECTION)
+# Maximum size of file uploads (20 MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('FILE_UPLOAD_MAX_MEMORY_SIZE', 20971520))  # 20 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DATA_UPLOAD_MAX_MEMORY_SIZE', 20971520))  # 20 MB
+
+# Maximum number of GET/POST parameters
+DATA_UPLOAD_MAX_NUMBER_FIELDS = int(os.environ.get('DATA_UPLOAD_MAX_NUMBER_FIELDS', 1000))
+
+# File upload permissions (optional - set file permissions for uploaded files)
+FILE_UPLOAD_PERMISSIONS = 0o644
+
+# Temporary file upload directory (optional - uses system temp by default)
+FILE_UPLOAD_TEMP_DIR = os.environ.get('FILE_UPLOAD_TEMP_DIR', None)
+
+# Allowed file extensions for additional security (optional)
+ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+ALLOWED_DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.txt']
+
+# Maximum file size validation (for custom validation in forms/models)
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024  # 20 MB in bytes
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
