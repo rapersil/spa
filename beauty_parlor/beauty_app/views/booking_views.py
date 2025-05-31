@@ -93,14 +93,7 @@ class BookingDetailView(LoginRequiredMixin, StaffRequiredMixin, DetailView):
 
         
         return context
-    
 
-
-import logging
-
-
-# Set up logging for debugging
-logger = logging.getLogger(__name__)
 
 class BookingCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     model = Booking
@@ -153,188 +146,14 @@ class BookingCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
             context['selected_service'] = service
             
         return context
-# class BookingUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
-#     model = Booking
-#     template_name = 'booking/booking_form.html'
-    
-#     def get_form_class(self):
-#         # Admin users get the form with discount option
-#         if self.request.user.user_type in ['ADMIN', 'SUPERADMIN']:
-#             return AdminBookingForm
-#         # Staff users get the standard form
-#         return BookingForm
-    
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs['user'] = self.request.user
-#         return kwargs
-    
-#     def form_valid(self, form):
-#         # Get the form's cleaned data
-#         service = form.cleaned_data.get('service')
-#         date_time = form.cleaned_data.get('date_time')
-#         additional_services = form.cleaned_data.get('additional_services', [])
-        
-#         # First save the form to get the instance
-#         response = super().form_valid(form)
-        
-#         # Now work with the saved instance
-#         booking = self.object
-#         booking.updated_by = self.request.user
-        
-#         # Check for active service discounts at the booking time
-#         active_discounts = service.discount_set.filter(
-#             start_date__lte=date_time,
-#             end_date__gte=date_time
-#         ).order_by('-percentage')  # Get highest discount if multiple exist
-        
-#         # Apply service discount if available, otherwise set to None
-#         if active_discounts.exists():
-#             booking.service_discount = active_discounts.first()
-#         else:
-#             booking.service_discount = None
-            
-#         # Save the booking again with updated service_discount
-#         booking.save(update_fields=['service_discount', 'updated_by'])
-        
-#         # Remove existing additional services
-#         AdditionalService.objects.filter(booking=booking).delete()
-        
-#         # Add new additional services
-#         if additional_services:
-#             # Process each additional service
-#             for service in additional_services:
-#                 # Check for active discounts
-#                 service_discount_percent = 0
-#                 active_service_discounts = service.discount_set.filter(
-#                     start_date__lte=booking.date_time,
-#                     end_date__gte=booking.date_time
-#                 ).order_by('-percentage')
-                
-#                 if active_service_discounts.exists():
-#                     service_discount_percent = active_service_discounts.first().percentage
-                
-#                 # Calculate final price
-#                 regular_price = service.price
-#                 if service_discount_percent > 0:
-#                     discount_amount = regular_price * (service_discount_percent / 100)
-#                     final_price = regular_price - discount_amount
-#                 else:
-#                     final_price = regular_price
-                
-#                 # Create additional service record
-#                 AdditionalService.objects.create(
-#                     booking=booking,
-#                     sale=None,  # Not associated with a sale yet
-#                     name=service.name,
-#                     description=service.description,
-#                     regular_price=regular_price,
-#                     discount_percentage=service_discount_percent,
-#                     final_price=final_price,
-#                     created_by=self.request.user
-#                 )
-        
-#         messages.success(self.request, "Booking updated successfully.")
-#         return response
-    
-#     def get_success_url(self):
-#         return reverse_lazy('booking_detail', kwargs={'pk': self.object.pk})
-# class BookingUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
-#     model = Booking
-#     template_name = 'booking/booking_form.html'
-    
-#     def get_form_class(self):
-#         # Admin users get the form with discount option
-#         if self.request.user.user_type in ['ADMIN', 'SUPERADMIN']:
-#             return AdminBookingForm
-#         # Staff users get the standard form
-#         return BookingForm
-    
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs['user'] = self.request.user
-#         return kwargs
-    
-#     def form_valid(self, form):
-#         # Get the form's cleaned data
-#         service = form.cleaned_data.get('service')
-#         date_time = form.cleaned_data.get('date_time')
-        
-#         # First save the form to get the instance
-#         response = super().form_valid(form)
-        
-#         # Now work with the saved instance
-#         booking = self.object
-#         booking.updated_by = self.request.user
-        
-#         # Check for active service discounts at the booking time
-#         active_discounts = service.discount_set.filter(
-#             start_date__lte=date_time,
-#             end_date__gte=date_time
-#         ).order_by('-percentage')  # Get highest discount if multiple exist
-        
-#         # Apply service discount if available, otherwise set to None
-#         if active_discounts.exists():
-#             booking.service_discount = active_discounts.first()
-#         else:
-#             booking.service_discount = None
-            
-#         # Save the booking again with updated service_discount
-#         booking.save(update_fields=['service_discount', 'updated_by'])
-        
-#         # Remove existing additional services
-#         AdditionalService.objects.filter(booking=booking, sale__isnull=True).delete()
-        
-#         # Parse additional services from JSON
-#         additional_services_json = self.request.POST.get('additional_services', '[]')
-#         try:
-#             additional_services_data = json.loads(additional_services_json)
-#         except json.JSONDecodeError:
-#             additional_services_data = []
-        
-#         # Create additional service records
-#         if additional_services_data:
-#             for service_data in additional_services_data:
-#                 # Create additional service record
-#                 AdditionalService.objects.create(
-#                     booking=booking,
-#                     sale=None,  # Not associated with a sale yet
-#                     name=service_data.get('name', ''),
-#                     description='',  # Optional description
-#                     regular_price=Decimal(str(service_data.get('regularPrice', 0))),
-#                     discount_percentage=Decimal(str(service_data.get('discountPercentage', 0))),
-#                     final_price=Decimal(str(service_data.get('finalPrice', 0))),
-#                     created_by=self.request.user
-#                 )
-        
-#         messages.success(self.request, "Booking updated successfully.")
-#         return response
-    
-#     def get_success_url(self):
-#         return reverse_lazy('booking_detail', kwargs={'pk': self.object.pk})
-    
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-        
-#         # Get available services for selection, excluding the main service
-#         form = context['form']
-#         context['available_services'] = form.get_available_services_with_discounts()
-        
-#         # Add existing additional services for initialization
-#         if self.object:
-#             context['existing_additional_services'] = self.object.additional_services.all()
-        
-#         return context
 
 class BookingUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     model = Booking
     template_name = 'booking/booking_form.html'
     
     def get_form_class(self):
-        # Admin users get the form with discount option
         if self.request.user.user_type in ['ADMIN', 'SUPERADMIN']:
             return AdminBookingForm
-        # Staff users get the standard form
         return BookingForm
     
     def get_form_kwargs(self):
@@ -344,16 +163,11 @@ class BookingUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     
     def get_initial(self):
         initial = super().get_initial()
-        
-        # Check if a new time was suggested from therapist assignment
         new_time = self.request.GET.get('new_time')
         if new_time:
             try:
-                # Parse the new time and set it as initial value
                 from datetime import datetime
                 from django.utils import timezone
-                
-                # Handle different formats depending on what's passed
                 if 'T' in new_time:
                     # ISO format: 2025-05-17T14:30
                     new_datetime = datetime.strptime(new_time, '%Y-%m-%dT%H:%M')
@@ -467,6 +281,15 @@ class BookingStatusUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView
     http_method_names = ['post']
     
     def form_valid(self, form):
+        if form.instance.status == 'CONFIRMED':
+            # If status is being set to CONFIRMED, check for therapist assignment
+            booking_assigned_therapist = False
+            if not BookingTherapistAssignment.objects.filter(booking=form.instance).exists():
+
+                messages.error(self.request, "Cannot confirm booking without assigning a therapist.")
+                return redirect('booking_detail', pk=form.instance.pk)
+            else:
+                booking_assigned_therapist = True
         form.instance.updated_by = self.request.user
         messages.success(self.request, f"Booking status updated to {form.instance.get_status_display()}.")
         return super().form_valid(form)

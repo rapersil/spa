@@ -28,14 +28,24 @@
                         <span class="material-icons me-2">warning</span>
                         <strong>Pending Booking:</strong> This booking is waiting for confirmation.
                     </div>
-                    <form method="post" action="{% url 'booking_status_update' booking.pk %}" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="status" value="CONFIRMED">
-                        <input type="hidden" name="next" value="{% url 'booking_detail' booking.pk %}">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            <span class="material-icons me-2">check_circle</span>Confirm Booking
-                        </button>
-                    </form>
+                    {% if booking_assigned_therapist %}
+                        <form method="post" action="{% url 'booking_status_update' booking.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="CONFIRMED">
+                            <input type="hidden" name="next" value="{% url 'booking_detail' booking.pk %}">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <span class="material-icons me-2">check_circle</span>Confirm Booking
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="text-danger">
+                            <span class="material-icons me-2">error</span>
+                            <strong>Therapist required:</strong> Assign a therapist before confirming.
+                             <a href="{% url 'assign_therapist' booking.pk %}" class="btn btn-sm btn-secondary ms-2">
+                                <span class="material-icons me-2">person_add</span>Assign Therapist
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             {% elif booking.status == 'CONFIRMED' %}

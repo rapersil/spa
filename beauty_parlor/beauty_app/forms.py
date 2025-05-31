@@ -129,6 +129,7 @@ class CustomerForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['email'].required = False
         # Add Bootstrap classes
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
