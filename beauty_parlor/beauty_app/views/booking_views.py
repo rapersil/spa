@@ -282,14 +282,15 @@ class BookingStatusUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView
     
     def form_valid(self, form):
         if form.instance.status == 'CONFIRMED':
-            # If status is being set to CONFIRMED, check for therapist assignment
-            booking_assigned_therapist = False
-            if not BookingTherapistAssignment.objects.filter(booking=form.instance).exists():
+            # Check if there's a therapist directly assigned to the booking
+            has_therapist = form.instance.therapist is not None
 
-                messages.error(self.request, "Cannot confirm booking without assigning a therapist.")
-                return redirect('booking_detail', pk=form.instance.pk)
-            else:
-                booking_assigned_therapist = True
+            # Check if there are any therapist assignments for this booking
+            has_therapist_assignment = BookingTherapistAssignment.objects.filter(booking=form.instance).exists()
+
+            if not has_therapist and not has_therapist_assignment:
+                messages.error(self.request, "Cannot confirm booking without an assigned therapist.")
+                return redirect(self.get_success_url())
         form.instance.updated_by = self.request.user
         messages.success(self.request, f"Booking status updated to {form.instance.get_status_display()}.")
         return super().form_valid(form)

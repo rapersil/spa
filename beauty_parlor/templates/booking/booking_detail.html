@@ -28,7 +28,7 @@
                         <span class="material-icons me-2">warning</span>
                         <strong>Pending Booking:</strong> This booking is waiting for confirmation.
                     </div>
-                    {% if booking_assigned_therapist %}
+                    {% if booking.therapist or booking.therapist_assignments.exists %}
                         <form method="post" action="{% url 'booking_status_update' booking.pk %}" class="d-inline">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="CONFIRMED">
